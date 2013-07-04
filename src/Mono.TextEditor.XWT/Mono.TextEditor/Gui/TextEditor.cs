@@ -65,7 +65,7 @@ namespace Mono.TextEditor
 
 		public TextEditor (TextDocument doc, ITextEditorOptions options, EditMode initialMode) 
 		{
-			GtkWorkarounds.FixContainerLeak (this);
+			//GtkWorkarounds.FixContainerLeak (this);
 			//WidgetFlags |= WidgetFlags.NoWindow;
 			this.textArea = new TextArea (doc, options, initialMode);
 			this.textArea.Initialize (this, doc, options, initialMode);
@@ -74,7 +74,7 @@ namespace Mono.TextEditor
 			Show ();
 
 			stage.ActorStep += OnActorStep;
-			if (Platform.IsMac) {
+			/*if (Platform.IsMac) {
 				VScroll += delegate {
 					for (int i = 1; i < containerChildren.Count; i++) {
 						containerChildren[i].Child.QueueDraw ();
@@ -85,7 +85,7 @@ namespace Mono.TextEditor
 						containerChildren[i].Child.QueueDraw ();
 					}
 				};
-			}
+			}*/
 		}
 
 		protected override void OnGotFocus (EventArgs args)
