@@ -27,6 +27,7 @@
 
 using System;
 using Xwt;
+using Xwt.Drawing;
 
 namespace Mono.TextEditor.Vi
 {
@@ -71,15 +72,19 @@ namespace Mono.TextEditor.Vi
 			base.Dispose (disposing);
 		}
 
-		public void AllocateArea (TextArea textArea, Gdk.Rectangle allocation)
+		public void AllocateArea (TextArea textArea, Rectangle allocation)
 		{
 			if (!Visible)
 				Show ();
-			allocation.Height -= (int)textArea.LineHeight;
+			//allocation.Height -= (int)textArea.LineHeight;
+
+			WidthRequest = allocation.Width;
+			HeightRequest = allocation.Height - textArea.LineHeight;
+			/*
 			if (textArea.Allocation != allocation)
 				textArea.SizeAllocate (allocation);
 			SetSizeRequest (allocation.Width, (int)editor.LineHeight);
-			editor.MoveTopLevelWidget (this, 0, allocation.Height);
+			editor.MoveTopLevelWidget (this, 0, allocation.Height);*/
 		}
 
 		public bool ShowCaret {
@@ -107,55 +112,60 @@ namespace Mono.TextEditor.Vi
 			}
 		}
 
-		protected override bool OnExposeEvent (Gdk.EventExpose evnt)
+		protected override void OnDraw (Context cr, Rectangle dirtyRect)
 		{
-			using (Cairo.Context cr = Gdk.CairoHelper.Create (evnt.Window)) {
-				cr.Rectangle (evnt.Region.Clipbox.X, evnt.Region.Clipbox.Y, evnt.Region.Clipbox.Width, evnt.Region.Clipbox.Height);
-				cr.Color = editor.ColorStyle.PlainText.Background;
-				cr.Fill ();
-				using (var layout = PangoUtil.CreateLayout (editor)) {
-					layout.FontDescription = editor.Options.Font;
+			cr.Rectangle (dirtyRect.X, dirtyRect.Y, dirtyRect.Width, dirtyRect.Height);
+			cr.SetColor(editor.ColorStyle.PlainText.Background);
+			cr.Fill ();
 
-					layout.SetText ("000,00-00");
-					int minstatusw, minstatush;
-					layout.GetPixelSize (out minstatusw, out minstatush);
+			using (var layout = new TextLayout (this)) {
+				layout.Font = editor.Options.Font;
 
-					var line = editor.GetLine (editor.Caret.Line);
-					var visColumn = line.GetVisualColumn (editor.GetTextEditorData (), editor.Caret.Column);
+				layout.Text = "000,00-00";
+				int minstatusw, minstatush;
+				var sz = layout.GetSize();
+				minstatusw = sz.Width;
+				minstatush = sz.Height;
 
-					if (visColumn != editor.Caret.Column) {
-						layout.SetText (editor.Caret.Line + "," + editor.Caret.Column + "-" + visColumn);
-					} else {
-						layout.SetText (editor.Caret.Line + "," + editor.Caret.Column);
-					}
+				var line = editor.GetLine (editor.Caret.Line);
+				var visColumn = line.GetVisualColumn (editor.GetTextEditorData (), editor.Caret.Column);
 
-					int statusw, statush;
-					layout.GetPixelSize (out statusw, out statush);
+				if (visColumn != editor.Caret.Column) {
+					layout.Text = editor.Caret.Line + "," + editor.Caret.Column + "-" + visColumn;
+				} else {
+					layout.Text = editor.Caret.Line + "," + editor.Caret.Column;
+				}
 
-					statusw = System.Math.Max (statusw, minstatusw);
+				int statusw, statush;
+				sz = layout.GetSize();
+				statusw = sz.Width;
+				statush = sz.Height;
 
-					statusw += 8;
-					cr.MoveTo (Allocation.Width - statusw, 0);
-					statusw += 8;
-					cr.Color = editor.ColorStyle.PlainText.Foreground;
-					cr.ShowLayout (layout);
+				statusw = System.Math.Max (statusw, minstatusw);
 
-					layout.SetText (statusText ?? "");
-					int w, h;
-					layout.GetPixelSize (out w, out h);
-					var x = System.Math.Min (0, -w + Allocation.Width - editor.TextViewMargin.CharWidth - statusw);
-					cr.MoveTo (x, 0);
-					cr.Color = editor.ColorStyle.PlainText.Foreground;
-					cr.ShowLayout (layout);
-					if (ShowCaret) {
-						if (editor.TextViewMargin.caretBlink) {
-							cr.Rectangle (w + x, 0, (int)editor.TextViewMargin.CharWidth, (int)editor.LineHeight);
-							cr.Fill ();
-						}
+				statusw += 8;
+				cr.MoveTo (WidthRequest - statusw, 0);
+				statusw += 8;
+				cr.SetColor(editor.ColorStyle.PlainText.Foreground);
+				cr.ShowLayout (layout);
+
+				layout.Text (statusText ?? "");
+				int w, h;
+				sz = layout.GetSize();
+				w = sz.Width;
+				h = sz.Height;
+
+				var x = System.Math.Min (0, -w + WidthRequest - editor.TextViewMargin.CharWidth - statusw);
+				cr.MoveTo (x, 0);
+				cr.SetColor(editor.ColorStyle.PlainText.Foreground);
+				cr.ShowLayout (layout);
+				if (ShowCaret) {
+					if (editor.TextViewMargin.caretBlink) {
+						cr.Rectangle (w + x, 0, (int)editor.TextViewMargin.CharWidth, (int)editor.LineHeight);
+						cr.Fill ();
 					}
 				}
 			}
-			return true;
 		}
 	}
 }
