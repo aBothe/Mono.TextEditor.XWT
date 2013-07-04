@@ -1,0 +1,6 @@
+[submodule "src/ext/xwt"]
+	path = src/ext/xwt
+	url = https://github.com/mono/xwt.git
+[submodule "src/ext/nrefactory"]
+	path = src/ext/nrefactory
+	url = https://github.com/icsharpcode/NRefactory.git
