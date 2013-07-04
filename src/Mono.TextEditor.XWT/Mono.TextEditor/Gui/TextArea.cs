@@ -39,12 +39,12 @@ using Mono.TextEditor.Highlighting;
 using Mono.TextEditor.PopupWindow;
 using Mono.TextEditor.Theatrics;
 
-using Gdk;
-using Gtk;
+using Xwt;
+using Xwt.Drawing;
 
 namespace Mono.TextEditor
 {
-	public class TextArea : Container, ITextEditorDataProvider
+	public class TextArea : Canvas, ITextEditorDataProvider
 	{
 		TextEditorData textEditorData;
 		
@@ -63,9 +63,9 @@ namespace Mono.TextEditor
 		bool isDisposed = false;
 		IMMulticontext imContext;
 		Gdk.EventKey lastIMEvent;
-		Gdk.Key lastIMEventMappedKey;
+		Key lastIMEventMappedKey;
 		uint lastIMEventMappedChar;
-		Gdk.ModifierType lastIMEventMappedModifier;
+		ModifierKeys lastIMEventMappedModifier;
 		bool sizeHasBeenAllocated;
 		bool imContextNeedsReset;
 		string currentStyleName;
@@ -270,7 +270,7 @@ namespace Mono.TextEditor
 				textEditorData.VAdjustment.ValueChanged -= VAdjustmentValueChanged;
 		}
 
-		internal void SetTextEditorScrollAdjustments (Adjustment hAdjustement, Adjustment vAdjustement)
+		internal void SetTextEditorScrollAdjustments (ScrollAdjustment hAdjustement, ScrollAdjustment vAdjustement)
 		{
 			if (textEditorData == null)
 				return;

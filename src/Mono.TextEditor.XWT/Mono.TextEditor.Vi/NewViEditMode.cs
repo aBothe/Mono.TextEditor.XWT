@@ -29,6 +29,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Linq;
+using Xwt;
 
 namespace Mono.TextEditor.Vi
 {
@@ -75,12 +76,12 @@ namespace Mono.TextEditor.Vi
 			}
 		}
 
-		public override void AllocateTextArea (TextEditor textEditor, TextArea textArea, Gdk.Rectangle allocation)
+		public override void AllocateTextArea (TextEditor textEditor, TextArea textArea, Rectangle allocation)
 		{
 			statusArea.AllocateArea (textArea, allocation);
 		}
 
-		protected override void HandleKeypress (Gdk.Key key, uint unicodeKey, Gdk.ModifierType modifier)
+		protected override void HandleKeypress (Key key, uint unicodeKey, ModifierKeys modifier)
 		{
 			ViEditor.ProcessKey (modifier, key, (char)unicodeKey);
 		}

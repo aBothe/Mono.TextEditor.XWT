@@ -28,7 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Gdk;
+using Xwt;
 
 namespace Mono.TextEditor.Vi
 {
@@ -164,7 +164,7 @@ namespace Mono.TextEditor.Vi
 			}
 		}
 		
-		public void ProcessKey (Gdk.ModifierType modifiers, Key key, char ch)
+		public void ProcessKey (ModifierKeys modifiers, Key key, char ch)
 		{
 			if (Context == null)
 				Reset ("");

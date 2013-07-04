@@ -26,16 +26,16 @@
 //
 
 using System;
-using Gtk;
-using Gdk;
+using Xwt;
+using Xwt.Drawing;
 
 namespace Mono.TextEditor
 {
 	public class IconMargin : Margin
 	{
 		TextEditor editor;
-		Cairo.Color backgroundColor, separatorColor;
-		Pango.Layout layout;
+		Color backgroundColor, separatorColor;
+		TextLayout layout;
 		int marginWidth = 18;
 		
 		public IconMargin (TextEditor editor)
@@ -59,11 +59,10 @@ namespace Mono.TextEditor
 		{
 			backgroundColor = editor.ColorStyle.IndicatorMargin.Color;
 			separatorColor = editor.ColorStyle.IndicatorMarginSeparator.Color;
-			
-			layout.FontDescription = editor.Options.Font;
-			layout.SetText ("!");
-			int tmp;
-			layout.GetPixelSize (out tmp, out this.marginWidth);
+			layout.Font = editor.Options.Font;
+			layout.Text = "!";
+			marginWidth = layout.GetSize ().Width;
+			//layout.GetPixelSize (out tmp, out this.marginWidth);
 			marginWidth *= 12;
 			marginWidth /= 10;
 		}
@@ -118,7 +117,7 @@ namespace Mono.TextEditor
 			}
 		}
 
-		internal protected override void Draw (Cairo.Context ctx, Cairo.Rectangle area, DocumentLine lineSegment, int line, double x, double y, double lineHeight)
+		internal protected override void Draw (Context ctx, Rectangle area, DocumentLine lineSegment, int line, double x, double y, double lineHeight)
 		{
 			bool backgroundIsDrawn = false;
 			if (lineSegment != null) {
@@ -139,12 +138,12 @@ namespace Mono.TextEditor
 
 			if (!backgroundIsDrawn) {
 				ctx.Rectangle (x, y, Width, lineHeight);
-				ctx.Color = backgroundColor;
+				ctx.SetColor(backgroundColor);
 				ctx.Fill ();
 				
 				ctx.MoveTo (x + Width - 0.5, y);
 				ctx.LineTo (x + Width - 0.5, y + lineHeight);
-				ctx.Color = separatorColor;
+				ctx.SetColor(separatorColor);
 				ctx.Stroke ();
 			}
 
@@ -173,7 +172,7 @@ namespace Mono.TextEditor
 			private set;
 		}
 
-		public Cairo.Context Context {
+		public Context Context {
 			get;
 			private set;
 		}
@@ -198,7 +197,7 @@ namespace Mono.TextEditor
 			private set;
 		}
 		
-		public BookmarkMarginDrawEventArgs (TextEditor editor, Cairo.Context context, DocumentLine line, int lineNumber, double xPos, double yPos)
+		public BookmarkMarginDrawEventArgs (TextEditor editor, Context context, DocumentLine line, int lineNumber, double xPos, double yPos)
 		{
 			this.Editor = editor;
 			this.Context    = context;

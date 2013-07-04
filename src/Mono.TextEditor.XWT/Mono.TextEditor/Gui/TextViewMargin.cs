@@ -26,30 +26,28 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 using System;
-using System.Linq;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Runtime.InteropServices;
-
-using Mono.TextEditor.Highlighting;
-
-using Gdk; 
-using Gtk;
+using System.Text;
 using System.Timers;
-using ICSharpCode.NRefactory;
+
+using ICSharpCode.NRefactory; 
+using Xwt;
 using Xwt.Drawing;
+using Mono.TextEditor.Highlighting;
 
 namespace Mono.TextEditor
 {
 	public class TextViewMargin : Margin
 	{
 		readonly TextEditor textEditor;
-		Pango.TabArray tabArray;
-		Pango.Layout markerLayout, defaultLayout;
-		Pango.Layout eofEolLayout;
-		Pango.Rectangle eofEolLayoutRect;
-		Pango.Layout[] eolMarkerLayout;
-		Pango.Rectangle[] eolMarkerLayoutRect;
+		TabArray tabArray;
+		TextLayout markerLayout, defaultLayout;
+		TextLayout eofEolLayout;
+		Rectangle eofEolLayoutRect;
+		TextLayout[] eolMarkerLayout;
+		Rectangle[] eolMarkerLayoutRect;
 
 		internal double charWidth;
 		int highlightBracketOffset = -1;
@@ -144,19 +142,19 @@ namespace Mono.TextEditor
 			textEditor.SelectionChanged += UpdateBracketHighlighting;
 			textEditor.Document.Undone += HandleUndone; 
 			textEditor.Document.Redone += HandleUndone;
-			textEditor.TextArea.FocusInEvent += HandleFocusInEvent;
-			textEditor.TextArea.FocusOutEvent += HandleFocusOutEvent;
+			textEditor.TextArea.GotFocus += HandleFocusInEvent;
+			textEditor.TextArea.LostFocus += HandleFocusOutEvent;
 			Caret.PositionChanged += UpdateBracketHighlighting;
 			textEditor.VScroll += HandleVAdjustmentValueChanged;
 		}
 
-		void HandleFocusInEvent (object o, FocusInEventArgs args)
+		void HandleFocusInEvent (object o, EventArgs args)
 		{
 			selectionColor = ColorStyle.SelectedText;
 			currentLineColor = ColorStyle.LineMarker;
 		}
 
-		void HandleFocusOutEvent (object o, FocusOutEventArgs args)
+		void HandleFocusOutEvent (object o, EventArgs args)
 		{
 			selectionColor = ColorStyle.SelectedInactiveText;
 			currentLineColor = ColorStyle.LineMarkerInactive;

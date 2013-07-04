@@ -26,6 +26,7 @@
 
 using System;
 using System.Collections.Generic;
+using Xwt;
 
 namespace Mono.TextEditor.Vi
 {
@@ -41,9 +42,9 @@ namespace Mono.TextEditor.Vi
 		/// be eliminated and re-constructed later.
 		/// </summary>
 		public struct KeySet {
-			public Gdk.Key Key { get; set;}
+			public Key Key { get; set;}
 			public uint UnicodeKey {get; set;}
-			public Gdk.ModifierType Modifiers {get; set;}
+			public ModifierKeys Modifiers {get; set;}
 		}
 		
 		/// <summary>

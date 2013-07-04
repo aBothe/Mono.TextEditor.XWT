@@ -25,9 +25,12 @@
 // THE SOFTWARE.
 using System;
 using Mono.TextEditor.Highlighting;
+using Xwt;
+
+
 namespace Mono.TextEditor
 {
-	public class CodeSegmentEditorWindow : Gtk.Window
+	public class CodeSegmentEditorWindow : Window
 	{
 		TextEditor codeSegmentEditor = new TextEditor ();
 		
@@ -49,14 +52,16 @@ namespace Mono.TextEditor
 			}
 		}
 		
-		public CodeSegmentEditorWindow (TextEditor editor) : base (Gtk.WindowType.Toplevel)
+		public CodeSegmentEditorWindow (TextEditor editor)
 		{
-			Gtk.ScrolledWindow scrolledWindow = new Gtk.ScrolledWindow ();
-			scrolledWindow.Child = codeSegmentEditor;
-			scrolledWindow.ShadowType = Gtk.ShadowType.In;
-			Child = scrolledWindow;
-			codeSegmentEditor.Realize ();
-			((SimpleEditMode)codeSegmentEditor.CurrentMode).AddBinding (Gdk.Key.Escape, Close);
+			//TODO: Set to top level
+
+			ScrollView scrolledWindow = new ScrollView ();
+			scrolledWindow.Content = codeSegmentEditor;
+			//scrolledWindow.ShadowType = Gtk.ShadowType.In;
+			Content = scrolledWindow;
+			codeSegmentEditor.Show ();
+			((SimpleEditMode)codeSegmentEditor.CurrentMode).AddBinding (Key.Escape, Close);
 			TextEditorOptions options = new TextEditorOptions ();
 			options.FontName = editor.Options.FontName;
 			options.ColorScheme = editor.Options.ColorScheme;
@@ -70,8 +75,8 @@ namespace Mono.TextEditor
 			codeSegmentEditor.Options = options;
 			
 			codeSegmentEditor.KeyPressEvent += delegate(object o, Gtk.KeyPressEventArgs args) {
-				if (args.Event.Key == Gdk.Key.Escape)
-					Destroy ();
+				if (args.Event.Key == Key.Escape)
+					Dispose ();
 				
 			};
 			Gtk.Widget parent = editor.Parent;

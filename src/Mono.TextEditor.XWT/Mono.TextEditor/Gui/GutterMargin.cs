@@ -28,6 +28,7 @@
 using System;
 using Xwt;
 using System.Linq;
+using Xwt.Drawing;
 
 namespace Mono.TextEditor
 {
@@ -112,7 +113,7 @@ namespace Mono.TextEditor
 				return;
 			editor.LockedMargin = this;
 			int lineNumber = args.LineNumber;
-			bool extendSelection = (args.ModifierState & Gdk.ModifierType.ShiftMask) == Gdk.ModifierType.ShiftMask;
+			bool extendSelection = (args.ModifierState & ModifierKeys.Shift) == ModifierKeys.Shift;
 			if (lineNumber <= editor.Document.LineCount) {
 				DocumentLocation loc = new DocumentLocation (lineNumber, DocumentLocation.MinColumn);
 				DocumentLine line = args.LineSegment;
@@ -188,9 +189,9 @@ namespace Mono.TextEditor
 			base.Dispose ();
 		}
 		
-		Cairo.Color lineNumberBgGC, lineNumberGC/*, lineNumberHighlightGC*/;
+		Color lineNumberBgGC, lineNumberGC/*, lineNumberHighlightGC*/;
 
-		Pango.FontDescription gutterFont;
+		Font gutterFont;
 
 		internal protected override void OptionsChanged ()
 		{
@@ -208,18 +209,18 @@ namespace Mono.TextEditor
 			CalculateWidth ();
 		}
 
-		void DrawGutterBackground (Cairo.Context cr, int line, double x, double y, double lineHeight)
+		void DrawGutterBackground (Context cr, int line, double x, double y, double lineHeight)
 		{
 			if (editor.Caret.Line == line) {
 				editor.TextViewMargin.DrawCaretLineMarker (cr, x, y, Width, lineHeight);
 				return;
 			}
 			cr.Rectangle (x, y, Width, lineHeight);
-			cr.Color = lineNumberBgGC;
+			cr.SetColor(lineNumberBgGC);
 			cr.Fill ();
 		}
 
-		internal protected override void Draw (Cairo.Context cr, Cairo.Rectangle area, DocumentLine lineSegment, int line, double x, double y, double lineHeight)
+		internal protected override void Draw (Context cr, Rectangle area, DocumentLine lineSegment, int line, double x, double y, double lineHeight)
 		{
 			var gutterMarker = lineSegment != null ? (MarginMarker)lineSegment.Markers.FirstOrDefault (marker => marker is MarginMarker && ((MarginMarker)marker).CanDraw (this)) : null;
 			if (gutterMarker != null && gutterMarker.CanDrawBackground (this)) {

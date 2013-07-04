@@ -134,7 +134,6 @@
     <Compile Include="Mono.TextEditor\Gui\IconMargin.cs" />
     <Compile Include="Mono.TextEditor\Gui\Margin.cs" />
     <Compile Include="Mono.TextEditor\Gui\MarginDrawer.cs" />
-    <Compile Include="Mono.TextEditor\Gui\PangoUtil.cs" />
     <Compile Include="Mono.TextEditor\Gui\SolidFoldMarkerMargin.cs" />
     <Compile Include="Mono.TextEditor\Gui\TextArea.cs" />
     <Compile Include="Mono.TextEditor\Gui\TextEditor.cs" />
@@ -215,5 +214,6 @@
   <ItemGroup>
     <None Include="Mono.TextEditor\Gui\GtkGestures.cs" />
     <None Include="Mono.TextEditor\Gui\GtkWorkarounds.cs" />
+    <None Include="Mono.TextEditor\Gui\PangoUtil.cs" />
   </ItemGroup>
 </Project>

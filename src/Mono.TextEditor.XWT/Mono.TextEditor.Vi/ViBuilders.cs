@@ -26,7 +26,7 @@
 
 using System;
 using System.Linq;
-using Gdk;
+using Xwt;
 using System.Text;
 
 namespace Mono.TextEditor.Vi
@@ -56,11 +56,11 @@ namespace Mono.TextEditor.Vi
 			bool inUndoTx = false;
 			return (ViBuilderContext ctx) => {
 				var l = ctx.LastKey;
-				bool noModifiers = l.Modifiers == ModifierType.None;
+				bool noModifiers = l.Modifiers == ModifierKeys.None;
 				
 				ctx.Message = ctx.Mode == ViEditorMode.Replace? "-- REPLACE --" : "-- INSERT --";
 				
-				if ((noModifiers && l.Key == Key.Escape) || (l.Char == 'c' && (l.Modifiers & ModifierType.ControlMask) != 0)) {
+				if ((noModifiers && l.Key == Key.Escape) || (l.Char == 'c' && (l.Modifiers & ModifierKeys.Control) != 0)) {
 					ctx.RunAction ((ViEditor ed) => {
 						if (inUndoTx)
 						{

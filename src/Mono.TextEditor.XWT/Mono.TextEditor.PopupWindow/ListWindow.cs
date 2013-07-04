@@ -25,9 +25,7 @@
 //
 //
 
-using Gtk;
-using Gdk;
-using Pango;
+using Xwt;
 using System;
 using System.Text;
 using Mono.TextEditor;
@@ -42,9 +40,9 @@ namespace Mono.TextEditor.PopupWindow
 		Complete = 8 
 	}
 	
-	public class ListWindow<T> : Gtk.Window
+	public class ListWindow<T> : Xwt.Window
 	{
-		ScrolledWindow scrollbar;
+		ScrollView scrollbar;
 		ListWidget<T> list;
 		IListDataProvider<T> provider;
 		Widget footer;
@@ -53,7 +51,7 @@ namespace Mono.TextEditor.PopupWindow
 		StringBuilder word;
 		int curPos;
 		
-		public ListWindow () : base (Gtk.WindowType.Popup)
+		public ListWindow ()
 		{
 			vbox = new VBox ();
 			
@@ -187,7 +185,7 @@ namespace Mono.TextEditor.PopupWindow
 			get { return list; }
 		}
 		
-		public ListWindowKeyAction ProcessKey (Gdk.Key key, Gdk.ModifierType modifier)
+		public ListWindowKeyAction ProcessKey (Key key, ModifierKeys modifier)
 		{
 			switch (key)
 			{

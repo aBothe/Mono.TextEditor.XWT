@@ -28,6 +28,8 @@ using System;
 using Gtk;
 using System.Runtime.InteropServices;
 
+currently not compiled
+
 namespace Mono.TextEditor
 {
 	public static class PangoUtil

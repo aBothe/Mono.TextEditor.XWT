@@ -28,8 +28,7 @@
 
 using System;
 using System.Collections.Generic;
-using Gdk;
-using Gtk;
+using Xwt;
 
 namespace Mono.TextEditor.Theatrics
 {
@@ -41,7 +40,7 @@ namespace Mono.TextEditor.Theatrics
 		Going
 	}
 
-	internal class AnimatedWidget : Container
+	internal class AnimatedWidget : Xwt.Widget
 	{
 		public event EventHandler WidgetDestroyed;
 

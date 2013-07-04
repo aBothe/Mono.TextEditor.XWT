@@ -26,10 +26,11 @@
 // THE SOFTWARE.
 
 using System;
+using Xwt;
 
 namespace Mono.TextEditor.Vi
 {
-	class ViStatusArea : Gtk.DrawingArea
+	class ViStatusArea : Canvas
 	{
 		TextEditor editor;
 		bool showCaret;
@@ -58,15 +59,16 @@ namespace Mono.TextEditor.Vi
 
 		public void RemoveFromParentAndDestroy ()
 		{
+			Visible = false;
 			editor.Remove (this);
-			Destroy ();
+			Dispose ();
 		}
 
-		protected override void OnDestroyed ()
+		protected override void Dispose (bool disposing)
 		{
 			editor.Caret.PositionChanged -= HandlePositionChanged;
 			editor.TextViewMargin.CaretBlink -= HandleCaretBlink;
-			base.OnDestroyed ();
+			base.Dispose (disposing);
 		}
 
 		public void AllocateArea (TextArea textArea, Gdk.Rectangle allocation)

@@ -24,21 +24,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using Gtk;
-using Gdk;
-using Pango;
 using System;
 using System.Text;
+using Xwt;
+using Xwt.Drawing;
 
 namespace Mono.TextEditor.PopupWindow
 {
-	public class ListWidget<T> : Gtk.DrawingArea
+	public class ListWidget<T> : Canvas
 	{
 		int margin = 0;
 		int padding = 4;
 		int listWidth = 300;
 		
-		Pango.Layout layout;
+		TextLayout layout;
 		ListWindow<T> win;
 		int selection = 0;
 		int visibleRows = -1;
@@ -162,10 +161,10 @@ namespace Mono.TextEditor.PopupWindow
 			return true;
 		}
 
-		Adjustment hadj;
-		Adjustment vadj;
+		ScrollAdjustment hadj;
+		ScrollAdjustment vadj;
 
-		protected override void OnSetScrollAdjustments (Adjustment hadj, Adjustment vadj)
+		protected override void OnSetScrollAdjustments (ScrollAdjustment hadj, ScrollAdjustment vadj)
 		{
 			this.hadj = hadj;
 			this.vadj = vadj;
@@ -174,14 +173,14 @@ namespace Mono.TextEditor.PopupWindow
 			base.OnSetScrollAdjustments (hadj, vadj);
 		}
 
-		void SetAdjustments (Gdk.Rectangle allocation)
+		void SetAdjustments (Rectangle allocation)
 		{
 			hadj.SetBounds (0, allocation.Width, 0, 0, allocation.Width);
 			var height = System.Math.Max (allocation.Height, rowHeight * this.win.DataProvider.Count);
 			vadj.SetBounds (0, height, rowHeight, allocation.Height, allocation.Height);
 		}
 
-		protected override void OnSizeAllocated (Gdk.Rectangle allocation)
+		protected override void OnSizeAllocated (Rectangle allocation)
 		{
 			SetAdjustments (allocation);
 
@@ -286,9 +285,9 @@ namespace Mono.TextEditor.PopupWindow
 			return ypos / rowHeight;
 		}
 		
-		public Gdk.Rectangle GetRowArea (int row)
+		public Rectangle GetRowArea (int row)
 		{
-			return new Gdk.Rectangle (0, row * rowHeight, Allocation.Width, rowHeight);
+			return new Rectangle (0, row * rowHeight, Allocation.Width, rowHeight);
 		}
 
 		public int VisibleRows
@@ -336,9 +335,8 @@ namespace Mono.TextEditor.PopupWindow
 				layout.Dispose ();
 			layout = PangoUtil.CreateLayout (this);
 			layout.Wrap = Pango.WrapMode.Char;
-			
-			FontDescription des = this.Style.FontDescription.Copy();
-			layout.FontDescription = des;
+
+			layout.Font = this.Style.FontDescription.Copy();
 			CalcVisibleRows ();
 		}
 	}

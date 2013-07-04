@@ -32,8 +32,7 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-using Gtk;
-using Gdk;
+using Xwt;
 
 namespace Mono.TextEditor.PopupWindow
 {

@@ -30,12 +30,13 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-using Gtk;
-using Gdk;
+using Xwt;
+using Xwt.Drawing;
+
 
 namespace Mono.TextEditor.PopupWindow
 {
-	public class TooltipWindow : Gtk.Window
+	public class TooltipWindow : Xwt.Window
 	{
 		bool nudgeVertical = false;
 		bool nudgeHorizontal = false;
@@ -51,7 +52,7 @@ namespace Mono.TextEditor.PopupWindow
 			}
 		}
 		
-		public TooltipWindow () : base (Gtk.WindowType.Popup)
+		public TooltipWindow ()
 		{
 			this.SkipPagerHint = true;
 			this.SkipTaskbarHint = true;
@@ -189,7 +190,7 @@ namespace Mono.TextEditor.PopupWindow
 		{
 			string text;
 			bool use_markup = false;
-			Pango.Layout layout;
+			TextLayout layout;
 			int indent;
 			int width = int.MaxValue;
 			
@@ -224,9 +225,9 @@ namespace Mono.TextEditor.PopupWindow
 				
 				layout = PangoUtil.CreateLayout (this, null);
 				if (use_markup) {
-					layout.SetMarkup (brokentext != null? brokentext : (text ?? string.Empty));
+					layout.Markup = brokentext != null? brokentext : (text ?? string.Empty);
 				} else {
-					layout.SetText (brokentext != null? brokentext : (text ?? string.Empty));
+					layout.Text = brokentext != null? brokentext : (text ?? string.Empty);
 				}
 				layout.Indent = (int) (indent * Pango.Scale.PangoScale);
 				layout.Wrap = wrapMode;
@@ -434,9 +435,9 @@ namespace Mono.TextEditor.PopupWindow
 				
 				if (layout != null) {
 					if (use_markup) {
-						layout.SetMarkup (brokentext != null? brokentext : (text ?? string.Empty));
+						layout.Markup = brokentext != null? brokentext : (text ?? string.Empty);
 					} else {
-						layout.SetText (brokentext != null? brokentext : (text ?? string.Empty));
+						layout.Text = brokentext != null? brokentext : (text ?? string.Empty);
 					}
 				}
 				QueueResize ();

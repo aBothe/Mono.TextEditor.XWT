@@ -29,8 +29,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Gtk;
 using System.Timers;
+using Xwt;
+using Xwt.Drawing;
 
 namespace Mono.TextEditor
 {
@@ -38,7 +39,7 @@ namespace Mono.TextEditor
 	{
 		TextEditor editor;
 		DocumentLine lineHover;
-		Pango.Layout layout;
+		TextLayout layout;
 		
 		double foldSegmentSize = 8;
 		double marginWidth;
@@ -229,8 +230,8 @@ namespace Mono.TextEditor
 			marginWidth = (int)(10 * editor.Options.Zoom);
 		}
 		
-		Cairo.Color foldBgGC, foldLineHighlightedGC, foldLineHighlightedGCBg;
-		Cairo.Color lineStateChangedGC, lineStateDirtyGC;
+		Color foldBgGC, foldLineHighlightedGC, foldLineHighlightedGCBg;
+		Color lineStateChangedGC, lineStateDirtyGC;
 		
 		public override void Dispose ()
 		{
@@ -240,7 +241,7 @@ namespace Mono.TextEditor
 			layout = layout.Kill ();
 		}
 
-		static HslColor GetColor (Cairo.Color col)
+		static HslColor GetColor (Color col)
 		{
 			HslColor hsl = col;
 			if (HslColor.Brightness (hsl) < 0.5) {
@@ -251,42 +252,42 @@ namespace Mono.TextEditor
 			return hsl;
 		}
 
-		void DrawClosedFolding (Cairo.Context cr, Cairo.Color col, double x, double y)
+		void DrawClosedFolding (Context cr, Color col, double x, double y)
 		{
-			var drawArea = new Cairo.Rectangle (System.Math.Floor (x + (Width - foldSegmentSize) / 2) + 0.5, 
+			var drawArea = new Rectangle (System.Math.Floor (x + (Width - foldSegmentSize) / 2) + 0.5, 
 			                                    System.Math.Floor (y + (editor.LineHeight - foldSegmentSize) / 2) + 0.5, foldSegmentSize, foldSegmentSize);
-			cr.MoveTo (new Cairo.PointD (drawArea.X, drawArea.Y));
-			cr.LineTo (new Cairo.PointD (drawArea.X, drawArea.Y + drawArea.Height));
-			cr.LineTo (new Cairo.PointD (drawArea.X + drawArea.Width, drawArea.Y + drawArea.Height / 2));
+			cr.MoveTo (new Point (drawArea.X, drawArea.Y));
+			cr.LineTo (new Point (drawArea.X, drawArea.Y + drawArea.Height));
+			cr.LineTo (new Point (drawArea.X + drawArea.Width, drawArea.Y + drawArea.Height / 2));
 			cr.ClosePath ();
-			cr.Color = GetColor (col);
+			cr.SetColor (col);
 			cr.Fill ();
 		}
 
-		void DrawUpFolding (Cairo.Context cr, Cairo.Color col, double x, double y)
+		void DrawUpFolding (Context cr, Color col, double x, double y)
 		{
-			var drawArea = new Cairo.Rectangle (System.Math.Floor (x + (Width - foldSegmentSize) / 2) + 0.5, 
+			var drawArea = new Rectangle (System.Math.Floor (x + (Width - foldSegmentSize) / 2) + 0.5, 
 			                                    System.Math.Floor (y + (editor.LineHeight - foldSegmentSize) / 2) + 0.5, foldSegmentSize, foldSegmentSize);
-			cr.MoveTo (new Cairo.PointD (drawArea.X, drawArea.Y));
-			cr.LineTo (new Cairo.PointD (drawArea.X + drawArea.Width, drawArea.Y));
-			cr.LineTo (new Cairo.PointD (drawArea.X + drawArea.Width / 2, drawArea.Y + drawArea.Height));
+			cr.MoveTo (new Point (drawArea.X, drawArea.Y));
+			cr.LineTo (new Point (drawArea.X + drawArea.Width, drawArea.Y));
+			cr.LineTo (new Point (drawArea.X + drawArea.Width / 2, drawArea.Y + drawArea.Height));
 			cr.ClosePath ();
 			
-			cr.Color = GetColor (col);
+			cr.SetColor(col);
 			cr.Fill ();
 		}
 
-		void DrawDownFolding (Cairo.Context cr, Cairo.Color col, double x, double y)
+		void DrawDownFolding (Context cr, Color col, double x, double y)
 		{
-			var drawArea = new Cairo.Rectangle (System.Math.Floor (x + (Width - foldSegmentSize) / 2) + 0.5, 
+			var drawArea = new Rectangle (System.Math.Floor (x + (Width - foldSegmentSize) / 2) + 0.5, 
 			                                    System.Math.Floor (y + (editor.LineHeight - foldSegmentSize) / 2) + 0.5, foldSegmentSize, foldSegmentSize);
 
-			cr.MoveTo (new Cairo.PointD (drawArea.X, drawArea.Y + drawArea.Height));
-			cr.LineTo (new Cairo.PointD (drawArea.X + drawArea.Width / 2, drawArea.Y));
-			cr.LineTo (new Cairo.PointD (drawArea.X + drawArea.Width, drawArea.Y + drawArea.Height));
+			cr.MoveTo (new Point (drawArea.X, drawArea.Y + drawArea.Height));
+			cr.LineTo (new Point (drawArea.X + drawArea.Width / 2, drawArea.Y));
+			cr.LineTo (new Point (drawArea.X + drawArea.Width, drawArea.Y + drawArea.Height));
 
 			cr.ClosePath ();
-			cr.Color = GetColor (col);
+			cr.SetColor(col);
 			cr.Fill ();
 		}
 
@@ -298,12 +299,12 @@ namespace Mono.TextEditor
 		List<FoldSegment> startFoldings      = new List<FoldSegment> ();
 		List<FoldSegment> containingFoldings = new List<FoldSegment> ();
 
-		internal protected override void Draw (Cairo.Context cr, Cairo.Rectangle area, DocumentLine lineSegment, int line, double x, double y, double lineHeight)
+		internal protected override void Draw (Context cr, Rectangle area, DocumentLine lineSegment, int line, double x, double y, double lineHeight)
 		{
 			foldSegmentSize = marginWidth * 4 / 6;
 			foldSegmentSize -= (foldSegmentSize) % 2;
 			
-			Cairo.Rectangle drawArea = new Cairo.Rectangle (x, y, marginWidth, lineHeight);
+			Rectangle drawArea = new Rectangle (x, y, marginWidth, lineHeight);
 			var state = editor.Document.GetLineState (lineSegment);
 			
 			bool isSelected = false;
@@ -343,7 +344,7 @@ namespace Mono.TextEditor
 			}
 			
 			cr.Rectangle (drawArea);
-			cr.Color = bgGC;
+			cr.SetColor(bgGC);
 			cr.Fill ();
 
 			if (editor.TextViewMargin.BackgroundRenderer == null) {
@@ -355,7 +356,7 @@ namespace Mono.TextEditor
 					} else {
 						col.L = System.Math.Max (0.0, col.L - (nextDepth - delta * 1.5) / 15.0);
 					}
-					cr.Color = col;
+					cr.SetColor(col);
 					cr.MoveTo (x, y + lineHeight - 0.5);
 					cr.LineTo (x + marginWidth, y + lineHeight - 0.5);
 					cr.Stroke ();
@@ -363,11 +364,11 @@ namespace Mono.TextEditor
 			}
 
 			if (state == TextDocument.LineState.Changed) {
-				cr.Color = lineStateChangedGC;
+				cr.SetColor(lineStateChangedGC);
 				cr.Rectangle (x + 1, y, marginWidth / 3, lineHeight);
 				cr.Fill ();
 			} else if (state == TextDocument.LineState.Dirty) {
-				cr.Color = lineStateDirtyGC;
+				cr.SetColor(lineStateDirtyGC);
 				cr.Rectangle (x + 1, y, marginWidth / 3, lineHeight);
 				cr.Fill ();
 			}

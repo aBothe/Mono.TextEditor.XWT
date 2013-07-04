@@ -34,7 +34,7 @@ using System.Collections.Generic;
 
 namespace Mono.TextEditor
 {
-	public class CodeSegmentPreviewWindow : Gtk.Window
+	public class CodeSegmentPreviewWindow : Window
 	{
 		const int DefaultPreviewWindowWidth = 320;
 		const int DefaultPreviewWindowHeight = 200;

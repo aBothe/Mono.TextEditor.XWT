@@ -26,14 +26,14 @@
 // THE SOFTWARE.
 
 using System;
-using Gdk;
+using Xwt;
 
 namespace Mono.TextEditor.Theatrics
 {
 	/// <summary>
 	/// Tooltip that "bounces", then fades away.
 	/// </summary>
-	public abstract class BounceFadePopupWindow : Gtk.Window
+	public abstract class BounceFadePopupWindow : Canvas
 	{
 		Stage<BounceFadePopupWindow> stage = new Stage<BounceFadePopupWindow> ();
 		Gdk.Pixbuf textImage = null;
@@ -117,8 +117,8 @@ namespace Mono.TextEditor.Theatrics
 			Popup ();
 		}
 
-		Gtk.Adjustment vAdjustment;
-		Gtk.Adjustment hAdjustment;
+		ScrollAdjustment vAdjustment;
+		ScrollAdjustment hAdjustment;
 		protected void ListenToEvents ()
 		{
 			if (vAdjustment == null) {
@@ -132,10 +132,6 @@ namespace Mono.TextEditor.Theatrics
 			hValue = hAdjustment.Value;
 		}
 
-		protected override void OnShown ()
-		{
-			base.OnShown ();
-		}
 		
 		protected void DetachEvents ()
 		{
@@ -223,7 +219,7 @@ namespace Mono.TextEditor.Theatrics
 	/// <summary>
 	/// Tooltip that "bounces", then fades away.
 	/// </summary>
-	public abstract class BounceFadePopupWidget : Gtk.Widget
+	public abstract class BounceFadePopupWidget : Canvas
 	{
 		Stage<BounceFadePopupWidget> stage = new Stage<BounceFadePopupWidget> ();
 		Gdk.Pixbuf textImage = null;
@@ -271,8 +267,8 @@ namespace Mono.TextEditor.Theatrics
 		public Easing BounceEasing { get; set; }
 
 		int xExpandedOffset, yExpandedOffset;
-		Cairo.Rectangle userspaceArea;
-		Cairo.Rectangle bounds;
+		Rectangle userspaceArea;
+		Rectangle bounds;
 
 		public virtual void Popup ()
 		{
@@ -288,7 +284,7 @@ namespace Mono.TextEditor.Theatrics
 			int y = (int) System.Math.Floor (bounds.Y);
 
 			//capture any lost fractions to pass as an offset to Draw
-			userspaceArea = new Cairo.Rectangle (bounds.X - x, bounds.Y - y, bounds.Width, bounds.Height);
+			userspaceArea = new Rectangle (bounds.X - x, bounds.Y - y, bounds.Width, bounds.Height);
 
 			//lose half-pixels on the expansion, it's not a big deal
 			xExpandedOffset = (int) (System.Math.Floor (ExpandWidth / 2d));

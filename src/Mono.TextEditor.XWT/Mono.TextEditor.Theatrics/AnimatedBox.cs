@@ -29,12 +29,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Gdk;
-using Gtk;
+using Xwt;
 
 namespace Mono.TextEditor.Theatrics
 {
-	public abstract class AnimatedBox : Container
+	public abstract class AnimatedBox : Widget
 	{
 		private readonly Stage<AnimatedWidget> stage = new Stage<AnimatedWidget> ();
 		private readonly LinkedList<AnimatedWidget> children = new LinkedList<AnimatedWidget> ();

@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
-using Gtk;
-using Gdk;
+using Xwt;
 using System.Collections.Generic;
 
 namespace Mono.TextEditor.Theatrics
@@ -9,13 +8,13 @@ namespace Mono.TextEditor.Theatrics
 	/// <summary>
 	/// A scrolled window with the ability to put widgets beside the scrollbars.
 	/// </summary>
-	public class SmartScrolledWindow : Bin
+	public class SmartScrolledWindow : Widget
 	{
-		Adjustment vAdjustment;
-		Gtk.Widget vScrollBar;
+		ScrollAdjustment vAdjustment;
+		Widget vScrollBar;
 		
-		Adjustment hAdjustment;
-		Gtk.HScrollbar hScrollBar;
+		ScrollAdjustment hAdjustment;
+		HScrollbar hScrollBar;
 		
 		List<SmartScrolledWindowContainerChild> children = new List<SmartScrolledWindowContainerChild> ();
 		public enum ChildPosition {
@@ -25,11 +24,11 @@ namespace Mono.TextEditor.Theatrics
 			Right
 		}
 		
-		public Adjustment Vadjustment {
+		public ScrollAdjustment Vadjustment {
 			get { return this.vAdjustment; }
 		}
 
-		public Adjustment Hadjustment {
+		public ScrollAdjustment Hadjustment {
 			get { return this.hAdjustment; }
 		}
 
@@ -63,29 +62,30 @@ namespace Mono.TextEditor.Theatrics
 			QueueDraw ();
 		}
 		
-		public SmartScrolledWindow (Gtk.Widget vScrollBar = null)
+		public SmartScrolledWindow (Widget vScrollBar = null)
 		{
 			GtkWorkarounds.FixContainerLeak (this);
 			
-			vAdjustment = new Adjustment (0, 0, 0, 0, 0, 0);
-			vAdjustment.Changed += HandleAdjustmentChanged;
+			vAdjustment = new ScrollAdjustment();
+			vAdjustment.ValueChanged += HandleAdjustmentChanged;
 			
 			this.vScrollBar = vScrollBar ?? new VScrollbar (vAdjustment);
 			this.vScrollBar.Parent = this;
 			this.vScrollBar.Show ();
 			
-			hAdjustment = new Adjustment (0, 0, 0, 0, 0, 0);
-			hAdjustment.Changed += HandleAdjustmentChanged;
+			hAdjustment = new ScrollAdjustment();
+			hAdjustment.ValueChanged += HandleAdjustmentChanged;
 			
 			hScrollBar = new HScrollbar (hAdjustment);
 			hScrollBar.Parent = this;
 			hScrollBar.Show ();
 		}
 		
-		public void ReplaceVScrollBar (Gtk.Widget widget)
+		public void ReplaceVScrollBar (Widget widget)
 		{
 			if (vScrollBar != null) {
-				vScrollBar.Unparent ();
+				vScrollBar.
+				vScrollBar.Dispose ();
 				vScrollBar.Destroy ();
 			}
 			this.vScrollBar = widget;
@@ -123,7 +123,7 @@ namespace Mono.TextEditor.Theatrics
 		
 		void HandleAdjustmentChanged (object sender, EventArgs e)
 		{
-			var adjustment = (Adjustment)sender;
+			var adjustment = (ScrollAdjustment)sender;
 			var scrollbar = adjustment == vAdjustment ? vScrollBar : hScrollBar;
 			if (!(scrollbar is Scrollbar))
 				return;

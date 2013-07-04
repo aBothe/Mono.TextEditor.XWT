@@ -27,6 +27,7 @@
 //
 
 using System;
+using Xwt;
 
 namespace Mono.TextEditor.Vi
 {
@@ -117,144 +118,144 @@ namespace Mono.TextEditor.Vi
 			return null;
 		}
 		
-		public static Action<TextEditorData> GetDirectionKeyAction (Gdk.Key key, Gdk.ModifierType modifier)
+		public static Action<TextEditorData> GetDirectionKeyAction (Key key, ModifierKeys modifier)
 		{
 			//
 			// NO MODIFIERS
 			//
-			if ((modifier & (Gdk.ModifierType.ShiftMask | Gdk.ModifierType.ControlMask)) == 0) {
+			if ((modifier & (ModifierKeys.Shift | ModifierKeys.Control)) == 0) {
 				switch (key) {
-				case Gdk.Key.Left:
-				case Gdk.Key.KP_Left:
+				case Key.Left:
+				case Key.NumPadLeft:
 					return ViActions.Left;
 					
-				case Gdk.Key.Right:
-				case Gdk.Key.KP_Right:
+				case Key.Right:
+				case Key.NumPadRight:
 					return ViActions.Right;
 					
-				case Gdk.Key.Up:
-				case Gdk.Key.KP_Up:
+				case Key.Up:
+				case Key.NumPadUp:
 					return ViActions.Up;
 					
-				case Gdk.Key.Down:
-				case Gdk.Key.KP_Down:
+				case Key.Down:
+				case Key.NumPadDown:
 					return ViActions.Down;
 				
 				//not strictly vi, but more useful IMO
-				case Gdk.Key.KP_Home:
-				case Gdk.Key.Home:
+				case Key.NumPadHome:
+				case Key.Home:
 					return CaretMoveActions.LineHome;
 					
-				case Gdk.Key.KP_End:
-				case Gdk.Key.End:
+				case Key.NumPadEnd:
+				case Key.End:
 					return ViActions.LineEnd;
 
-				case Gdk.Key.Page_Up:
-				case Gdk.Key.KP_Page_Up:
+				case Key.PageUp:
+				//case Key.NumPadPage_Up:
 					return CaretMoveActions.PageUp;
 
-				case Gdk.Key.Page_Down:
-				case Gdk.Key.KP_Page_Down:
+				case Key.PageDown:
+				//case Key.NumPadPage_Down:
 					return CaretMoveActions.PageDown;
 				}
 			}
 			//
 			// === CONTROL ===
 			//
-			else if ((modifier & Gdk.ModifierType.ShiftMask) == 0
-			         && (modifier & Gdk.ModifierType.ControlMask) != 0)
+			else if ((modifier & ModifierKeys.Shift) == 0
+			         && (modifier & ModifierKeys.Control) != 0)
 			{
 				switch (key) {
-				case Gdk.Key.Left:
-				case Gdk.Key.KP_Left:
+				case Key.Left:
+				case Key.NumPadLeft:
 					return CaretMoveActions.PreviousWord;
 					
-				case Gdk.Key.Right:
-				case Gdk.Key.KP_Right:
+				case Key.Right:
+				case Key.NumPadRight:
 					return CaretMoveActions.NextWord;
 					
-				case Gdk.Key.Up:
-				case Gdk.Key.KP_Up:
+				case Key.Up:
+				case Key.NumPadUp:
 					return ScrollActions.Up;
 					
 				// usually bound at IDE level
-				case Gdk.Key.u:
+				case Key.u:
 					return CaretMoveActions.PageUp;
 					
-				case Gdk.Key.Down:
-				case Gdk.Key.KP_Down:
+				case Key.Down:
+				case Key.NumPadDown:
 					return ScrollActions.Down;
 					
-				case Gdk.Key.d:
+				case Key.d:
 					return CaretMoveActions.PageDown;
 				
-				case Gdk.Key.KP_Home:
-				case Gdk.Key.Home:
+				case Key.NumPadHome:
+				case Key.Home:
 					return CaretMoveActions.ToDocumentStart;
 					
-				case Gdk.Key.KP_End:
-				case Gdk.Key.End:
+				case Key.NumPadEnd:
+				case Key.End:
 					return CaretMoveActions.ToDocumentEnd;
 				}
 			}
 			return null;
 		}
 		
-		public static Action<TextEditorData> GetInsertKeyAction (Gdk.Key key, Gdk.ModifierType modifier)
+		public static Action<TextEditorData> GetInsertKeyAction (Key key, ModifierKeys modifier)
 		{
 			//
 			// NO MODIFIERS
 			//
-			if ((modifier & (Gdk.ModifierType.ShiftMask | Gdk.ModifierType.ControlMask)) == 0) {
+			if ((modifier & (ModifierKeys.Shift | ModifierKeys.Control)) == 0) {
 				switch (key) {
-				case Gdk.Key.Tab:
+				case Key.Tab:
 					return MiscActions.InsertTab;
 					
-				case Gdk.Key.Return:
-				case Gdk.Key.KP_Enter:
+				case Key.Return:
+				case Key.NumPadEnter:
 					return MiscActions.InsertNewLine;
 					
-				case Gdk.Key.BackSpace:
+				case Key.BackSpace:
 					return DeleteActions.Backspace;
 					
-				case Gdk.Key.Delete:
-				case Gdk.Key.KP_Delete:
+				case Key.Delete:
+				case Key.NumPadDelete:
 					return DeleteActions.Delete;
 					
-				case Gdk.Key.Insert:
+				case Key.Insert:
 					return MiscActions.SwitchCaretMode;
 				}
 			}
 			//
 			// CONTROL
 			//
-			else if ((modifier & Gdk.ModifierType.ControlMask) != 0
-			         && (modifier & Gdk.ModifierType.ShiftMask) == 0)
+			else if ((modifier & ModifierKeys.Control) != 0
+			         && (modifier & ModifierKeys.Shift) == 0)
 			{
 				switch (key) {
-				case Gdk.Key.BackSpace:
+				case Key.BackSpace:
 					return DeleteActions.PreviousWord;
 					
-				case Gdk.Key.Delete:
-				case Gdk.Key.KP_Delete:
+				case Key.Delete:
+				case Key.NumPadDelete:
 					return DeleteActions.NextWord;
 				}
 			}
 			//
 			// SHIFT
 			//
-			else if ((modifier & Gdk.ModifierType.ControlMask) == 0
-			         && (modifier & Gdk.ModifierType.ShiftMask) != 0)
+			else if ((modifier & ModifierKeys.Control) == 0
+			         && (modifier & ModifierKeys.Shift) != 0)
 			{
 				switch (key) {
-				case Gdk.Key.Tab:
+				case Key.Tab:
 					return MiscActions.RemoveTab;
 					
-				case Gdk.Key.BackSpace:
+				case Key.BackSpace:
 					return DeleteActions.Backspace;
 
-				case Gdk.Key.Return:
-				case Gdk.Key.KP_Enter:
+				case Key.Return:
+				case Key.NumPadEnter:
 					return MiscActions.InsertNewLine;
 				}
 			}
