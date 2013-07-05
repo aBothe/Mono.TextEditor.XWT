@@ -165,6 +165,7 @@ namespace Mono.TextEditor.Vi
 						cr.Fill ();
 					}
 				}
+				cr.Stroke ();
 			}
 		}
 	}
