@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XwtExperiments", "XwtExperiments.csproj", "{07C57CE0-F80E-4504-AD8D-35E047A0DAFE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xwt", "..\ext\xwt\Xwt\Xwt.csproj", "{92494904-35FA-4DC9-BDE9-3A3E87AC49D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xwt.Gtk", "..\ext\xwt\Xwt.Gtk\Xwt.Gtk.csproj", "{C3887A93-B2BD-4097-8E2F-3A063EFF32FD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{07C57CE0-F80E-4504-AD8D-35E047A0DAFE}.Debug|x86.ActiveCfg = Debug|x86
+		{07C57CE0-F80E-4504-AD8D-35E047A0DAFE}.Debug|x86.Build.0 = Debug|x86
+		{07C57CE0-F80E-4504-AD8D-35E047A0DAFE}.Release|x86.ActiveCfg = Release|x86
+		{07C57CE0-F80E-4504-AD8D-35E047A0DAFE}.Release|x86.Build.0 = Release|x86
+		{92494904-35FA-4DC9-BDE9-3A3E87AC49D3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{92494904-35FA-4DC9-BDE9-3A3E87AC49D3}.Debug|x86.Build.0 = Debug|Any CPU
+		{92494904-35FA-4DC9-BDE9-3A3E87AC49D3}.Release|x86.ActiveCfg = Release|Any CPU
+		{92494904-35FA-4DC9-BDE9-3A3E87AC49D3}.Release|x86.Build.0 = Release|Any CPU
+		{C3887A93-B2BD-4097-8E2F-3A063EFF32FD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C3887A93-B2BD-4097-8E2F-3A063EFF32FD}.Debug|x86.Build.0 = Debug|Any CPU
+		{C3887A93-B2BD-4097-8E2F-3A063EFF32FD}.Release|x86.ActiveCfg = Release|Any CPU
+		{C3887A93-B2BD-4097-8E2F-3A063EFF32FD}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = XwtExperiments.csproj
+	EndGlobalSection
+EndGlobal

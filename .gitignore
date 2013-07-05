@@ -4,6 +4,8 @@ src/Mono.TextEditor.XWT/bin/*
 src/Mono.TextEditor.XWT/obj/*
 src/EditorTests/bin/*
 src/EditorTests/obj/*
+src/XwtExperiments/bin/*
+src/XwtExperiments/obj/*
 *.suo
 *.user
 *.pidb
