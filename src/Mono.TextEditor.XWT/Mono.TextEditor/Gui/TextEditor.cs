@@ -39,7 +39,7 @@ namespace Mono.TextEditor
 {
 	[System.ComponentModel.Category("Mono.TextEditor")]
 	[System.ComponentModel.ToolboxItem(true)]
-	public class TextEditor : Widget
+	public class TextEditor : VBox
 	{
 		readonly TextArea textArea;
 
@@ -111,12 +111,13 @@ namespace Mono.TextEditor
 
 		ScrollAdjustment hAdjustement;
 		ScrollAdjustment vAdjustement;
-		protected override void OnSetScrollAdjustments (ScrollAdjustment hAdjustement, ScrollAdjustment vAdjustement)
+
+		protected override void SetScrollAdjustments (ScrollAdjustment hAdjustement, ScrollAdjustment vAdjustement)
 		{
 			UnregisterAdjustments ();
 			this.vAdjustement = vAdjustement;
 			this.hAdjustement = hAdjustement;
-			base.OnSetScrollAdjustments (hAdjustement, vAdjustement);
+			base.SetScrollAdjustments (hAdjustement, vAdjustement);
 			textArea.SetTextEditorScrollAdjustments (hAdjustement, vAdjustement);
 			if (hAdjustement != null) {
 				hAdjustement.ValueChanged += HandleAdjustmentValueChange;
@@ -130,7 +131,7 @@ namespace Mono.TextEditor
 
 		void HandleAdjustmentValueChange (object sender, EventArgs e)
 		{
-			SetChildrenPositions (Allocation);
+			SetChildrenPositions ();
 		}
 
 		protected virtual void OnScrollAdjustmentsSet ()
@@ -162,14 +163,10 @@ namespace Mono.TextEditor
 			public int X { get; set; }
 			public int Y { get; set; }
 			public bool FixedPosition { get; set; }
+			public Widget Child;
 			public EditorContainerChild (Container parent, Widget child) : base (parent, child)
 			{
 			}
-		}
-		
-		public override GLib.GType ChildType ()
-		{
-			return Gtk.Widget.GType;
 		}
 		
 		internal List<EditorContainerChild> containerChildren = new List<EditorContainerChild> ();
