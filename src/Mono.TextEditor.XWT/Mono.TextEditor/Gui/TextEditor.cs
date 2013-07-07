@@ -70,10 +70,10 @@ namespace Mono.TextEditor
 			this.textArea = new TextArea (doc, options, initialMode);
 			this.textArea.Initialize (this, doc, options, initialMode);
 			this.textArea.EditorOptionsChanged += (sender, e) => OptionsChanged (sender, e);
-			AddTopLevelWidget (textArea, 0, 0);
+			PackStart (textArea, true, true);
+			//AddTopLevelWidget (textArea, 0, 0);
 			Show ();
 
-			stage.ActorStep += OnActorStep;
 			/*if (Platform.IsMac) {
 				VScroll += delegate {
 					for (int i = 1; i < containerChildren.Count; i++) {
@@ -93,230 +93,57 @@ namespace Mono.TextEditor
 			textArea.SetFocus ();
 		}
 
-		protected override void OnDestroyed ()
-		{
-			base.OnDestroyed ();
-			UnregisterAdjustments ();
-		}
-
-		void UnregisterAdjustments ()
-		{
-			if (vAdjustement != null)
-				vAdjustement.ValueChanged -= HandleAdjustmentValueChange;
-			if (hAdjustement != null)
-				hAdjustement.ValueChanged -= HandleAdjustmentValueChange;
-			vAdjustement = null;
-			hAdjustement = null;
-		}
-
-		ScrollAdjustment hAdjustement;
-		ScrollAdjustment vAdjustement;
-
-		protected override void SetScrollAdjustments (ScrollAdjustment hAdjustement, ScrollAdjustment vAdjustement)
-		{
-			UnregisterAdjustments ();
-			this.vAdjustement = vAdjustement;
-			this.hAdjustement = hAdjustement;
-			base.SetScrollAdjustments (hAdjustement, vAdjustement);
-			textArea.SetTextEditorScrollAdjustments (hAdjustement, vAdjustement);
-			if (hAdjustement != null) {
-				hAdjustement.ValueChanged += HandleAdjustmentValueChange;
-			}
-
-			if (vAdjustement != null) {
-				vAdjustement.ValueChanged += HandleAdjustmentValueChange;
-			}
-			OnScrollAdjustmentsSet ();
-		}
-
-		void HandleAdjustmentValueChange (object sender, EventArgs e)
-		{
-			SetChildrenPositions ();
-		}
-
-		protected virtual void OnScrollAdjustmentsSet ()
-		{
-		}
-
-		protected override void OnSizeAllocated (Rectangle allocation)
-		{
-			base.OnSizeAllocated (allocation);
-			CurrentMode.AllocateTextArea (this, textArea, allocation);
-			SetChildrenPositions (allocation);
-		}
-
-		protected override void OnSizeRequested (ref Requisition requisition)
-		{
-			base.OnSizeRequested (ref requisition);
-			containerChildren.ForEach (c => c.Child.SizeRequest ());
-		}
-
-		#region Container
-		public override ContainerChild this [Widget w] {
-			get {
-				return containerChildren.FirstOrDefault (info => info.Child == w || (info.Child is AnimatedWidget && ((AnimatedWidget)info.Child).Widget == w));
-			}
-		}
-
-		public class EditorContainerChild : Container.ContainerChild
-		{
-			public int X { get; set; }
-			public int Y { get; set; }
-			public bool FixedPosition { get; set; }
-			public Widget Child;
-			public EditorContainerChild (Container parent, Widget child) : base (parent, child)
-			{
-			}
-		}
-		
-		internal List<EditorContainerChild> containerChildren = new List<EditorContainerChild> ();
-		
-		public void AddTopLevelWidget (Gtk.Widget widget, int x, int y)
-		{
-			widget.Parent = this;
-			EditorContainerChild info = new EditorContainerChild (this, widget);
-			info.X = x;
-			info.Y = y;
-			containerChildren.Add (info);
-		}
-		
-		public void MoveTopLevelWidget (Gtk.Widget widget, int x, int y)
-		{
-			foreach (EditorContainerChild info in containerChildren.ToArray ()) {
-				if (info.Child == widget || (info.Child is AnimatedWidget && ((AnimatedWidget)info.Child).Widget == widget)) {
-					if (info.X == x && info.Y == y)
-						break;
-					info.X = x;
-					info.Y = y;
-					if (widget.Visible)
-						ResizeChild (Allocation, info);
-					break;
-				}
-			}
-		}
-
-		/// <summary>
-		/// Returns the position of an embedded widget
-		/// </summary>
-		public void GetTopLevelWidgetPosition (Gtk.Widget widget, out int x, out int y)
-		{
-			foreach (EditorContainerChild info in containerChildren.ToArray ()) {
-				if (info.Child == widget || (info.Child is AnimatedWidget && ((AnimatedWidget)info.Child).Widget == widget)) {
-					x = info.X;
-					y = info.Y;
-					return;
-				}
-			}
-			x = y = 0;
-		}
-		
-		public void MoveToTop (Gtk.Widget widget)
-		{
-			EditorContainerChild editorContainerChild = containerChildren.FirstOrDefault (c => c.Child == widget);
-			if (editorContainerChild == null)
-				throw new Exception ("child " + widget + " not found.");
-			List<EditorContainerChild> newChilds = new List<EditorContainerChild> (containerChildren.Where (child => child != editorContainerChild));
-			newChilds.Add (editorContainerChild);
-			this.containerChildren = newChilds;
-			widget.GdkWindow.Raise ();
-		}
-		
-		protected override void OnAdded (Widget widget)
-		{
-			AddTopLevelWidget (widget, 0, 0);
-		}
-		
-		protected override void OnRemoved (Widget widget)
-		{
-			foreach (EditorContainerChild info in containerChildren.ToArray ()) {
-				if (info.Child == widget) {
-					widget.Unparent ();
-					containerChildren.Remove (info);
-					break;
-				}
-			}
-		}
-		
-		protected override void ForAll (bool include_internals, Gtk.Callback callback)
-		{
-			containerChildren.ForEach (child => callback (child.Child));
-		}
-
-		void ResizeChild (Rectangle allocation, EditorContainerChild child)
-		{
-			Requisition req = child.Child.SizeRequest ();
-			var childRectangle = new Gdk.Rectangle (Allocation.X + child.X, Allocation.Y + child.Y, req.Width, req.Height);
-			if (!child.FixedPosition) {
-				double zoom = Options.Zoom;
-				childRectangle.X = Allocation.X + (int)(child.X * zoom - HAdjustment.Value);
-				childRectangle.Y = Allocation.Y + (int)(child.Y * zoom - VAdjustment.Value);
-			}
-			//			childRectangle.X += allocation.X;
-			//			childRectangle.Y += allocation.Y;
-			child.Child.SizeAllocate (childRectangle);
-		}
-		
-		void SetChildrenPositions (Rectangle allocation)
-		{
-			foreach (EditorContainerChild child in containerChildren.ToArray ()) {
-				if (child.Child == textArea)
-					continue;
-				ResizeChild (allocation, child);
-			}
-		}
-		#endregion
-
 		#region Animated Widgets
 		Stage<AnimatedWidget> stage = new Stage<AnimatedWidget> ();
-		
+
 		bool OnActorStep (Actor<AnimatedWidget> actor)
 		{
 			switch (actor.Target.AnimationState) {
-			case AnimationState.Coming:
-				actor.Target.QueueDraw ();
-				actor.Target.Percent = actor.Percent;
-				if (actor.Expired) {
-					actor.Target.AnimationState = AnimationState.Idle;
-					return false;
-				}
-				break;
-			case AnimationState.IntendingToGo:
-				actor.Target.AnimationState = AnimationState.Going;
-				actor.Target.Bias = actor.Percent;
-				actor.Reset ((uint)(actor.Target.Duration * actor.Percent));
-				break;
-			case AnimationState.Going:
-				if (actor.Expired) {
-					this.Remove (actor.Target);
-					return false;
-				}
-				actor.Target.Percent = 1.0 - actor.Percent;
-				break;
+				case AnimationState.Coming:
+					actor.Target.QueueDraw ();
+					actor.Target.Percent = actor.Percent;
+					if (actor.Expired) {
+						actor.Target.AnimationState = AnimationState.Idle;
+						return false;
+					}
+					break;
+					case AnimationState.IntendingToGo:
+					actor.Target.AnimationState = AnimationState.Going;
+					actor.Target.Bias = actor.Percent;
+					actor.Reset ((uint)(actor.Target.Duration * actor.Percent));
+					break;
+					case AnimationState.Going:
+					if (actor.Expired) {
+						this.Remove (actor.Target);
+						return false;
+					}
+					actor.Target.Percent = 1.0 - actor.Percent;
+					break;
 			}
 			return true;
 		}
-		
+
 		void OnWidgetDestroyed (object sender, EventArgs args)
 		{
 			RemoveCore ((AnimatedWidget)sender);
 		}
-		
+
 		void RemoveCore (AnimatedWidget widget)
 		{
 			RemoveCore (widget, widget.Duration, 0, 0, false, false);
 		}
-		
+
 		void RemoveCore (AnimatedWidget widget, uint duration, Easing easing, Blocking blocking, bool use_easing, bool use_blocking)
 		{
 			if (duration > 0)
 				widget.Duration = duration;
-			
+
 			if (use_easing)
 				widget.Easing = easing;
-			
+
 			if (use_blocking)
 				widget.Blocking = blocking;
-			
+
 			if (widget.AnimationState == AnimationState.Coming) {
 				widget.AnimationState = AnimationState.IntendingToGo;
 			} else {
@@ -333,7 +160,7 @@ namespace Mono.TextEditor
 				stage.Add (widget, widget.Duration);
 			}
 		}
-		
+
 		public void AddAnimatedWidget (Widget widget, uint duration, Easing easing, Blocking blocking, int x, int y)
 		{
 			AnimatedWidget animated_widget = new AnimatedWidget (widget, duration, easing, blocking, false);
@@ -343,7 +170,7 @@ namespace Mono.TextEditor
 			animated_widget.StartPadding = 0;
 			animated_widget.EndPadding = widget.Allocation.Height;
 			//			animated_widget.Node = animated_widget;
-			
+
 			EditorContainerChild info = new EditorContainerChild (this, animated_widget);
 			info.X = x;
 			info.Y = y;
@@ -351,6 +178,7 @@ namespace Mono.TextEditor
 			containerChildren.Add (info);
 		}
 		#endregion
+
 		
 		#region TextArea delegation
 		public TextDocument Document {
@@ -386,7 +214,7 @@ namespace Mono.TextEditor
 				return textArea.Caret;
 			}
 		}
-
+		/*
 		protected internal IMMulticontext IMContext {
 			get { return textArea.IMContext; }
 		}
@@ -398,7 +226,7 @@ namespace Mono.TextEditor
 			set {
 				textArea.IMModule = value;
 			}
-		}
+		}*/
 
 		public ITextEditorOptions Options {
 			get {
@@ -490,7 +318,7 @@ namespace Mono.TextEditor
 			textArea.ScrollTo (p);
 		}
 
-		public void ScrollTo (Gdk.Rectangle rect)
+		public void ScrollTo (Rectangle rect)
 		{
 			textArea.ScrollTo (rect);
 		}
@@ -571,12 +399,12 @@ namespace Mono.TextEditor
 				return textArea.preeditCursorCharIndex;
 			}
 		}
-		
+		/*
 		internal Pango.AttrList preeditAttrs {
 			get {
 				return textArea.preeditAttrs;
 			}
-		}
+		}*/
 
 		internal bool UpdatePreeditLineHeight ()
 		{
@@ -593,7 +421,7 @@ namespace Mono.TextEditor
 			return textArea.ContainsPreedit (offset, length);
 		}
 
-		internal void FireLinkEvent (string link, uint button, ModifierType modifierState)
+		internal void FireLinkEvent (string link, uint button, ModifierKeys modifierState)
 		{
 			textArea.FireLinkEvent (link, button, modifierState);
 		}
@@ -849,6 +677,7 @@ namespace Mono.TextEditor
 		{
 			textArea.HideTooltip (checkMouseOver);
 		}
+		/*
 		public Action<Gdk.EventButton> DoPopupMenu {
 			get {
 				return textArea.DoPopupMenu;
@@ -856,7 +685,7 @@ namespace Mono.TextEditor
 			set {
 				textArea.DoPopupMenu = value;
 			} 
-		}
+		}*/
 
 		public MenuItem CreateInputMethodMenuItem (string label)
 		{

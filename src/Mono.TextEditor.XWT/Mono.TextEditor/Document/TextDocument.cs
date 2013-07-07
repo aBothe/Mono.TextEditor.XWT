@@ -35,6 +35,7 @@ using System.ComponentModel;
 using ICSharpCode.NRefactory.Editor;
 using System.Threading.Tasks;
 using System.Threading;
+using Xwt;
 
 namespace Mono.TextEditor
 {
@@ -1054,7 +1055,7 @@ namespace Mono.TextEditor
 			if (!startTask) {
 				var newFoldedSegments = UpdateFoldSegmentWorker (newSegments, out update);
 				if (useApplicationInvoke) {
-					Gtk.Application.Invoke (delegate {
+					Application.Invoke (delegate {
 						foldedSegments = newFoldedSegments;
 						InformFoldTreeUpdated ();
 					});
@@ -1070,7 +1071,7 @@ namespace Mono.TextEditor
 				var segments = UpdateFoldSegmentWorker (newSegments, out update, token);
 				if (token.IsCancellationRequested)
 					return;
-				Gtk.Application.Invoke (delegate {
+				Application.Invoke (delegate {
 					if (token.IsCancellationRequested)
 						return;
 					foldedSegments = segments;

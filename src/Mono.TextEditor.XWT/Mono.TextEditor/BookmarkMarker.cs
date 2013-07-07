@@ -27,6 +27,7 @@
 
 using System;
 using Mono.TextEditor.Highlighting;
+using Xwt.Drawing;
 
 namespace Mono.TextEditor
 {
@@ -40,26 +41,27 @@ namespace Mono.TextEditor
 
 		public bool CanDrawBackground { get { return false; } }
 
-		public void DrawBackground (TextEditor editor, Cairo.Context cr, DocumentLine line, int lineNumber, double xPos, double yPos, double width, double height)
+		public void DrawBackground (TextEditor editor, Context cr, DocumentLine line, int lineNumber, double xPos, double yPos, double width, double height)
 		{
 			throw new NotSupportedException ();
 		}
 
-		public void DrawIcon (TextEditor editor, Cairo.Context cr, DocumentLine lineSegment, int lineNumber, double x, double y, double width, double height)
+		public void DrawIcon (TextEditor editor, Context cr, DocumentLine lineSegment, int lineNumber, double x, double y, double width, double height)
 		{
 			if (lineSegment.IsBookmarked) {
 				var color1 = editor.ColorStyle.Bookmarks.Color;
 				var color2 = editor.ColorStyle.Bookmarks.SecondColor;
-				
+
 				DrawRoundRectangle (cr, x + 1, y + 1, 8, width - 4, height - 4);
-				using (var pat = new Cairo.LinearGradient (x + width / 4, y, x + width / 2, y + height - 4)) {
+
+				using (var pat = new LinearGradient (x + width / 4, y, x + width / 2, y + height - 4)) {
 					pat.AddColorStop (0, color1);
 					pat.AddColorStop (1, color2);
 					cr.Pattern = pat;
 					cr.FillPreserve ();
 				}
 				
-				using (var pat = new Cairo.LinearGradient (x, y + height, x + width, y)) {
+				using (var pat = new LinearGradient (x, y + height, x + width, y)) {
 					pat.AddColorStop (0, color2);
 					//pat.AddColorStop (1, color1);
 					cr.Pattern = pat;
@@ -68,7 +70,7 @@ namespace Mono.TextEditor
 			}
 		}
 		
-		public static void DrawRoundRectangle (Cairo.Context cr, double x, double y, double r, double w, double h)
+		public static void DrawRoundRectangle (Context cr, double x, double y, double r, double w, double h)
 		{
 			const double ARC_TO_BEZIER = 0.55228475;
 			double radius_x = r;

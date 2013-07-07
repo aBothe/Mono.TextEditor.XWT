@@ -61,9 +61,9 @@ namespace Mono.TextEditor
 		int oldRequest = -1;
 		
 		bool isDisposed = false;
-		IMMulticontext imContext;
+		/*IMMulticontext imContext;
 		Gdk.EventKey lastIMEvent;
-		Key lastIMEventMappedKey;
+		*/Key lastIMEventMappedKey;
 		uint lastIMEventMappedChar;
 		ModifierKeys lastIMEventMappedModifier;
 		bool sizeHasBeenAllocated;
@@ -105,25 +105,25 @@ namespace Mono.TextEditor
 				return textEditorData.Caret;
 			}
 		}
-		
+		/*
 		protected internal IMMulticontext IMContext {
 			get { return imContext; }
-		}
+		}*/
 
 		public MenuItem CreateInputMethodMenuItem (string label)
-		{
+		{/*
 			if (GtkWorkarounds.GtkMinorVersion >= 16) {
 				bool showMenu = (bool) GtkWorkarounds.GetProperty (Settings, "gtk-show-input-method-menu").Val;
 				if (!showMenu)
 					return null;
-			}
+			}*/
 			MenuItem imContextMenuItem = new MenuItem (label);
 			Menu imContextMenu = new Menu ();
-			imContextMenuItem.Submenu = imContextMenu;
-			IMContext.AppendMenuitems (imContextMenu);
+			imContextMenuItem.SubMenu = imContextMenu;
+			//IMContext.AppendMenuitems (imContextMenu);
 			return imContextMenuItem;
 		}
-
+		/*
 		[DllImport (PangoUtil.LIBGTK, CallingConvention = CallingConvention.Cdecl)]
 		static extern void gtk_im_multicontext_set_context_id (IntPtr context, string context_id);
 
@@ -142,7 +142,7 @@ namespace Mono.TextEditor
 					return;
 				gtk_im_multicontext_set_context_id (imContext.Handle, value);
 			}
-		}
+		}*/
 		
 		public ITextEditorOptions Options {
 			get {
@@ -187,10 +187,10 @@ namespace Mono.TextEditor
 		}
 		
 		void HAdjustmentValueChanged (object sender, EventArgs args)
-		{
+		{/*
 			var alloc = this.Allocation;
 			alloc.X = alloc.Y = 0;
-
+			*/
 			HAdjustmentValueChanged ();
 		}
 		
@@ -203,18 +203,18 @@ namespace Mono.TextEditor
 				return;
 			}
 			textViewMargin.HideCodeSegmentPreviewWindow ();
-			QueueDrawArea ((int)this.textViewMargin.XOffset, 0, this.Allocation.Width - (int)this.textViewMargin.XOffset, this.Allocation.Height);
+			QueueDrawArea ((int)this.textViewMargin.XOffset, 0, base.WidthRequest - (int)this.textViewMargin.XOffset, HeightRequest);
 			OnHScroll (EventArgs.Empty);
-			SetChildrenPositions (Allocation);
+			SetChildrenPositions (Bounds);
 		}
 		
 		void VAdjustmentValueChanged (object sender, EventArgs args)
-		{
+		{/*
 			var alloc = this.Allocation;
 			alloc.X = alloc.Y = 0;
-
+			*/
 			VAdjustmentValueChanged ();
-			SetChildrenPositions (alloc);
+			SetChildrenPositions (Bounds);
 		}
 		
 		protected virtual void VAdjustmentValueChanged ()
@@ -973,7 +973,7 @@ namespace Mono.TextEditor
 				textViewMargin.OpenCodeSegmentEditor ();
 				return true;
 			}
-			
+
 			//FIXME: why are we doing this?
 			if ((key == Gdk.Key.space || key == Gdk.Key.parenleft || key == Gdk.Key.parenright) && (mod & Gdk.ModifierType.ShiftMask) == Gdk.ModifierType.ShiftMask)
 				mod = Gdk.ModifierType.None;
@@ -1096,7 +1096,7 @@ namespace Mono.TextEditor
 			startingPos = -1;
 			return null;
 		}
-		
+		ftzftz
 		protected override bool OnButtonReleaseEvent (EventButton e)
 		{
 			RemoveScrollWindowTimer ();
@@ -1789,64 +1789,48 @@ namespace Mono.TextEditor
 			}
 		}
 
-#if DEBUG_EXPOSE
-		DateTime started = DateTime.Now;
-#endif
-		protected override bool OnExposeEvent (Gdk.EventExpose e)
+		protected override void OnDraw (Context cr, Rectangle dirtyRect)
 		{
 			if (this.isDisposed)
 				return false;
 			UpdateAdjustments ();
 
+			/*FIXME: How to toggle AA in XWT?
+			 * if (!Options.UseAntiAliasing) {
+				textViewCr.Antialias = Cairo.Antialias.None;
+				cr.Antialias = Cairo.Antialias.None;
+			}*/
 
-			var area = e.Region.Clipbox;
-			var cairoArea = new Cairo.Rectangle (area.X, area.Y, area.Width, area.Height);
-			using (Cairo.Context cr = Gdk.CairoHelper.Create (e.Window))
-			using (Cairo.Context textViewCr = Gdk.CairoHelper.Create (e.Window)) {
-				if (!Options.UseAntiAliasing) {
-					textViewCr.Antialias = Cairo.Antialias.None;
-					cr.Antialias = Cairo.Antialias.None;
-				}
-				
-				UpdateMarginXOffsets ();
-				
-				cr.LineWidth = Options.Zoom;
-				textViewCr.LineWidth = Options.Zoom;
-				textViewCr.Rectangle (textViewMargin.XOffset, 0, Allocation.Width - textViewMargin.XOffset, Allocation.Height);
-				textViewCr.Clip ();
-				
-				RenderMargins (cr, textViewCr, cairoArea);
-			
-#if DEBUG_EXPOSE
-				Console.WriteLine ("{0} expose {1},{2} {3}x{4}", (long)(DateTime.Now - started).TotalMilliseconds,
-					e.Area.X, e.Area.Y, e.Area.Width, e.Area.Height);
-#endif
-				if (requestResetCaretBlink && HasFocus) {
-					textViewMargin.ResetCaretBlink (200);
-					requestResetCaretBlink = false;
-				}
-				
-				foreach (Animation animation in actors) {
-					animation.Drawer.Draw (cr);
-				}
-				
-				if (HasFocus)
-					textViewMargin.DrawCaret (e.Window, e.Area);
-				
-				OnPainted (new PaintEventArgs (cr, cairoArea));
+			UpdateMarginXOffsets ();
+
+			cr.SetLineWidth(Options.Zoom);
+
+			// textViewCr
+			cr.Rectangle (textViewMargin.XOffset, 0, WidthRequest - textViewMargin.XOffset, HeightRequest);
+			// textViewCr
+			cr.Clip ();
+
+			RenderMargins (cr, dirtyRect);
+
+			if (requestResetCaretBlink && HasFocus) {
+				textViewMargin.ResetCaretBlink (200);
+				requestResetCaretBlink = false;
 			}
+
+			foreach (Animation animation in actors) {
+				animation.Drawer.Draw (cr);
+			}
+
+			if (HasFocus)
+				textViewMargin.DrawCaret (e.Window, e.Area);
+
+			if (Painted != null)
+				Painted (this, new PaintEventArgs (cr, dirtyRect));
 
 			if (Caret.IsVisible)
 				textViewMargin.DrawCaret (e.Window, Allocation);
 
-			return base.OnExposeEvent (e);
-		}
-		
-		protected virtual void OnPainted (PaintEventArgs e)
-		{
-			EventHandler<PaintEventArgs> handler = this.Painted;
-			if (handler != null)
-				handler (this, e);
+			base.OnDraw (cr, dirtyRect);
 		}
 
 		public event EventHandler<PaintEventArgs> Painted;
@@ -2621,16 +2605,16 @@ namespace Mono.TextEditor
 		int tipX, tipY;
 		uint tipHideTimeoutId = 0;
 		uint tipShowTimeoutId = 0;
-		static Gtk.Window tipWindow;
+		static Window tipWindow;
 		static TooltipProvider currentTooltipProvider;
 
 		// Data for the next tooltip to be shown
 		int nextTipOffset = 0;
 		int nextTipX=0; int nextTipY=0;
-		Gdk.ModifierType nextTipModifierState = ModifierType.None;
+		ModifierKeys nextTipModifierState = ModifierKeys.None;
 		DateTime nextTipScheduledTime; // Time at which we want the tooltip to show
 		
-		void ShowTooltip (Gdk.ModifierType modifierState)
+		void ShowTooltip (ModifierKeys modifierState)
 		{
 			if (mx < TextViewMargin.XOffset + TextViewMargin.TextStartPosition) {
 				HideTooltip ();
@@ -2656,7 +2640,7 @@ namespace Mono.TextEditor
 			             (int)my);
 		}
 		
-		void ShowTooltip (Gdk.ModifierType modifierState, int offset, int xloc, int yloc)
+		void ShowTooltip (ModifierKeys modifierState, int offset, int xloc, int yloc)
 		{
 			CancelScheduledShow ();
 			if (textEditorData.SuppressTooltips)
@@ -2724,7 +2708,7 @@ namespace Mono.TextEditor
 				tipX = nextTipX;
 				tipY = nextTipY;
 				tipItem = item;
-				Gtk.Window tw = null;
+				Window tw = null;
 				try {
 					tw = provider.ShowTooltipWindow (editor, nextTipOffset, nextTipModifierState, tipX + (int) TextViewMargin.XOffset, tipY, item);
 				} catch (Exception e) {
@@ -3192,10 +3176,9 @@ namespace Mono.TextEditor
 			containerChildren.ForEach (child => child.Child.Unmap ());
 		}
 
-		void ResizeChild (Rectangle allocation, TextEditor.EditorContainerChild child)
+		void ResizeChild (Rectangle allocation, Widget child)
 		{
-			Requisition req = child.Child.SizeRequest ();
-			var childRectangle = new Gdk.Rectangle (child.X, child.Y, req.Width, req.Height);
+			var childRectangle = GetChildBounds(child);
 			if (!child.FixedPosition) {
 //				double zoom = Options.Zoom;
 				childRectangle.X = (int)(child.X /** zoom */- HAdjustment.Value);
@@ -3208,7 +3191,7 @@ namespace Mono.TextEditor
 		
 		void SetChildrenPositions (Rectangle allocation)
 		{
-			foreach (var child in containerChildren.ToArray ()) {
+			foreach (var child in Children) {
 				ResizeChild (allocation, child);
 			}
 		}
@@ -3219,26 +3202,6 @@ namespace Mono.TextEditor
 	public interface ITextEditorDataProvider
 	{
 		TextEditorData GetTextEditorData ();
-	}
-	
-	[Serializable]
-	public sealed class PaintEventArgs : EventArgs
-	{
-		public Cairo.Context Context {
-			get;
-			set;
-		}
-		
-		public Cairo.Rectangle Area {
-			get;
-			set;
-		}
-		
-		public PaintEventArgs (Cairo.Context context, Cairo.Rectangle area)
-		{
-			this.Context = context;
-			this.Area = area;
-		}
 	}
 }
 

@@ -29,6 +29,7 @@ using Mono.TextEditor.Utils;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using Xwt;
 
 namespace Mono.TextEditor
 {

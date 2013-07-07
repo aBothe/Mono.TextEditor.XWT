@@ -43,7 +43,6 @@ namespace XwtExperiments
 				w.Dispose();
 			};
 
-
 			var vb = new VBox ();
 			w.Content = vb;
 
@@ -53,8 +52,6 @@ namespace XwtExperiments
 			mc.LineColor = Colors.Green;
 			mc.ExpandHorizontal = true;
 			vb.PackStart (mc);
-
-
 
 			var scr = new HScrollbar ();
 			scr.ExpandHorizontal = true;
@@ -77,7 +74,12 @@ namespace XwtExperiments
 				mc.QueueDraw();
 			};
 
+			var button = new Button ("Hello");
+			mc.AddChild (button, 50, 20);
+
 			w.Show ();
+
+
 
 			Application.Run ();
 			Application.Dispose ();
@@ -134,6 +136,9 @@ namespace XwtExperiments
 			var sz = Size;
 			ctx.SetColor (drawnCol);
 			ctx.SetLineWidth (5);
+			
+			ctx.Rectangle (4, 5, 60, 60);
+			ctx.Clip ();
 			ctx.MoveTo (0, 0);
 			ctx.LineTo (Size.Width * modValue, Size.Height);
 			ctx.Stroke ();

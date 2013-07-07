@@ -57,6 +57,8 @@
     <Folder Include="Mono.TextEditor.Theatrics\" />
     <Folder Include="Mono.TextEditor.Utils\" />
     <Folder Include="Mono.TextEditor.Vi\" />
+    <Folder Include="Styles\" />
+    <Folder Include="SyntaxModes\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Mono.TextEditor\Annotatable.cs" />
@@ -210,10 +212,127 @@
     <Compile Include="Mono.TextEditor.Vi\ViModeAbortException.cs" />
     <Compile Include="Mono.TextEditor.Vi\ViStatusArea.cs" />
     <Compile Include="Mono.TextEditor.Vi\ViWordFindStrategy.cs" />
+    <Compile Include="Mono.TextEditor\Gui\PaintEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Mono.TextEditor\Gui\GtkGestures.cs" />
     <None Include="Mono.TextEditor\Gui\GtkWorkarounds.cs" />
     <None Include="Mono.TextEditor\Gui\PangoUtil.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Styles\DefaultStyle.json">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Styles\MonokaiStyle.json">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Styles\NightshadeStyle.json">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Styles\OblivionStyle.json">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Styles\SolarizedDarkStyle.json">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Styles\SolarizedLightStyle.json">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Styles\TangoStyle.json">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Styles\VisualStudioStyle.json">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\ActionScriptSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\AspNetAshxSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\AspNetSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\BooSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\CGSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\CPPSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\CSharpSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\CSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\ChangeLogSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\CssSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\DiffSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\FSharpSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\HtmlSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\ILSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\JavaSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\JavascriptSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\JaySyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\JsonSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\LessSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\LuaSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\MakefileSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\PythonSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\RazorSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\RubySyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\ShellScriptSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\StringsSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\TypescriptSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\VBNetSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\ValaSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SyntaxModes\XmlSyntaxMode.xml">
+      <Gettext-ScanForTranslations>False</Gettext-ScanForTranslations>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

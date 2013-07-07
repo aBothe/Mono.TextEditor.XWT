@@ -25,9 +25,13 @@
 // THE SOFTWARE.
 using System;
 using System.Collections.Generic;
+using Xwt;
+using Xwt.Drawing;
+
+
 namespace Mono.TextEditor.PopupWindow
 {
-	public abstract class ModeHelpWindow : Gtk.Window
+	public abstract class ModeHelpWindow : Window
 	{
 		public string TitleText {
 			get;
@@ -44,19 +48,22 @@ namespace Mono.TextEditor.PopupWindow
 			private set;
 		}
 
-		public ModeHelpWindow () : base (Gtk.WindowType.Popup)
+		public ModeHelpWindow ()
 		{
-			this.SkipPagerHint = this.SkipTaskbarHint = true;
+			//this.SkipPagerHint = this.SkipTaskbarHint = true;
 			this.Decorated = false;
-			this.BorderWidth = 0;
+			base.Padding = 0;
+			//this.BorderWidth = 0;
 //			this.TypeHint = Gdk.WindowTypeHint.Normal;
-			this.AllowShrink = this.AllowGrow = false;
-			this.DestroyWithParent = true;
+			base.ShowInTaskbar = false;
+			base.Resizable = false;
+			//this.AllowShrink = this.AllowGrow = false;
+			//this.DestroyWithParent = true;
 			
 			Items = new List<KeyValuePair<string, string>> ();
-			CheckScreenColormap ();
+			//CheckScreenColormap ();
 		}
-
+		/*
 		void CheckScreenColormap ()
 		{
 			SupportsAlpha = Screen.IsComposited;
@@ -71,17 +78,17 @@ namespace Mono.TextEditor.PopupWindow
 		{
 			base.OnScreenChanged (previous_screen);
 			CheckScreenColormap ();
-		}
+		}*/
 
 	}
-
+	/*
 	public class TableLayoutModeHelpWindow : ModeHelpWindow
 	{
-		Pango.Layout layout;
+		TextLayout layout;
 		
 		public TableLayoutModeHelpWindow ()
 		{
-			layout = new Pango.Layout (PangoContext);
+			layout = new TextLayout();
 		}
 
 		protected override void OnSizeRequested (ref Gtk.Requisition requisition)
@@ -214,8 +221,8 @@ namespace Mono.TextEditor.PopupWindow
 			return false;
 		}
 	}
-
-	public class InsertionCursorLayoutModeHelpWindow : ModeHelpWindow
+	*/
+	/*public class InsertionCursorLayoutModeHelpWindow : ModeHelpWindow
 	{
 		Pango.Layout titleLayout;
 		Pango.Layout descriptionLayout;
@@ -348,5 +355,5 @@ namespace Mono.TextEditor.PopupWindow
 			return false;
 		}
 	}
-
+	*/
 }

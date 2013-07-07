@@ -174,7 +174,7 @@ namespace Mono.TextEditor.Highlighting
 
 			return result;
 		}
-
+		/*
 		public Gdk.GC CreateBgGC (Gdk.Drawable drawable)
 		{
 			return new Gdk.GC (drawable) { RgbBgColor = (HslColor)Foreground, RgbFgColor = (HslColor)Background };
@@ -183,7 +183,7 @@ namespace Mono.TextEditor.Highlighting
 		public Gdk.GC CreateFgGC (Gdk.Drawable drawable)
 		{
 			return new Gdk.GC (drawable) { RgbBgColor = (HslColor)Background, RgbFgColor = (HslColor)Foreground };
-		}
+		}*/
 
 		static string ColorToString (Color cairoColor)
 		{
