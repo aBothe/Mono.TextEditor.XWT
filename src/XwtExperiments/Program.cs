@@ -88,6 +88,7 @@ namespace XwtExperiments
 	{
 		Color lineCol, drawnCol;
 		public double modValue=1;
+		Menu cm;
 		public Color LineColor{
 			get{
 				return lineCol;
@@ -107,6 +108,9 @@ namespace XwtExperiments
 		public MyMainComponent()
 		{
 			base.CanGetFocus = true;
+
+			cm = new Menu ();
+			cm.Items.Add (new MenuItem("Morning!"));
 		}
 
 		protected override void OnMouseEntered (EventArgs args)
@@ -130,6 +134,21 @@ namespace XwtExperiments
 			QueueDraw ();
 		}
 
+		protected override void OnButtonPressed (ButtonEventArgs args)
+		{
+			if (args.Button == PointerButton.Right) {
+				cm.Popup(this, args.X, args.Y);
+			}
+
+			base.OnButtonPressed (args);
+		}
+
+		protected override void OnMouseMoved (MouseMovedEventArgs args)
+		{
+			ParentWindow.Title = args.X + "; "+ args.Y;
+			base.OnMouseMoved (args);
+		}
+
 		protected override void OnDraw (Context ctx, Rectangle dirtyRect)
 		{
 			var sz = Size;
@@ -137,7 +156,7 @@ namespace XwtExperiments
 			ctx.SetLineWidth (5);
 			
 			ctx.Rectangle (4, 5, 60, 60);
-			ctx.Clip ();
+			//ctx.Clip ();
 			ctx.MoveTo (0, 0);
 			ctx.LineTo (Size.Width * modValue, Size.Height);
 			ctx.Stroke ();

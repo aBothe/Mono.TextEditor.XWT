@@ -124,29 +124,24 @@ namespace Mono.TextEditor
 	
 	public class MarginMouseEventArgs : EventArgs
 	{
-		public double X {
-			get;
-			private set;
-		}
+		public readonly double X;
 		
-		public double Y {
-			get;
-			private set;
-		}
+		public readonly double Y;
+
+		public readonly ButtonEventArgs RawEvent;
 		
 		public ModifierKeys ModifierState {
 			get;
 			private set;
 		}
 		
-		public uint Button {
-			get;
-			private set;
+		public PointerButton Button {
+			get{ return RawEvent.Button; }
 		}
 		
 		public bool TriggersContextMenu ()
 		{
-			return Button;
+			return RawEvent.Button == PointerButton.Right;
 			/*
 			var evt = RawEvent as Gdk.EventButton;
 			return evt != null && evt.TriggersContextMenu ();*/
@@ -181,14 +176,10 @@ namespace Mono.TextEditor
 			private set;
 		}
 		
-		public MarginMouseEventArgs (TextEditor editor, uint button, double x, double y, ModifierKeys modifierState)
+		public MarginMouseEventArgs (TextEditor editor, ButtonEventArgs e, double x, double y, ModifierKeys modifierState)
 		{
+			this.RawEvent = e;
 			this.Editor = editor;
-			//this.Type = type;
-			
-			this.Button = button;
-			this.X = x;
-			this.Y = y;
 			this.ModifierState = modifierState;
 		}
 	}

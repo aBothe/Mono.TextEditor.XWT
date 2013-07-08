@@ -56,7 +56,6 @@ namespace Mono.TextEditor.PopupWindow
 		public ListWidget (ListWindow<T> win)
 		{
 			this.win = win;
-			this.Events = EventMask.ButtonPressMask | EventMask.ButtonReleaseMask | EventMask.PointerMotionMask; 
 		}
 		
 		public void Reset ()
@@ -72,12 +71,12 @@ namespace Mono.TextEditor.PopupWindow
 				selection = 0;
 
 			disableSelection = false;
-			if (IsRealized) {
+			if (Visible) {
 				UpdateStyle ();
 				QueueDraw ();
 			}
 			OnSelectionChanged (EventArgs.Empty);
-			SetAdjustments (Allocation);
+			SetAdjustments (Bounds);
 		}
 		
 		public int Selection
@@ -113,7 +112,7 @@ namespace Mono.TextEditor.PopupWindow
 				vadj.Value = area.Y;
 				return;
 			}
-			if (vadj.Value + Allocation.Height < area.Bottom) {
+			if (vadj.Value + Size.Height < area.Bottom) {
 				vadj.Value = System.Math.Max (0, area.Bottom - vadj.PageSize + 1);
 			}
 		}
@@ -127,38 +126,37 @@ namespace Mono.TextEditor.PopupWindow
 				this.QueueDraw ();
 			}
 		}
-		
 
-		protected override bool OnButtonPressEvent (EventButton e)
+		protected override void OnButtonPressed (ButtonEventArgs args)
 		{
-			Selection = GetRowByPosition ((int) (vadj.Value + e.Y));
+			Selection = GetRowByPosition ((int) (vadj.Value + args.Y));
 			buttonPressed = true;
-			return base.OnButtonPressEvent (e);
+			base.OnButtonPressed (args);
 		}
-		
-		protected override bool OnButtonReleaseEvent (EventButton e)
+
+		protected override void OnButtonReleased (ButtonEventArgs args)
 		{
 			buttonPressed = false;
-			return base.OnButtonReleaseEvent (e);
+			base.OnButtonReleased (args);
 		}
-		
-		protected override bool OnMotionNotifyEvent (EventMotion e)
+
+		protected override void OnMouseMoved (MouseMovedEventArgs e)
 		{
 			if (!buttonPressed)
-				return base.OnMotionNotifyEvent (e);
-			
-			int winWidth, winHeight;
+				return base.OnMouseMoved (e);
+
+			/*int winWidth, winHeight;
 			this.GdkWindow.GetSize (out winWidth, out winHeight);
-			
-	/*		int ypos = (int) e.Y;
+
+					int ypos = (int) e.Y;
 			if (ypos < 0) {
 			}
 			else if (ypos >= winHeight) {
 			}
 			else
 	*/			Selection = GetRowByPosition ((int) (vadj.Value + e.Y));
-			
-			return true;
+
+			base.OnMouseMoved (e);
 		}
 
 		ScrollAdjustment hadj;

@@ -235,7 +235,7 @@ namespace Mono.TextEditor.Theatrics
 	public abstract class BounceFadePopupWidget : Canvas
 	{
 		Stage<BounceFadePopupWidget> stage = new Stage<BounceFadePopupWidget> ();
-		Gdk.Pixbuf textImage = null;
+		Image textImage = null;
 		TextEditor editor;
 		
 		protected double scale = 0.0;
@@ -243,13 +243,13 @@ namespace Mono.TextEditor.Theatrics
 		
 		public BounceFadePopupWidget (TextEditor editor)
 		{
-			if (!IsComposited)
+			if (!Visible)
 				throw new InvalidOperationException ("Only works with composited screen. Check Widget.IsComposited.");
 			if (editor == null)
 				throw new ArgumentNullException ("Editor");
-			WidgetFlags |= Gtk.WidgetFlags.NoWindow;
+			//WidgetFlags |= Gtk.WidgetFlags.NoWindow;
 			this.editor = editor;
-			Events = EventMask.ExposureMask;
+			//Events = EventMask.ExposureMask;
 			Duration = 500;
 			ExpandWidth = 12;
 			ExpandHeight = 2;
@@ -304,9 +304,8 @@ namespace Mono.TextEditor.Theatrics
 			yExpandedOffset = (int) (System.Math.Floor (ExpandHeight / 2d));
 
 			//round the width/height up to make sure we have room for restored fractions
-			int width = System.Math.Max (1, (int) (System.Math.Ceiling (bounds.Width) + ExpandWidth));
-			int height = System.Math.Max (1, (int) (System.Math.Ceiling (bounds.Height) + ExpandHeight));
-			this.SetSizeRequest (width, height);
+			WidthRequest = System.Math.Max (1, (int) (System.Math.Ceiling (bounds.Width) + ExpandWidth));
+			HeightRequest = System.Math.Max (1, (int) (System.Math.Ceiling (bounds.Height) + ExpandHeight));
 			editor.TextArea.AddTopLevelWidget (this, x - xExpandedOffset, y - yExpandedOffset);
 
 			stage.AddOrReset (this, Duration);
@@ -345,35 +344,36 @@ namespace Mono.TextEditor.Theatrics
 			return true;
 		}
 
-		protected override bool OnExposeEvent (EventExpose evnt)
+		protected override void OnDraw (Context cr, Rectangle dirtyRect)
 		{
 			try {
-				var alloc = Allocation;
-				using (var cr = CairoHelper.Create (evnt.Window)) {
-					cr.Translate (alloc.X, alloc.Y);
-					cr.Translate (xExpandedOffset * (1 - scale), yExpandedOffset * (1 - scale));
-					var scaleX = (alloc.Width / userspaceArea.Width - 1) * scale + 1;
-					var scaleY = (alloc.Height / userspaceArea.Height - 1) * scale + 1;
-					cr.Scale (scaleX, scaleY);
-					Draw (cr, userspaceArea);
-				}
+				var alloc = Bounds;
+				cr.Translate (alloc.X, alloc.Y);
+				cr.Translate (xExpandedOffset * (1 - scale), yExpandedOffset * (1 - scale));
+				var scaleX = (alloc.Width / userspaceArea.Width - 1) * scale + 1;
+				var scaleY = (alloc.Height / userspaceArea.Height - 1) * scale + 1;
+				cr.Scale (scaleX, scaleY);
+				Draw (cr, userspaceArea);
+
 			} catch (Exception e) {
 				Console.WriteLine ("Exception in animation:" + e);
 			}
-			return true;
+
+			base.OnDraw (cr, dirtyRect);
 		}
 
-		protected abstract void Draw (Cairo.Context context, Cairo.Rectangle area);
+
+		protected abstract void Draw (Context context, Rectangle area);
 
 		protected virtual void OnAnimationCompleted ()
 		{
 			StopPlaying ();
 		}
-		
-		protected override void OnDestroyed ()
+
+		protected override void Dispose (bool disposing)
 		{
-			base.OnDestroyed ();
 			StopPlaying ();
+			base.Dispose (disposing);
 		}
 		
 		internal virtual void StopPlaying ()
@@ -386,6 +386,6 @@ namespace Mono.TextEditor.Theatrics
 			}
 		}
 
-		protected abstract Cairo.Rectangle CalculateInitialBounds ();
+		protected abstract Rectangle CalculateInitialBounds ();
 	}
 }
