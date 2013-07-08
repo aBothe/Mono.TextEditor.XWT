@@ -27,46 +27,66 @@
 
 using System;
 using Xwt;
+using Xwt.Drawing;
 
 namespace Mono.TextEditor.Theatrics
 {
 	/// <summary>
 	/// Tooltip that "bounces", then fades away.
 	/// </summary>
-	public abstract class BounceFadePopupWindow : Canvas
+	public abstract class BounceFadePopupWindow : Window
 	{
+		BounceFadePopupCanvas canvas;
 		Stage<BounceFadePopupWindow> stage = new Stage<BounceFadePopupWindow> ();
-		Gdk.Pixbuf textImage = null;
+		Image textImage = null;
 		TextEditor editor;
 		
 		protected double scale = 0.0;
 		protected double opacity = 1.0;
 		
-		public BounceFadePopupWindow (TextEditor editor) : base (Gtk.WindowType.Popup)
+		public BounceFadePopupWindow (TextEditor editor)
 		{
-			if (!IsComposited)
+			/*if (!IsComposited)
 				throw new InvalidOperationException ("Only works with composited screen. Check Widget.IsComposited.");
-			if (editor == null)
+			*/if (editor == null)
 				throw new ArgumentNullException ("Editor");
-			DoubleBuffered = true;
+			Content = canvas = new BounceFadePopupCanvas (this);
+			//DoubleBuffered = true;
 			Decorated = false;
-			BorderWidth = 0;
-			HasFrame = true;
+			Padding = 0;
+			//BorderWidth = 0;
+			//HasFrame = true;
 			this.editor = editor;
-			Events = Gdk.EventMask.ExposureMask;
+			//Events = Gdk.EventMask.ExposureMask;
 			Duration = 500;
 			ExpandWidth = 12;
 			ExpandHeight = 2;
 			BounceEasing = Easing.Sine;
-			
+			/*
 			var rgbaColormap = Screen.RgbaColormap;
 			if (rgbaColormap == null)
 				return;
 			Colormap = rgbaColormap;
-
+			*/
 			stage.ActorStep += OnAnimationActorStep;
 			stage.Iteration += OnAnimationIteration;
 			stage.UpdateFrequency = 10;
+		}
+
+		class BounceFadePopupCanvas : Canvas
+		{
+			BounceFadePopupWindow win;
+
+			public BounceFadePopupCanvas(BounceFadePopupWindow w)
+			{
+				this.win = w;
+			}
+
+			protected override void OnDraw (Context ctx, Rectangle dirtyRect)
+			{
+				win.OnDraw (ctx, dirtyRect);
+				//base.OnDraw (ctx, dirtyRect);
+			}
 		}
 		
 		protected TextEditor Editor { get { return editor; } }
@@ -83,27 +103,23 @@ namespace Mono.TextEditor.Theatrics
 		/// <summary>The easing used for the bounce part of the animation.</summary>
 		public Easing BounceEasing { get; set; }
 		
-		int x, y;
-		protected int width, height;
 		double vValue, hValue;
 		protected Rectangle bounds;
 
 		public virtual void Popup ()
-		{
+		{/*
 			if (editor.GdkWindow == null){
 				editor.Realized += HandleRealized;
 				return;
-			}
-			editor.GdkWindow.GetOrigin (out x, out y);
+			}*/
+			//editor.GdkWindow.GetOrigin (out x, out y);
 			bounds = CalculateInitialBounds ();
-			x = x + bounds.X - (int)(ExpandWidth / 2);
-			y = y + bounds.Y - (int)(ExpandHeight / 2);
-			Move (x, y);
+			X += bounds.X - (int)(ExpandWidth / 2);
+			Y += bounds.Y - (int)(ExpandHeight / 2);
 			
-			width = System.Math.Max (1, bounds.Width + (int)ExpandWidth);
-			height = System.Math.Max (1, bounds.Height + (int)ExpandHeight);
-			Resize (width, height);
-			
+			Width = System.Math.Max (1, bounds.Width + (int)ExpandWidth);
+			Height = System.Math.Max (1, bounds.Height + (int)ExpandHeight);
+
 			
 			stage.AddOrReset (this, Duration);
 			stage.Play ();
@@ -111,9 +127,9 @@ namespace Mono.TextEditor.Theatrics
 			Show ();
 		}
 
-		void HandleRealized (object sender, EventArgs e)
+		protected override void OnShown ()
 		{
-			editor.Realized -= HandleRealized;
+			base.OnShown ();
 			Popup ();
 		}
 
@@ -142,30 +158,28 @@ namespace Mono.TextEditor.Theatrics
 			vAdjustment = null;
 			hAdjustment = null;
 		}
-
+		/*
 		protected override void OnHidden ()
 		{
 			base.OnHidden ();
 			DetachEvents ();
-		}
+		}*/
 		
 		void HandleEditorVAdjustmentValueChanged (object sender, EventArgs e)
 		{
-			y += (int)(vValue - editor.VAdjustment.Value);
-			Move (x, y);
+			Y += (int)(vValue - editor.VAdjustment.Value);
 			vValue = editor.VAdjustment.Value;
 		}
 		
 		void HandleEditorHAdjustmentValueChanged (object sender, EventArgs e)
 		{
-			x += (int)(hValue - editor.HAdjustment.Value);
-			Move (x, y);
+			X += (int)(hValue - editor.HAdjustment.Value);
 			hValue = editor.HAdjustment.Value;
 		}
 		
 		void OnAnimationIteration (object sender, EventArgs args)
 		{
-			QueueDraw ();
+			canvas.QueueDraw ();
 		}
 		
 		protected virtual bool OnAnimationActorStep (Actor<BounceFadePopupWindow> actor)
@@ -188,16 +202,18 @@ namespace Mono.TextEditor.Theatrics
 			return true;
 		}
 
+		public abstract void OnDraw(Context ctx, Rectangle dirtyRect);
+
 		protected virtual void OnAnimationCompleted ()
 		{
 			StopPlaying ();
 		}
-		
-		protected override void OnDestroyed ()
+
+		protected override void Dispose (bool disposing)
 		{
 			editor.VAdjustment.ValueChanged -= HandleEditorVAdjustmentValueChanged;
-			base.OnDestroyed ();
 			StopPlaying ();
+			base.Dispose (disposing);
 		}
 		
 		internal virtual void StopPlaying ()
@@ -211,9 +227,6 @@ namespace Mono.TextEditor.Theatrics
 		}
 
 		protected abstract Rectangle CalculateInitialBounds ();
-		
-		
-		
 	}
 
 	/// <summary>

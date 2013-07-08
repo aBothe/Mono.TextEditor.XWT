@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xwt.Drawing;
 using System.Timers;
+using Xwt;
 
 namespace Mono.TextEditor
 {
@@ -66,7 +67,7 @@ namespace Mono.TextEditor
 		public FoldMarkerMargin (TextEditor editor)
 		{
 			this.editor = editor;
-			layout = PangoUtil.CreateLayout (editor);
+			layout = new TextLayout (editor.TextArea);
 			editor.Caret.PositionChanged += HandleEditorCaretPositionChanged;
 			editor.Document.FoldTreeUpdated += HandleEditorDocumentFoldTreeUpdated;
 			this.editor.Caret.PositionChanged += EditorCarethandlePositionChanged;
@@ -160,16 +161,22 @@ namespace Mono.TextEditor
 				list.Sort ((x, y) => x.Offset.CompareTo (y.Offset));
 				foldings = list;
 				if (editor.TextViewMargin.BackgroundRenderer == null) {
-					timerId = GLib.Timeout.Add (150, SetBackgroundRenderer);
+					if(timerId == null){
+						timerId = new Timer();
+						timerId.Interval = 150;
+						timerId.Elapsed += SetBackgroundRenderer;
+						timerId.AutoReset = false;
+					}
+					timerId.Start ();
 				} else {
-					SetBackgroundRenderer ();
+					SetBackgroundRenderer (null,null);
 				}
 			} else {
 				RemoveBackgroundRenderer ();
 			}
 		}
 		List<FoldSegment> oldFolds;
-		bool SetBackgroundRenderer ()
+		void SetBackgroundRenderer (object s,ElapsedEventArgs ea)
 		{
 			List<FoldSegment> curFolds = new List<FoldSegment> (foldings);
 			if (oldFolds != null && oldFolds.Count == curFolds.Count) {
@@ -182,33 +189,30 @@ namespace Mono.TextEditor
 				}
 
 				if (same)
-					return false;
+					return;
 			}
 
 			oldFolds = curFolds;
 			editor.TextViewMargin.DisposeLayoutDict ();
 			editor.TextViewMargin.BackgroundRenderer = new FoldingScreenbackgroundRenderer (editor, foldings);
-			editor.QueueDraw ();
-			timerId = 0;
-			return false;
+			editor.TextArea.QueueDraw ();
 		}
 		
 		void StopTimer ()
 		{
-			if (timerId != 0) {
-				GLib.Source.Remove (timerId);
-				timerId = 0;
+			if (timerId != null) {
+				timerId.Stop ();
 			}
 		}
 		
-		uint timerId;
+		Timer timerId;
 		IEnumerable<FoldSegment> foldings;
 		void RemoveBackgroundRenderer ()
 		{
 			oldFolds = null;
 			if (editor.TextViewMargin.BackgroundRenderer != null) {
 				editor.TextViewMargin.BackgroundRenderer = null;
-				editor.QueueDraw ();
+				editor.TextArea.QueueDraw ();
 			}
 		}
 		
@@ -230,12 +234,11 @@ namespace Mono.TextEditor
 			foldLineGC = editor.ColorStyle.FoldLineColor.Color;
 			foldLineHighlightedGC = editor.ColorStyle.PlainText.Foreground;
 			
-			HslColor hslColor = new HslColor (editor.ColorStyle.PlainText.Background);
-			double brightness = HslColor.Brightness (hslColor);
-			if (brightness < 0.5) {
-				hslColor.L = hslColor.L * 0.85 + hslColor.L * 0.25;
+			var hslColor = editor.ColorStyle.PlainText.Background;
+			if (hslColor.Brightness < 0.5) {
+				hslColor.Light *= 0.85 + 0.25;
 			} else {
-				hslColor.L = hslColor.L * 0.9;
+				hslColor.Light *= 0.9;
 			}
 			
 			foldLineHighlightedGCBg = hslColor;
@@ -247,8 +250,8 @@ namespace Mono.TextEditor
 			marginWidth = editor.LineHeight;
 		}
 		
-		Cairo.Color foldBgGC, foldLineGC, foldLineHighlightedGC, foldLineHighlightedGCBg, foldToggleMarkerGC, foldToggleMarkerBackground;
-		Cairo.Color lineStateChangedGC, lineStateDirtyGC;
+		Color foldBgGC, foldLineGC, foldLineHighlightedGC, foldLineHighlightedGCBg, foldToggleMarkerGC, foldToggleMarkerBackground;
+		Color lineStateChangedGC, lineStateDirtyGC;
 		
 		public override void Dispose ()
 		{
@@ -258,14 +261,14 @@ namespace Mono.TextEditor
 			layout = layout.Kill ();
 		}
 		
-		void DrawFoldSegment (Cairo.Context ctx, double x, double y, bool isOpen, bool isSelected)
+		void DrawFoldSegment (Context ctx, double x, double y, bool isOpen, bool isSelected)
 		{
-			var drawArea = new Cairo.Rectangle (System.Math.Floor (x + (Width - foldSegmentSize) / 2) + 0.5, 
+			var drawArea = new Rectangle (System.Math.Floor (x + (Width - foldSegmentSize) / 2) + 0.5, 
 			                                    System.Math.Floor (y + (editor.LineHeight - foldSegmentSize) / 2) + 0.5, foldSegmentSize, foldSegmentSize);
 			ctx.Rectangle (drawArea);
-			ctx.Color = isOpen ? foldBgGC : foldToggleMarkerBackground;
+			ctx.SetColor(isOpen ? foldBgGC : foldToggleMarkerBackground);
 			ctx.FillPreserve ();
-			ctx.Color = isSelected ? foldLineHighlightedGC  : foldLineGC;
+			ctx.SetColor(isSelected ? foldLineHighlightedGC  : foldLineGC);
 			ctx.Stroke ();
 			
 			ctx.DrawLine (isSelected ? foldLineHighlightedGC  : foldToggleMarkerGC,
@@ -291,7 +294,7 @@ namespace Mono.TextEditor
 		List<FoldSegment> containingFoldings = new List<FoldSegment> ();
 		List<FoldSegment> endFoldings        = new List<FoldSegment> ();
 		
-		internal protected override void Draw (Cairo.Context cr, Cairo.Rectangle area, DocumentLine lineSegment, int line, double x, double y, double lineHeight)
+		internal protected override void Draw (Context cr, Rectangle area, DocumentLine lineSegment, int line, double x, double y, double lineHeight)
 		{
 			var marker = lineSegment != null ? (MarginMarker)lineSegment.Markers.FirstOrDefault (m => m is MarginMarker && ((MarginMarker)m).CanDraw (this)) : null;
 			if (marker != null) {
@@ -303,7 +306,7 @@ namespace Mono.TextEditor
 			foldSegmentSize = marginWidth * 4 / 6;
 			foldSegmentSize -= (foldSegmentSize) % 2;
 			
-			Cairo.Rectangle drawArea = new Cairo.Rectangle (x, y, marginWidth, lineHeight);
+			Rectangle drawArea = new Rectangle (x, y, marginWidth, lineHeight);
 			var state = editor.Document.GetLineState (lineSegment);
 			
 			bool isFoldStart = false;
@@ -351,18 +354,18 @@ namespace Mono.TextEditor
 					}
 					
 					cr.Rectangle (drawArea);
-					cr.Color = bgGC;
+					cr.SetColor(bgGC);
 					cr.Fill ();
 				}
 			}
 
 			if (editor.Options.EnableQuickDiff) {
 				if (state == TextDocument.LineState.Changed) {
-					cr.Color = lineStateChangedGC;
+					cr.SetColor ( lineStateChangedGC);
 					cr.Rectangle (x + 1, y, marginWidth / 3, lineHeight);
 					cr.Fill ();
 				} else if (state == TextDocument.LineState.Dirty) {
-					cr.Color = lineStateDirtyGC;
+					cr.SetColor ( lineStateDirtyGC);
 					cr.Rectangle (x + 1, y, marginWidth / 3, lineHeight);
 					cr.Fill ();
 				}

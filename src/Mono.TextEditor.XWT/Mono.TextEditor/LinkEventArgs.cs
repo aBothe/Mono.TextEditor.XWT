@@ -27,6 +27,7 @@
 //
 
 using System;
+using Xwt;
 
 namespace Mono.TextEditor
 {
@@ -42,12 +43,12 @@ namespace Mono.TextEditor
 			private set;
 		}
 		
-		public Gdk.ModifierType ModifierState {
+		public ModifierKeys ModifierState {
 			get;
 			private set;
 		}
 		
-		public LinkEventArgs (string link, uint button, Gdk.ModifierType modifierState)
+		public LinkEventArgs (string link, uint button, ModifierKeys modifierState)
 		{
 			this.Link = link;
 			this.Button = button;

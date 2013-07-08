@@ -27,6 +27,7 @@
 using System;
 using Xwt.Drawing;
 using Mono.TextEditor.Highlighting;
+using Xwt;
 
 namespace Mono.TextEditor
 {

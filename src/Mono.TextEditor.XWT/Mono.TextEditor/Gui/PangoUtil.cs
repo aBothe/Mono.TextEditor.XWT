@@ -25,15 +25,15 @@
 // THE SOFTWARE.
 
 using System;
-using Gtk;
+//using Gtk;
 using System.Runtime.InteropServices;
-
-currently not compiled
 
 namespace Mono.TextEditor
 {
 	public static class PangoUtil
 	{
+		//public const int PangoScale = 1024;
+		/*
 		internal const string LIBGTK          = "libgtk-win32-2.0-0.dll";
 		internal const string LIBATK          = "libatk-1.0-0.dll";
 		internal const string LIBGLIB         = "libglib-2.0-0.dll";
@@ -73,9 +73,9 @@ namespace Mono.TextEditor
 		static extern IntPtr gtk_widget_create_pango_layout (IntPtr widget, IntPtr text);
 		
 		[DllImport (LIBGTK, CallingConvention=CallingConvention.Cdecl)]
-		static extern IntPtr gtk_print_context_create_pango_layout (IntPtr context);
+		static extern IntPtr gtk_print_context_create_pango_layout (IntPtr context);*/
 	}
-	
+	/*
 	/// <summary>
 	/// This creates a Pango list and applies attributes to it with *much* less overhead than the GTK# version.
 	/// </summary>
@@ -256,5 +256,5 @@ namespace Mono.TextEditor
 				return false;
 			});
 		}
-	}
+	}*/
 }

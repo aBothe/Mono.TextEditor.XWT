@@ -189,7 +189,6 @@
     <Compile Include="Mono.TextEditor.Theatrics\Choreographer.cs" />
     <Compile Include="Mono.TextEditor.Theatrics\Pulsator.cs" />
     <Compile Include="Mono.TextEditor.Theatrics\SingleActorStage.cs" />
-    <Compile Include="Mono.TextEditor.Theatrics\SmartScrolledWindow.cs" />
     <Compile Include="Mono.TextEditor.Theatrics\Stage.cs" />
     <Compile Include="Mono.TextEditor.Utils\Diff.cs" />
     <Compile Include="Mono.TextEditor.Utils\HtmlWriter.cs" />
@@ -213,11 +212,12 @@
     <Compile Include="Mono.TextEditor.Vi\ViStatusArea.cs" />
     <Compile Include="Mono.TextEditor.Vi\ViWordFindStrategy.cs" />
     <Compile Include="Mono.TextEditor\Gui\PaintEventArgs.cs" />
+    <Compile Include="Mono.TextEditor\Gui\PangoUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Mono.TextEditor\Gui\GtkGestures.cs" />
     <None Include="Mono.TextEditor\Gui\GtkWorkarounds.cs" />
-    <None Include="Mono.TextEditor\Gui\PangoUtil.cs" />
+    <None Include="Mono.TextEditor.Theatrics\SmartScrolledWindow.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Styles\DefaultStyle.json">

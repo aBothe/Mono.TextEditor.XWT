@@ -36,12 +36,9 @@ namespace Mono.TextEditor
 {
 	public class CodeSegmentPreviewWindow : Window
 	{
-		const int DefaultPreviewWindowWidth = 320;
-		const int DefaultPreviewWindowHeight = 200;
+		CodeSegmentPreviewCanvas canvas;
 		TextEditor editor;
-		Font fontDescription;
-		TextLayout layout;
-		TextLayout informLayout;
+
 		
 		public static string CodeSegmentPreviewInformString {
 			get;
@@ -49,8 +46,8 @@ namespace Mono.TextEditor
 		}
 		
 		public bool HideCodeSegmentPreviewInformString {
-			get;
-			private set;
+			get {return canvas.HideCodeSegmentPreviewInformString;}
+			private set{canvas.HideCodeSegmentPreviewInformString = value;}
 		}
 		
 		public TextSegment Segment {
@@ -60,7 +57,7 @@ namespace Mono.TextEditor
 		
 		public bool IsEmptyText {
 			get {
-				return string.IsNullOrEmpty ((layout.Text ?? "").Trim ());
+				return canvas.IsEmptyText;
 			}
 		}
 
@@ -68,22 +65,17 @@ namespace Mono.TextEditor
 		{
 		}
 		
-		public CodeSegmentPreviewWindow (TextEditor editor, bool hideCodeSegmentPreviewInformString, TextSegment segment, int width, int height, bool removeIndent = true) : base (Gtk.WindowType.Popup)
+		public CodeSegmentPreviewWindow (TextEditor editor, bool hideCodeSegmentPreviewInformString, TextSegment segment, int width, int height, bool removeIndent = true) 
 		{
+			canvas = new CodeSegmentPreviewCanvas (editor);
+			Content = canvas;
 			this.HideCodeSegmentPreviewInformString = hideCodeSegmentPreviewInformString;
 			this.Segment = segment;
 			this.editor = editor;
-			this.AppPaintable = true;
-			this.SkipPagerHint = this.SkipTaskbarHint = true;
-			this.TypeHint = WindowTypeHint.Menu;
-			layout = PangoUtil.CreateLayout (this);
-			informLayout = PangoUtil.CreateLayout (this);
-			informLayout.SetText (CodeSegmentPreviewInformString);
-			
-			fontDescription = Pango.FontDescription.FromString (editor.Options.FontName);
-			fontDescription.Size = (int)(fontDescription.Size * 0.8f);
-			layout.FontDescription = fontDescription;
-			layout.Ellipsize = Pango.EllipsizeMode.End;
+			//this.SkipPagerHint = this.SkipTaskbarHint = true;
+			ShowInTaskbar = false;
+			//this.TypeHint = WindowTypeHint.Menu;
+					
 			// setting a max size for the segment (40 lines should be enough), 
 			// no need to markup thousands of lines for a preview window
 			SetSegment (segment, removeIndent);
@@ -100,78 +92,134 @@ namespace Mono.TextEditor
 			bool pushedLineLimit = endLine - startLine > maxLines;
 			if (pushedLineLimit)
 				segment = new TextSegment (segment.Offset, editor.Document.GetLine (startLine + maxLines).Offset - segment.Offset);
-			layout.Ellipsize = Pango.EllipsizeMode.End;
-			layout.SetMarkup (editor.GetTextEditorData ().GetMarkup (segment.Offset, segment.Length, removeIndent) + (pushedLineLimit ? Environment.NewLine + "..." : ""));
-			QueueDraw ();
+			canvas.layout.Trimming = TextTrimming.WordElipsis;
+			//canvas.layout.Ellipsize = Pango.EllipsizeMode.End;
+			canvas.layout.Markup = editor.GetTextEditorData ().GetMarkup (segment.Offset, segment.Length, removeIndent) + (pushedLineLimit ? Environment.NewLine + "..." : "");
+			canvas.QueueDraw ();
 		}
 		
 		public int PreviewInformStringHeight {
-			get; private set;
+			get {return canvas.PreviewInformStringHeight; }
 		}
 		
 		public void CalculateSize (int defaultWidth = -1)
 		{
-			int w, h;
-			layout.GetPixelSize (out w, out h);
-			
-			if (!HideCodeSegmentPreviewInformString) {
-				int w2, h2;
-				informLayout.GetPixelSize (out w2, out h2); 
-				PreviewInformStringHeight = h2;
-				w = System.Math.Max (w, w2);
-				h += h2;
-			}
-			Gdk.Rectangle geometry = Screen.GetUsableMonitorGeometry (Screen.GetMonitorAtWindow (editor.GdkWindow));
-			this.SetSizeRequest (System.Math.Max (1, System.Math.Min (w + 3, geometry.Width * 2 / 5)), 
-			                     System.Math.Max (1, System.Math.Min (h + 3, geometry.Height * 2 / 5)));
+			canvas.CalculateSize (defaultWidth);
 		}
 		
-		protected override void OnDestroyed ()
+		protected override void Dispose (bool disposing)
+		{
+			canvas.Dispose ();
+			base.Dispose (disposing);
+		}
+
+		/*protected override bool OnKeyPressEvent (EventKey evnt)
+		{
+//			Console.WriteLine (evnt.Key);
+			return base.OnKeyPressEvent (evnt);
+		}*/
+	}
+
+	class CodeSegmentPreviewCanvas : Canvas
+	{
+		#region Properties
+		Font fontDescription;
+		internal TextLayout layout;
+		TextLayout informLayout;
+		const int DefaultPreviewWindowWidth = 320;
+		const int DefaultPreviewWindowHeight = 200;
+
+		public int PreviewInformStringHeight {
+			get; private set;
+		}
+
+
+		public readonly TextEditor Editor;
+
+		Color textGC, foldGC, textBgGC, foldBgGC;
+
+		public bool IsEmptyText {
+			get {
+				return string.IsNullOrEmpty ((layout.Text ?? "").Trim ());
+			}
+		}
+
+		public bool HideCodeSegmentPreviewInformString {
+			get;
+			set;
+		}
+		#endregion
+
+		public CodeSegmentPreviewCanvas(TextEditor editor)
+		{
+			this.Editor = editor;
+
+			layout = new TextLayout (this);
+			informLayout = new TextLayout (this);
+			informLayout.Text = CodeSegmentPreviewWindow.CodeSegmentPreviewInformString;
+
+			fontDescription = Font.FromName (editor.Options.FontName).WithScaledSize(0.8);
+			layout.Font = fontDescription;
+			layout.Trimming = TextTrimming.WordElipsis;
+			//layout.Ellipsize = Pango.EllipsizeMode.End;
+		}
+
+		public void CalculateSize (int defaultWidth = -1)
+		{
+			var sz = layout.GetSize ();
+			var h = sz.Height, w = sz.Width;
+
+			if (!HideCodeSegmentPreviewInformString) {
+				sz = informLayout.GetSize ();
+				PreviewInformStringHeight = sz.Height;
+				w = System.Math.Max (w, sz.Width);
+				h += sz.Height;
+			}
+			var geometry = ParentWindow.Screen.VisibleBounds;
+			WidthRequest = System.Math.Max (1, System.Math.Min (w + 3, geometry.Width * 2 / 5));
+			HeightRequest= System.Math.Max (1, System.Math.Min (h + 3, geometry.Height * 2 / 5));
+		}
+
+		protected override void OnDraw (Context ctx, Rectangle dirtyRect)
+		{
+			if (textGC == null) {
+				textGC = Editor.ColorStyle.PlainText.Foreground;
+				textBgGC = Editor.ColorStyle.PlainText.Background;
+				foldGC = Editor.ColorStyle.CollapsedText.Foreground;
+				foldBgGC = Editor.ColorStyle.CollapsedText.Background;
+			}
+
+			ctx.SetColor (textBgGC);
+			ctx.Rectangle (dirtyRect);
+			ctx.SetColor(textGC);
+			ctx.DrawTextLayout (layout, 1, 1);
+			var sz = Size;
+			ctx.SetColor (textBgGC);
+			ctx.Rectangle (1, 1, sz.Width - 3, sz.Height - 3);
+			ctx.SetColor (foldGC);
+			ctx.Rectangle (0, 0, sz.Width - 1, sz.Height - 1);
+
+			if (!HideCodeSegmentPreviewInformString) {
+				informLayout.Text = CodeSegmentPreviewWindow.CodeSegmentPreviewInformString;
+				var layoutSize = informLayout.GetSize ();
+				var h = layoutSize.Height, w = layoutSize.Width;
+				PreviewInformStringHeight = h;
+				ctx.SetColor (foldBgGC);
+				ctx.Rectangle (sz.Width - w - 3, sz.Height - h, w + 2, h - 1);
+				ctx.SetColor (foldGC);
+				ctx.DrawTextLayout (informLayout,sz.Width - w - 3, sz.Height - h);
+			}
+		}
+
+		protected override void Dispose (bool disposing)
 		{
 			layout = layout.Kill ();
 			informLayout = informLayout.Kill ();
 			fontDescription = fontDescription.Kill ();
 			if (textGC != null) {
-				textGC.Dispose ();
-				textBgGC.Dispose ();
-				foldGC.Dispose ();
-				foldBgGC.Dispose ();
 				textGC = textBgGC = foldGC = foldBgGC = null;
 			}
-			base.OnDestroyed ();
-		}
-		
-		protected override bool OnKeyPressEvent (EventKey evnt)
-		{
-//			Console.WriteLine (evnt.Key);
-			return base.OnKeyPressEvent (evnt);
-		}
-		
-		Gdk.GC textGC, foldGC, textBgGC, foldBgGC;
-		
-		protected override bool OnExposeEvent (Gdk.EventExpose ev)
-		{
-			if (textGC == null) {
-				textGC = editor.ColorStyle.PlainText.CreateFgGC (ev.Window);
-				textBgGC = editor.ColorStyle.PlainText.CreateBgGC (ev.Window);
-				foldGC = editor.ColorStyle.CollapsedText.CreateFgGC (ev.Window);
-				foldBgGC = editor.ColorStyle.CollapsedText.CreateBgGC (ev.Window);
-			}
-			
-			ev.Window.DrawRectangle (textBgGC, true, ev.Area);
-			ev.Window.DrawLayout (textGC, 1, 1, layout);
-			ev.Window.DrawRectangle (textBgGC, false, 1, 1, this.Allocation.Width - 3, this.Allocation.Height - 3);
-			ev.Window.DrawRectangle (foldGC, false, 0, 0, this.Allocation.Width - 1, this.Allocation.Height - 1);
-			
-			if (!HideCodeSegmentPreviewInformString) {
-				informLayout.SetText (CodeSegmentPreviewInformString);
-				int w, h;
-				informLayout.GetPixelSize (out w, out h); 
-				PreviewInformStringHeight = h;
-				ev.Window.DrawRectangle (foldBgGC, true, Allocation.Width - w - 3, Allocation.Height - h, w + 2, h - 1);
-				ev.Window.DrawLayout (foldGC, Allocation.Width - w - 3, Allocation.Height - h, informLayout);
-			}
-			return true;
+			base.Dispose (disposing);
 		}
 	}
 }

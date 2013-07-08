@@ -88,10 +88,10 @@ namespace Mono.TextEditor
 		{
 		}
 
-		public virtual void SelectValidShortcut (KeyboardShortcut[] accels, out Key key, out ModifierKeys mod)
+		public virtual void SelectValidShortcut (Tuple<Key,ModifierKeys>[] accels, out Key key, out ModifierKeys mod)
 		{
-			key = accels [0].Key;
-			mod = accels [0].Modifier;
+			key = accels [0].Item1;
+			mod = accels [0].Item2;
 		}
 
 		protected Caret Caret { get { return textEditorData.Caret; } }
@@ -231,35 +231,9 @@ namespace Mono.TextEditor
 		
 		}
 		
-		static Dictionary<Key, Key> keyMappings = new Dictionary<Key, Key> ();
-		static EditMode ()
+		public static ulong GetKeyCode (Key key, ModifierKeys modifier)
 		{
-			for (char ch = 'a'; ch <= 'z'; ch++) {
-				keyMappings[(Key)ch] = (Key)(ch -'a' + 'A');
-			}
-		}
-		
-		
-		public virtual bool PreemptIM (Key key, uint unicodeKey, ModifierKeys modifier)
-		{
-			return false;
-		}
-		
-		public static int GetKeyCode (Key key)
-		{
-			return (int)(keyMappings.ContainsKey (key) ? keyMappings[key] : key);
-		}
-		
-		public static int GetKeyCode (Key key, ModifierKeys modifier)
-		{
-			//TODO / FIXME
-			uint m =       (uint)(((modifier & ModifierKeys.Control) != 0)? 1 : 0);
-			m = (m << 1) | (uint)(((modifier & ModifierKeys.Shift)   != 0)? 1 : 0);
-			m = (m << 1) | (uint)(((modifier & ModifierKeys.Alt)    != 0)? 1 : 0); // Meta
-			m = (m << 1) | (uint)(((modifier & ModifierKeys.Command)    != 0)? 1 : 0); // Mod1
-			//m = (m << 1) | (uint)(((modifier & ModifierKeys.SuperMask)   != 0)? 1 : 0); // Super
-			
-			return GetKeyCode (key) | (int)(m << 16);
+			return (ulong)key | ((ulong)modifier << 16);
 		}
 		
 		protected void HideMouseCursor ()
@@ -271,7 +245,10 @@ namespace Mono.TextEditor
 
 		#region TextAreaControl
 		public virtual void AllocateTextArea (TextEditor textEditor, TextArea textArea, Rectangle allocation)
-		{/*TODO
+		{
+			textArea.HeightRequest = allocation.Height;
+			textArea.WidthRequest = allocation.Width;
+			/*TODO
 			if (textArea. != allocation)
 				textArea.SizeAllocate (allocation);*/
 		}

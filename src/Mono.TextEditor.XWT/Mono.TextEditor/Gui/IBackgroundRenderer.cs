@@ -27,10 +27,14 @@
 using System;
 using System.Collections.Generic;
 using Mono.TextEditor.Highlighting;
+using Xwt.Drawing;
+using Xwt;
+
+
 namespace Mono.TextEditor
 {
 	public interface IBackgroundRenderer
 	{
-		void Draw (Cairo.Context cr, Cairo.Rectangle area);
+		void Draw (Context cr, Rectangle area);
 	}
 }

@@ -47,8 +47,6 @@ namespace XwtExperiments
 			w.Content = vb;
 
 			var mc = new MyMainComponent ();
-			mc.WidthRequest = 400;
-			mc.HeightRequest = 300;
 			mc.LineColor = Colors.Green;
 			mc.ExpandHorizontal = true;
 			vb.PackStart (mc);
@@ -120,6 +118,7 @@ namespace XwtExperiments
 		protected override void OnKeyPressed (KeyEventArgs args)
 		{
 			drawnCol = Colors.Red;
+			var ch = (char) args.Key;
 			base.OnKeyPressed (args);
 			QueueDraw ();
 		}

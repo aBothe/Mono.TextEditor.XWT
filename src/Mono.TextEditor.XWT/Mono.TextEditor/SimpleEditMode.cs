@@ -34,7 +34,7 @@ namespace Mono.TextEditor
 {
 	public class SimpleEditMode : EditMode
 	{
-		Dictionary<int, Action<TextEditorData>> keyBindings = new Dictionary<int, Action<TextEditorData>> ();
+		Dictionary<ulong, Action<TextEditorData>> keyBindings = new Dictionary<ulong, Action<TextEditorData>> ();
 		public Dictionary<int, Action<TextEditorData>> KeyBindings { get { return keyBindings; } }
 		
 		public SimpleEditMode ()
@@ -277,106 +277,105 @@ namespace Mono.TextEditor
 			Action<TextEditorData> action;
 			
 			// Up/down
-			/* TODO
 			action = CaretMoveActions.UpLineStart;
-			keyBindings.Add (GetKeyCode (Key.Up, Gdk.ModifierType.Mod1Mask), action);
+			keyBindings.Add (GetKeyCode (Key.Up, ModifierKeys.Command), action);
 			
 			action = CaretMoveActions.DownLineEnd;
-			keyBindings.Add (GetKeyCode (Key.Down, Gdk.ModifierType.Mod1Mask), action);
+			keyBindings.Add (GetKeyCode (Key.Down, ModifierKeys.Command), action);
 			
 			action = SelectionActions.MoveUpLineStart;
-			keyBindings.Add (GetKeyCode (Key.Up, Gdk.ModifierType.Mod1Mask | ModifierKeys.Shift), action);
+			keyBindings.Add (GetKeyCode (Key.Up, ModifierKeys.Command | ModifierKeys.Shift), action);
 			
 			action = SelectionActions.MoveDownLineEnd;
-			keyBindings.Add (GetKeyCode (Key.Down, Gdk.ModifierType.Mod1Mask | ModifierKeys.Shift), action);
+			keyBindings.Add (GetKeyCode (Key.Down, ModifierKeys.Command | ModifierKeys.Shift), action);
 				
 			// === Home ===
 			
 			action = CaretMoveActions.LineHome;
-			keyBindings.Add (GetKeyCode (Key.Left, Gdk.ModifierType.MetaMask), action);
+			keyBindings.Add (GetKeyCode (Key.Left, ModifierKeys.Alt), action);
 			keyBindings.Add (GetKeyCode (Key.a, ModifierKeys.Control), action); //emacs
 			keyBindings.Add (GetKeyCode (Key.a, ModifierKeys.Control | ModifierKeys.Shift), SelectionActions.MoveLineHome);
 			
 			action = SelectionActions.MoveLineHome;
-			keyBindings.Add (GetKeyCode (Key.Left, Gdk.ModifierType.MetaMask | ModifierKeys.Shift), action);
+			keyBindings.Add (GetKeyCode (Key.Left, ModifierKeys.Alt | ModifierKeys.Shift), action);
 			
 			action = CaretMoveActions.ToDocumentStart;
 			keyBindings.Add (GetKeyCode (Key.NumPadHome), action);
 			keyBindings.Add (GetKeyCode (Key.Home), action);
-			keyBindings.Add (GetKeyCode (Key.Up, Gdk.ModifierType.MetaMask), action);
+			keyBindings.Add (GetKeyCode (Key.Up, ModifierKeys.Alt), action);
 
 			action = SelectionActions.MoveToDocumentStart;
 			keyBindings.Add (GetKeyCode (Key.NumPadHome, ModifierKeys.Shift), action);
 			keyBindings.Add (GetKeyCode (Key.Home, ModifierKeys.Shift), action);
-			keyBindings.Add (GetKeyCode (Key.Up, Gdk.ModifierType.MetaMask | ModifierKeys.Shift), action);
+			keyBindings.Add (GetKeyCode (Key.Up, ModifierKeys.Alt | ModifierKeys.Shift), action);
 
 			// ==== End ====
 			
 			action = CaretMoveActions.LineEnd;
-			keyBindings.Add (GetKeyCode (Key.Right, Gdk.ModifierType.MetaMask), action);
+			keyBindings.Add (GetKeyCode (Key.Right, ModifierKeys.Alt), action);
 			keyBindings.Add (GetKeyCode (Key.e, ModifierKeys.Control), action); //emacs
 			keyBindings.Add (GetKeyCode (Key.e, ModifierKeys.Control | ModifierKeys.Shift), SelectionActions.MoveLineEnd);
 			
 			
 			action = SelectionActions.MoveLineEnd;
-			keyBindings.Add (GetKeyCode (Key.Right, Gdk.ModifierType.MetaMask | ModifierKeys.Shift), action);
+			keyBindings.Add (GetKeyCode (Key.Right, ModifierKeys.Alt | ModifierKeys.Shift), action);
 			
 			action = CaretMoveActions.ToDocumentEnd;
 			keyBindings.Add (GetKeyCode (Key.NumPadEnd), action);
 			keyBindings.Add (GetKeyCode (Key.End), action);
-			keyBindings.Add (GetKeyCode (Key.Down, Gdk.ModifierType.MetaMask), action);
+			keyBindings.Add (GetKeyCode (Key.Down, ModifierKeys.Alt), action);
 
 			action = SelectionActions.MoveToDocumentEnd;
 			keyBindings.Add (GetKeyCode (Key.NumPadEnd, ModifierKeys.Shift), action);
 			keyBindings.Add (GetKeyCode (Key.End, ModifierKeys.Shift), action);
-			keyBindings.Add (GetKeyCode (Key.Down, Gdk.ModifierType.MetaMask | ModifierKeys.Shift), action);
+			keyBindings.Add (GetKeyCode (Key.Down, ModifierKeys.Alt | ModifierKeys.Shift), action);
 
 			// ==== Cut, copy, paste ===
 			
 			action = ClipboardActions.Cut;
-			keyBindings.Add (GetKeyCode (Key.x, Gdk.ModifierType.MetaMask), action);
+			keyBindings.Add (GetKeyCode (Key.x, ModifierKeys.Alt), action);
 			keyBindings.Add (GetKeyCode (Key.w, ModifierKeys.Control), action); //emacs
 			
 			action = ClipboardActions.Copy;
-			keyBindings.Add (GetKeyCode (Key.c, Gdk.ModifierType.MetaMask), action);
+			keyBindings.Add (GetKeyCode (Key.c, ModifierKeys.Alt), action);
 			
 			action = ClipboardActions.Paste;
-			keyBindings.Add (GetKeyCode (Key.v, Gdk.ModifierType.MetaMask), action);
+			keyBindings.Add (GetKeyCode (Key.v, ModifierKeys.Alt), action);
 			keyBindings.Add (GetKeyCode (Key.y, ModifierKeys.Control), action); //emacs
 			
 			// ==== Page up/down ====
 			
 			action = ScrollActions.PageDown;
-			keyBindings.Add (GetKeyCode (Key.NumPadPage_Down), action);
-			keyBindings.Add (GetKeyCode (Key.Page_Down), action);
+			//keyBindings.Add (GetKeyCode (Key.NumPadPage_Down), action);
+			keyBindings.Add (GetKeyCode (Key.PageDown), action);
 			
 			action = ScrollActions.PageUp;
-			keyBindings.Add (GetKeyCode (Key.NumPadPage_Up), action);
-			keyBindings.Add (GetKeyCode (Key.Page_Up), action);
+			//keyBindings.Add (GetKeyCode (Key.NumPadPage_Up), action);
+			keyBindings.Add (GetKeyCode (Key.PageUp), action);
 			
 			action = CaretMoveActions.PageDown;
-			keyBindings.Add (GetKeyCode (Key.NumPadPage_Down, Gdk.ModifierType.Mod1Mask), action);
-			keyBindings.Add (GetKeyCode (Key.Page_Down, Gdk.ModifierType.Mod1Mask), action);
+			//keyBindings.Add (GetKeyCode (Key.NumPadPage_Down, Gdk.ModifierType.Mod1Mask), action);
+			keyBindings.Add (GetKeyCode (Key.PageDown, ModifierKeys.Command), action);
 			
 			action = CaretMoveActions.PageUp;
-			keyBindings.Add (GetKeyCode (Key.NumPadPage_Up, Gdk.ModifierType.Mod1Mask), action);
-			keyBindings.Add (GetKeyCode (Key.Page_Up, Gdk.ModifierType.Mod1Mask), action);
+			//keyBindings.Add (GetKeyCode (Key.NumPadPage_Up, Gdk.ModifierType.Mod1Mask), action);
+			keyBindings.Add (GetKeyCode (Key.PageUp, ModifierKeys.Command), action);
 			
 			action = SelectionActions.MovePageUp;
-			keyBindings.Add (GetKeyCode (Key.NumPadPage_Up, ModifierKeys.Shift), action);
-			keyBindings.Add (GetKeyCode (Key.Page_Up, ModifierKeys.Shift), action);
+			//keyBindings.Add (GetKeyCode (Key.NumPadPage_Up, ModifierKeys.Shift), action);
+			keyBindings.Add (GetKeyCode (Key.PageUp, ModifierKeys.Shift), action);
 			
 			action = SelectionActions.MovePageDown;
-			keyBindings.Add (GetKeyCode (Key.NumPadPage_Down, ModifierKeys.Shift), action);
-			keyBindings.Add (GetKeyCode (Key.Page_Down, ModifierKeys.Shift), action);
+			//keyBindings.Add (GetKeyCode (Key.NumPadPage_Down, ModifierKeys.Shift), action);
+			keyBindings.Add (GetKeyCode (Key.PageDown, ModifierKeys.Shift), action);
 			
 			// ==== Misc ====
 			
-			keyBindings.Add (GetKeyCode (Key.a, Gdk.ModifierType.MetaMask), SelectionActions.SelectAll);
+			keyBindings.Add (GetKeyCode (Key.a, ModifierKeys.Alt), SelectionActions.SelectAll);
 			
-			keyBindings.Add (GetKeyCode (Key.z, Gdk.ModifierType.MetaMask), MiscActions.Undo);
-			keyBindings.Add (GetKeyCode (Key.z, Gdk.ModifierType.MetaMask | ModifierKeys.Shift), MiscActions.Redo);
-			*/
+			keyBindings.Add (GetKeyCode (Key.z, ModifierKeys.Alt), MiscActions.Undo);
+			keyBindings.Add (GetKeyCode (Key.z, ModifierKeys.Alt | ModifierKeys.Shift), MiscActions.Redo);
+
 			// selection actions
 			
 			action = SelectionActions.MoveDown;
@@ -402,24 +401,24 @@ namespace Mono.TextEditor
 			keyBindings.Add (GetKeyCode (key), action);
 		}
 
-		public override void SelectValidShortcut (KeyboardShortcut[] accels, out Key key, out ModifierKeys mod)
+		public override void SelectValidShortcut (Tuple<Key,ModifierKeys>[] accels, out Key key, out ModifierKeys mod)
 		{
 			foreach (var accel in accels) {
-				int keyCode = GetKeyCode (accel.Key, accel.Modifier);
+				var keyCode = GetKeyCode (accel.Item1, accel.Item2);
 				if (keyBindings.ContainsKey (keyCode)) {
-					key = accel.Key;
-					mod = accel.Modifier;
+					key = accel.Item1;
+					mod = accel.Item2;
 					return;
 				}
 			}
-			key = accels [0].Key;
-			mod = accels [0].Modifier;
+			key = accels [0].Item1;
+			mod = accels [0].Item2;
 		}
 
 		
 		protected override void HandleKeypress (Key key, uint unicodeKey, ModifierKeys modifier)
 		{
-			int keyCode = GetKeyCode (key, modifier);
+			var keyCode = GetKeyCode (key, modifier);
 			if (keyBindings.ContainsKey (keyCode)) {
 				RunAction (keyBindings [keyCode]);
 			} else if (unicodeKey != 0 && modifier == ModifierKeys.None) {

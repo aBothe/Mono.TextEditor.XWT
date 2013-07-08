@@ -79,7 +79,6 @@ namespace Mono.TextEditor.PopupWindow
 			base.OnScreenChanged (previous_screen);
 			CheckScreenColormap ();
 		}*/
-
 	}
 	/*
 	public class TableLayoutModeHelpWindow : ModeHelpWindow

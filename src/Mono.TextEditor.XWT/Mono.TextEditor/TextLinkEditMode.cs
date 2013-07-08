@@ -27,6 +27,8 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Mono.TextEditor.PopupWindow;
+using Xwt.Drawing;
+using Xwt;
 
 namespace Mono.TextEditor
 {
@@ -120,7 +122,7 @@ namespace Mono.TextEditor
 			}
 		}
 
-		public Gdk.Pixbuf GetIcon (int n)
+		public Image GetIcon (int n)
 		{
 			return Values != null ? Values.GetIcon (n) : null;
 		}
@@ -404,7 +406,7 @@ namespace Mono.TextEditor
 			Editor.Document.CommitUpdateAll ();
 		}
 
-		protected override void HandleKeypress (Gdk.Key key, uint unicodeKey, Gdk.ModifierType modifier)
+		protected override void HandleKeypress (Key key, uint unicodeKey, ModifierKeys modifier)
 		{
 			var wnd = window;
 			if (wnd != null) {
@@ -425,31 +427,31 @@ namespace Mono.TextEditor
 			TextLink link = links.Find (l => l.Links.Any (s => s.Offset <= caretOffset && caretOffset <= s.EndOffset));
 			
 			switch (key) {
-			case Gdk.Key.BackSpace:
+			case Key.BackSpace:
 				if (link != null && caretOffset == link.PrimaryLink.Offset)
 					return;
 				goto default;
-			case Gdk.Key.space:
+			case Key.space:
 				if (link == null || !link.IsIdentifier)
 					goto default;
 				return;
-			case Gdk.Key.Delete:
+			case Key.Delete:
 				if (link != null && caretOffset == link.PrimaryLink.EndOffset)
 					return;
 				goto default;
-			case Gdk.Key.Tab:
-				if ((modifier & Gdk.ModifierType.ControlMask) != 0)
+			case Key.Tab:
+				if ((modifier & ModifierKeys.Control) != 0)
 				if (link != null && !link.IsIdentifier)
 					goto default;
-				if ((modifier & Gdk.ModifierType.ShiftMask) == 0)
+				if ((modifier & ModifierKeys.Shift) == 0)
 					GotoNextLink (link);
 				else
 					GotoPreviousLink (link);
 				return;
-			case Gdk.Key.Escape:
-			case Gdk.Key.Return:
-			case Gdk.Key.KP_Enter:
-				if ((modifier & Gdk.ModifierType.ControlMask) != 0)
+			case Key.Escape:
+			case Key.Return:
+			case Key.NumPadEnter:
+				if ((modifier & ModifierKeys.Control) != 0)
 				if (link != null && !link.IsIdentifier)
 					goto default;
 				if (wnd != null) {
@@ -457,7 +459,7 @@ namespace Mono.TextEditor
 				} else {
 					ExitTextLinkMode ();
 				}
-				if (key == Gdk.Key.Escape)
+				if (key == Key.Escape)
 					OnCancel (EventArgs.Empty);
 				return;
 			default:
@@ -480,7 +482,7 @@ namespace Mono.TextEditor
 		void DestroyWindow ()
 		{
 			if (window != null) {
-				window.Destroy ();
+				window.Dispose ();
 				window = null;
 			}
 		}
@@ -560,7 +562,7 @@ namespace Mono.TextEditor
 			//return mode.Links.First (l => l.PrimaryLink != null && l.PrimaryLink.Offset <= o && o <= l.PrimaryLink.EndOffset);
 		}
 
-		protected override Gtk.Window CreateTooltipWindow (TextEditor Editor, int offset, Gdk.ModifierType modifierState, TooltipItem item)
+		protected override Window CreateTooltipWindow (TextEditor Editor, int offset, ModifierKeys modifierState, TooltipItem item)
 		{
 			TextLink link = item.Item as TextLink;
 			if (link == null || string.IsNullOrEmpty (link.Tooltip))
@@ -571,10 +573,10 @@ namespace Mono.TextEditor
 			return window;
 		}
 
-		protected override void GetRequiredPosition (TextEditor Editor, Gtk.Window tipWindow, out int requiredWidth, out double xalign)
+		protected override void GetRequiredPosition (TextEditor Editor, Window tipWindow, out int requiredWidth, out double xalign)
 		{
 			TooltipWindow win = (TooltipWindow)tipWindow;
-			requiredWidth = win.SetMaxWidth (win.Screen.Width);
+			requiredWidth = win.SetMaxWidth (win.Screen.Bounds.Width);
 			xalign = 0.5;
 		}
 		#endregion
@@ -595,7 +597,7 @@ namespace Mono.TextEditor
 			IsVisible = true;
 		}
 
-		public override bool DrawBackground (TextEditor editor, Cairo.Context cr, double y, LineMetrics metrics)
+		public override bool DrawBackground (TextEditor editor, Context cr, double y, LineMetrics metrics)
 		{
 			int caretOffset = editor.Caret.Offset - BaseOffset;
 
@@ -608,12 +610,12 @@ namespace Mono.TextEditor
 						int strOffset = BaseOffset + segment.Offset - metrics.TextStartOffset;
 						int strEndOffset = BaseOffset + segment.EndOffset - metrics.TextStartOffset;
 
-						int x_pos = metrics.Layout.Layout.IndexToPos (strOffset).X;
-						int x_pos2 = metrics.Layout.Layout.IndexToPos (strEndOffset).X;
+						var x_pos = metrics.Layout.Layout.GetCoordinateFromIndex (strOffset).X; //.IndexToPos (strOffset).X;
+						var x_pos2 = metrics.Layout.Layout.GetCoordinateFromIndex (strEndOffset).X;
 					
-						x_pos = (int)(x_pos / Pango.Scale.PangoScale);
-						x_pos2 = (int)(x_pos2 / Pango.Scale.PangoScale);
-						Cairo.Color fillGc, rectangleGc;
+						//x_pos = (int)(x_pos / Pango.Scale.PangoScale);
+						//x_pos2 = (int)(x_pos2 / Pango.Scale.PangoScale);
+						Color fillGc, rectangleGc;
 						if (segment == link.PrimaryLink) {
 							fillGc = isPrimaryHighlighted ? editor.ColorStyle.PrimaryTemplateHighlighted.SecondColor : editor.ColorStyle.PrimaryTemplate.SecondColor;
 							rectangleGc = isPrimaryHighlighted ? editor.ColorStyle.PrimaryTemplateHighlighted.SecondColor : editor.ColorStyle.PrimaryTemplate.SecondColor;
@@ -628,10 +630,10 @@ namespace Mono.TextEditor
 
 						cr.Rectangle (x1 + 0.5, y + 0.5, x2 - x1, editor.LineHeight - 1);
 						
-						cr.Color = fillGc;
+						cr.SetColor(fillGc);
 						cr.FillPreserve ();
 						
-						cr.Color = rectangleGc;
+						cr.SetColor(rectangleGc);
 						cr.Stroke ();
 					}
 				}
@@ -650,19 +652,19 @@ namespace Mono.TextEditor
 			return margin is GutterMargin;
 		}
 
-		public override bool DrawBackground (TextEditor editor, Cairo.Context cr, MarginDrawMetrics metrics)
+		public override bool DrawBackground (TextEditor editor, Context cr, MarginDrawMetrics metrics)
 		{
 			var width = metrics.Width;
 
 			cr.Rectangle (metrics.X, metrics.Y, metrics.Width, metrics.Height);
 			var lineNumberGC = editor.ColorStyle.LineNumbers.Foreground;
-			cr.Color = editor.Caret.Line == metrics.LineNumber ? editor.ColorStyle.LineMarker.Color : lineNumberGC;
+			cr.SetColor(editor.Caret.Line == metrics.LineNumber ? editor.ColorStyle.LineMarker.Color : lineNumberGC);
 			cr.Fill ();
 
 			return true;
 		}
 
-		public override void DrawForeground (TextEditor editor, Cairo.Context cr, MarginDrawMetrics metrics)
+		public override void DrawForeground (TextEditor editor, Context cr, MarginDrawMetrics metrics)
 		{
 			var width = metrics.Width;
 			var lineNumberBgGC = editor.ColorStyle.LineNumbers.Background;
@@ -670,15 +672,14 @@ namespace Mono.TextEditor
 			if (metrics.LineNumber <= editor.Document.LineCount) {
 				// Due to a mac? gtk bug I need to re-create the layout here
 				// otherwise I get pango exceptions.
-				using (var layout = PangoUtil.CreateLayout (editor)) {
-					layout.FontDescription = editor.Options.Font;
+				using (var layout = new TextLayout(editor.TextArea)) {
+					layout.Font = editor.Options.Font;
 					layout.Width = (int)width;
-					layout.Alignment = Pango.Alignment.Right;
-					layout.SetText (metrics.LineNumber.ToString ());
+					//layout.Alignment = Pango.Alignment.Right;
+					layout.Text = metrics.LineNumber.ToString ();
 					cr.Save ();
-					cr.Translate (metrics.X + (int)width + (editor.Options.ShowFoldMargin ? 0 : -2), metrics.Y);
-					cr.Color = lineNumberBgGC;
-					cr.ShowLayout (layout);
+					cr.SetColor(lineNumberBgGC);
+					cr.DrawTextLayout (layout,metrics.X + (int)width + (editor.Options.ShowFoldMargin ? 0 : -2), metrics.Y);
 					cr.Restore ();
 				}
 			}

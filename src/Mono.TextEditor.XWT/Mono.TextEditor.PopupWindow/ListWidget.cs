@@ -204,6 +204,11 @@ namespace Mono.TextEditor.PopupWindow
 			}
 		}
 
+		protected override void OnDraw (Context ctx, Rectangle dirtyRect)
+		{
+
+		}
+
 		//FIXME: we could use the expose event's clipbox to make the drawing more efficient
 		void DrawList (Gdk.EventExpose args)
 		{

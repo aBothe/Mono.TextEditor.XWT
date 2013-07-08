@@ -134,17 +134,7 @@ namespace Mono.TextEditor
 			private set;
 		}
 		
-		/// <summary>
-		/// The raw GDK event. May be null if the event was synthesized.
-		/// </summary>
-		public Gdk.Event RawEvent { get; private set; }
-		
-		public Gdk.EventType Type {
-			get;
-			private set;
-		}
-		
-		public Gdk.ModifierType ModifierState {
+		public ModifierKeys ModifierState {
 			get;
 			private set;
 		}
@@ -156,8 +146,10 @@ namespace Mono.TextEditor
 		
 		public bool TriggersContextMenu ()
 		{
+			return Button;
+			/*
 			var evt = RawEvent as Gdk.EventButton;
-			return evt != null && evt.TriggersContextMenu ();
+			return evt != null && evt.TriggersContextMenu ();*/
 		}
 		
 		int lineNumber = -2; // -2 means that line number has not yet been calculated
@@ -189,16 +181,10 @@ namespace Mono.TextEditor
 			private set;
 		}
 		
-		public MarginMouseEventArgs (TextEditor editor, Gdk.Event raw, uint button, double x, double y, Gdk.ModifierType modifierState)
-			: this (editor, raw.Type, button, x, y, modifierState)
-		{
-			this.RawEvent = raw;
-		}
-		
-		public MarginMouseEventArgs (TextEditor editor, Gdk.EventType type, uint button, double x, double y, Gdk.ModifierType modifierState)
+		public MarginMouseEventArgs (TextEditor editor, uint button, double x, double y, ModifierKeys modifierState)
 		{
 			this.Editor = editor;
-			this.Type = type;
+			//this.Type = type;
 			
 			this.Button = button;
 			this.X = x;

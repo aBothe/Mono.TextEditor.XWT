@@ -240,7 +240,7 @@ namespace Mono.TextEditor
 			editor.Document.FoldTreeUpdated -= HandleEditorDocumentFoldTreeUpdated;
 			layout = layout.Kill ();
 		}
-
+		/*
 		static HslColor GetColor (Color col)
 		{
 			HslColor hsl = col;
@@ -250,7 +250,7 @@ namespace Mono.TextEditor
 				hsl.L = System.Math.Max (0.0, hsl.L - 0.5);
 			}
 			return hsl;
-		}
+		}*/
 
 		void DrawClosedFolding (Context cr, Color col, double x, double y)
 		{

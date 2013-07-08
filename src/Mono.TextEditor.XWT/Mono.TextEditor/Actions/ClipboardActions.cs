@@ -55,11 +55,13 @@ namespace Mono.TextEditor
 		public static void Copy (TextEditorData data)
 		{
 			CopyOperation operation = new CopyOperation ();
-			
+
+			Clipboard.SetData (data);
+			/*
 			Clipboard clipboard = Clipboard.GetData<object> (CopyOperation.CLIPBOARD_ATOM);
 			operation.CopyData (data);
 			Clipboard.SetData ();
-			clipboard (CopyOperation.TargetEntries, operation.ClipboardGetFunc, operation.ClipboardClearFunc);
+			clipboard (CopyOperation.TargetEntries, operation.ClipboardGetFunc, operation.ClipboardClearFunc);*/
 		}
 	
 		public class CopyOperation
@@ -71,13 +73,13 @@ namespace Mono.TextEditor
 			public const int MonoTextType = 99;
 
 			const int UTF8_FORMAT = 8;
-			
+			/*
 			public static readonly Gdk.Atom CLIPBOARD_ATOM        = Gdk.Atom.Intern ("CLIPBOARD", false);
 			public static readonly Gdk.Atom PRIMARYCLIPBOARD_ATOM = Gdk.Atom.Intern ("PRIMARY", false);
 			public static readonly Gdk.Atom RTF_ATOM;
 			public static readonly Gdk.Atom MD_ATOM  = Gdk.Atom.Intern ("text/monotext", false);
 			public static readonly Gdk.Atom HTML_ATOM;
-
+			*/
 			public CopyOperation ()	
 			{
 			}
@@ -99,7 +101,7 @@ namespace Mono.TextEditor
 				}
 				return plainText.ToString ();
 			}
-
+			/*
 			public void SetData (SelectionData selection_data, uint info)
 			{
 				if (selection_data == null)
@@ -197,10 +199,10 @@ namespace Mono.TextEditor
 				TargetEntries = newTargets.ToArray ();
 				TargetList = new TargetList (TargetEntries);
 			}
-			
+			*/
 			void CopyData (TextEditorData data, Selection selection)
 			{
-				if (!selection.IsEmpty && data != null && data.Document != null) {
+				/*TODO if (!selection.IsEmpty && data != null && data.Document != null) {
 					this.docStyle = data.ColorStyle;
 					this.options = data.Options;
 					copyData = null;
@@ -236,12 +238,12 @@ namespace Mono.TextEditor
 					}
 				} else {
 					copiedColoredChunks = null;
-				}
+				}*/
 			}
 			
 			public void CopyData (TextEditorData data)
 			{
-				Selection selection;
+				/*TODO Selection selection;
 				isLineSelectionMode = !data.IsSomethingSelected;
 				if (data.IsSomethingSelected) {
 					selection = data.MainSelection;
@@ -253,7 +255,7 @@ namespace Mono.TextEditor
 				CopyData (data, selection);
 				
 				if (Copy != null)
-					Copy (GetCopiedPlainText ());
+					Copy (GetCopiedPlainText ());*/
 			}
 		
 			public delegate void CopyDelegate (string text);
@@ -264,28 +266,31 @@ namespace Mono.TextEditor
 		{
 			if (Platform.IsWindows) // disable middle click on windows.
 				return;
+			Clipboard.SetText (data.SelectedText);/*
 			Clipboard clipboard = Clipboard.Get (CopyOperation.PRIMARYCLIPBOARD_ATOM);
-			clipboard.Text = data.SelectedText;
+			clipboard.Text = data.SelectedText;*/
 		}
 		
 		public static void ClearPrimary ()
 		{
+			Clipboard.Clear ();
+			/*
 			Clipboard clipboard = Clipboard.Get (CopyOperation.PRIMARYCLIPBOARD_ATOM);
-			clipboard.Clear ();
+			clipboard.Clear ();*/
 		}
 		
-		static int PasteFrom (Clipboard clipboard, TextEditorData data, bool preserveSelection, int insertionOffset)
+		static int PasteFrom (TextEditorData data, bool preserveSelection, int insertionOffset)
 		{
-			return PasteFrom (clipboard, data, preserveSelection, insertionOffset, false);
+			return PasteFrom (data, preserveSelection, insertionOffset, false);
 		}
 
-		static int PasteFrom (Clipboard clipboard, TextEditorData data, bool preserveSelection, int insertionOffset, bool preserveState)
+		static int PasteFrom (TextEditorData data, bool preserveSelection, int insertionOffset, bool preserveState)
 		{
 			int result = -1;
 			if (!data.CanEdit (data.Document.OffsetToLineNumber (insertionOffset)))
 				return result;
-			if (clipboard.WaitIsTargetAvailable (CopyOperation.MD_ATOM)) {
-				clipboard.RequestContents (CopyOperation.MD_ATOM, delegate(Clipboard clp, SelectionData selectionData) {
+			/*var selectionData = Clipboard.GetData<SelectionData> ();
+			Clipboard.BeginGetText( delegate(Clipboard clp, SelectionData selectionData) {
 					if (selectionData.Length > 0) {
 						byte[] selBytes = selectionData.Data;
 						byte[] copyData = new byte[selBytes[1]];
@@ -368,13 +373,13 @@ namespace Mono.TextEditor
 				// we got MD_ATOM text - no need to request text. (otherwise buffer may get copied twice).
 				return result;
 			}
-			
-			if (result < 0 && clipboard.WaitIsTextAvailable ()) {
-				clipboard.RequestText (delegate(Clipboard clp, string text) {
-					if (string.IsNullOrEmpty (text))
-						return;
-					result = PastePlainText (data, insertionOffset, text, preserveSelection);
-				});
+			*/
+			if (result < 0 && Clipboard.ContainsText()) {
+				//TODO: Shall this action be done asynchronously?
+				var text = Clipboard.GetText ();
+				if (string.IsNullOrEmpty (text))
+					return;
+				result = PastePlainText (data, insertionOffset, text, preserveSelection);
 			}
 			
 			return result;
@@ -416,7 +421,7 @@ namespace Mono.TextEditor
 		
 		public static int PasteFromPrimary (TextEditorData data, int insertionOffset)
 		{
-			var result = PasteFrom (Clipboard.Get (CopyOperation.PRIMARYCLIPBOARD_ATOM), data, true, insertionOffset, true);
+			var result = PasteFrom (data, true, insertionOffset, true);
 			data.Document.CommitLineUpdate (data.GetLineByOffset (insertionOffset));
 			return result;
 		}
@@ -425,7 +430,7 @@ namespace Mono.TextEditor
 		{
 			if (!data.CanEditSelection)
 				return;
-			PasteFrom (Clipboard.Get (CopyOperation.CLIPBOARD_ATOM), data, false, data.IsSomethingSelected ? data.SelectionRange.Offset : data.Caret.Offset);
+			PasteFrom (data, false, data.IsSomethingSelected ? data.SelectionRange.Offset : data.Caret.Offset);
 		}
 	}
 }

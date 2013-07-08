@@ -25,13 +25,15 @@
 // THE SOFTWARE.
 
 using System;
+using Xwt.Drawing;
+using Xwt;
 
 namespace Mono.TextEditor
 {
 	public class DashedLineMargin : Margin
 	{
 		TextEditor editor;
-		Cairo.Color color;
+		Color color;
 		
 		public override double Width {
 			get {
@@ -49,11 +51,11 @@ namespace Mono.TextEditor
 			color = editor.ColorStyle.CollapsedText.Foreground;
 		}
 		
-		internal protected override void Draw (Cairo.Context cr, Cairo.Rectangle area, DocumentLine lineSegment, int line, double x, double y, double lineHeight)
+		internal protected override void Draw (Context cr, Rectangle area, DocumentLine lineSegment, int line, double x, double y, double lineHeight)
 		{
 			cr.MoveTo (x + 0.5, y);
 			cr.LineTo (x + 0.5, y + lineHeight);
-			cr.Color = color;
+			cr.SetColor(color);
 			cr.Stroke ();
 		}
 	}

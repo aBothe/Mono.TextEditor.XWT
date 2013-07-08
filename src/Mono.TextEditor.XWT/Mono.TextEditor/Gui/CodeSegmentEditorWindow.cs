@@ -74,31 +74,37 @@ namespace Mono.TextEditor
 			codeSegmentEditor.Document.ReadOnly = true;
 			codeSegmentEditor.Options = options;
 			
-			codeSegmentEditor.KeyPressEvent += delegate(object o, Gtk.KeyPressEventArgs args) {
-				if (args.Event.Key == Key.Escape)
+			codeSegmentEditor.KeyPressed += delegate(object o, KeyEventArgs args) {
+				if (args.Key == Key.Escape)
 					Dispose ();
 				
 			};
-			Gtk.Widget parent = editor.Parent;
-			while (parent != null && !(parent is Gtk.Window))
+			var parent = editor.Parent;
+			while (parent != null && !(parent is Window))
 				parent = parent.Parent;
-			if (parent is Gtk.Window)
-				this.TransientFor = (Gtk.Window)parent;
-			this.SkipTaskbarHint = true;
+			if (parent is Window)
+				this.TransientFor = (Window)parent;
+			//this.SkipTaskbarHint = true;
+			ShowInTaskbar = false;
 			this.Decorated = false;
-			Gdk.Pointer.Grab (this.GdkWindow, true, Gdk.EventMask.ButtonPressMask | Gdk.EventMask.ButtonReleaseMask | Gdk.EventMask.PointerMotionMask | Gdk.EventMask.EnterNotifyMask | Gdk.EventMask.LeaveNotifyMask, null, null, Gtk.Global.CurrentEventTime);
+			/*Gdk.Pointer.Grab (this.GdkWindow, true, Gdk.EventMask.ButtonPressMask | Gdk.EventMask.ButtonReleaseMask | Gdk.EventMask.PointerMotionMask | Gdk.EventMask.EnterNotifyMask | Gdk.EventMask.LeaveNotifyMask, null, null, Gtk.Global.CurrentEventTime);
 			Gtk.Grab.Add (this);
 			GrabBrokenEvent += delegate {
 				Destroy ();
-			};
-			codeSegmentEditor.GrabFocus ();
+			};*/
+
+			codeSegmentEditor.LostFocus += (object o, EventArgs ea) => { Visible = false; Dispose(); };
+
+			codeSegmentEditor.SetFocus ();
 		}
 		
 		public void Close (TextEditorData data)
 		{
-			Destroy ();
+			Dispose ();
 		}
-		
+
+
+		/*
 		protected override bool OnFocusOutEvent (Gdk.EventFocus evnt)
 		{
 			Destroy ();
@@ -110,7 +116,7 @@ namespace Mono.TextEditor
 			Gtk.Grab.Remove (this);
 			Gdk.Pointer.Ungrab (Gtk.Global.CurrentEventTime);
 			base.OnDestroyed ();
-		}
+		}*/
 	}
 }
 

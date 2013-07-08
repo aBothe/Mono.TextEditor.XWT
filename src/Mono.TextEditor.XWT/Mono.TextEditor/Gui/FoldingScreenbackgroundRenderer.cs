@@ -26,6 +26,8 @@
 using System;
 using System.Collections.Generic;
 using Mono.TextEditor.Highlighting;
+using Xwt.Drawing;
+using Xwt;
 
 namespace Mono.TextEditor
 {
@@ -59,6 +61,7 @@ namespace Mono.TextEditor
 			this.editor = editor;
 			this.foldSegments = new List<FoldSegment> (foldSegments);
 			startTime = DateTime.Now;
+
 			timeout = GLib.Timeout.Add (30, delegate {
 				editor.QueueDraw ();
 				var cont = (DateTime.Now - startTime).TotalMilliseconds < animationLength;
@@ -68,21 +71,21 @@ namespace Mono.TextEditor
 			});
 		}
 
-		HslColor GetColor (int i, double brightness, int colorCount)
+		Color GetColor (int i, double brightness, int colorCount)
 		{
-			HslColor hslColor = new HslColor (editor.ColorStyle.PlainText.Background);
+			var hslColor = editor.ColorStyle.PlainText.Background;
 			int colorPosition = i + 1;
 			if (i == foldSegments.Count - 1)
 				return hslColor;
 			if (brightness < 0.5) {
-				hslColor.L = hslColor.L * 0.81 + hslColor.L * 0.25 * (colorCount - colorPosition) / colorCount;
+				hslColor.Light = hslColor.Light * 0.81 + hslColor.Light * 0.25 * (colorCount - colorPosition) / colorCount;
 			} else {
-				hslColor.L = hslColor.L * 0.86 + hslColor.L * 0.1 * colorPosition / colorCount;
+				hslColor.Light = hslColor.Light * 0.86 + hslColor.Light * 0.1 * colorPosition / colorCount;
 			}
 			return hslColor;
 		}
 		
-		public void Draw (Cairo.Context cr, Cairo.Rectangle area)
+		public void Draw (Context cr, Rectangle area)
 		{
 			TextViewMargin textViewMargin = editor.TextViewMargin;
 			ISyntaxMode mode = Document.SyntaxMode != null && editor.Options.EnableSyntaxHighlighting ? Document.SyntaxMode : new SyntaxMode (Document);
@@ -94,7 +97,7 @@ namespace Mono.TextEditor
 			cr.Color = GetColor (-1, brightness, colorCount);
 			cr.Rectangle (area);
 			cr.Fill ();
-			var rectangles = new Cairo.Rectangle[foldSegments.Count];
+			var rectangles = new Rectangle[foldSegments.Count];
 			const int xPadding = 4;
 			const int yPadding = 2;
 			const int rightMarginPadding = 16;
@@ -206,12 +209,12 @@ namespace Mono.TextEditor
 			}
 		}
 
-		public static void DrawRoundRectangle (Cairo.Context cr, bool upperRound, bool lowerRound, double x, double y, double r, double w, double h)
+		public static void DrawRoundRectangle (Context cr, bool upperRound, bool lowerRound, double x, double y, double r, double w, double h)
 		{
 			DrawRoundRectangle (cr, upperRound, upperRound, lowerRound, lowerRound, x, y, r, w, h);
 		}
 		
-		public static void DrawRoundRectangle (Cairo.Context cr, bool topLeftRound, bool topRightRound, bool bottomLeftRound, bool bottomRightRound, double x, double y, double r, double w, double h)
+		public static void DrawRoundRectangle (Context cr, bool topLeftRound, bool topRightRound, bool bottomLeftRound, bool bottomRightRound, double x, double y, double r, double w, double h)
 		{
 			//  UA****BQ
 			//  H      C

@@ -24,6 +24,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
+using Xwt.Drawing;
+using Xwt;
+
+
 namespace Mono.TextEditor
 {
 	public abstract class MarginDrawer
@@ -34,7 +38,7 @@ namespace Mono.TextEditor
 			}
 		}
 		
-		public abstract void Draw (Cairo.Context cr, Cairo.Rectangle erea);
+		public abstract void Draw (Context cr, Rectangle erea);
 	}
 }
 
