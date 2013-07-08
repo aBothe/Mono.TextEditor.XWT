@@ -162,13 +162,13 @@ namespace Mono.TextEditor.PopupWindow
 		ScrollAdjustment hadj;
 		ScrollAdjustment vadj;
 
-		protected override void OnSetScrollAdjustments (ScrollAdjustment hadj, ScrollAdjustment vadj)
+		protected override void SetScrollAdjustments (ScrollAdjustment hadj, ScrollAdjustment vadj)
 		{
 			this.hadj = hadj;
 			this.vadj = vadj;
 			if (this.vadj != null)
 				this.vadj.ValueChanged += (sender, e) => QueueDraw ();
-			base.OnSetScrollAdjustments (hadj, vadj);
+			base.SetScrollAdjustments (hadj, vadj);
 		}
 
 		void SetAdjustments (Rectangle allocation)
@@ -185,17 +185,11 @@ namespace Mono.TextEditor.PopupWindow
 			base.OnSizeAllocated (allocation);
 		}
 
-		protected override bool OnExposeEvent (Gdk.EventExpose args)
-		{
-			base.OnExposeEvent (args);
-			DrawList (args);
-	  		return true;
-		}
-		
 		public int TextOffset {
 			get {
 				int iconWidth, iconHeight;
-				if (!Gtk.Icon.SizeLookup (Gtk.IconSize.Menu, out iconWidth, out iconHeight)) {
+				//if (!Gtk.Icon.SizeLookup (Gtk.IconSize.Menu, out iconWidth, out iconHeight))
+				{
 					iconHeight = iconWidth = 24;
 				}
 				return iconWidth + margin + padding + 2;
@@ -204,11 +198,11 @@ namespace Mono.TextEditor.PopupWindow
 
 		protected override void OnDraw (Context ctx, Rectangle dirtyRect)
 		{
-
+			DrawList (ctx, dirtyRect);
 		}
 
 		//FIXME: we could use the expose event's clipbox to make the drawing more efficient
-		void DrawList (Gdk.EventExpose args)
+		void DrawList (Context ctx, Rectangle dirtyRect)
 		{
 			var window = args.Window;
 			
@@ -240,7 +234,7 @@ namespace Mono.TextEditor.PopupWindow
 				if (!hasMarkup)
 					layout.SetText (win.DataProvider.GetText (n) ?? "<null>");
 				
-				Gdk.Pixbuf icon = win.DataProvider.GetIcon (n);
+				Image icon = win.DataProvider.GetIcon (n);
 				int iconHeight, iconWidth;
 				
 				if (icon != null) {

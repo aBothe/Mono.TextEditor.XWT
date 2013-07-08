@@ -1862,13 +1862,13 @@ namespace Mono.TextEditor
 			}
 
 			if (HasFocus)
-				textViewMargin.DrawCaret (e.Window, e.Area);
+				textViewMargin.DrawCaret (cr, dirtyRect);
 
 			if (Painted != null)
 				Painted (this, new PaintEventArgs (cr, dirtyRect));
 
 			if (Caret.IsVisible)
-				textViewMargin.DrawCaret (e.Window, Allocation);
+				textViewMargin.DrawCaret (cr, dirtyRect);
 
 			base.OnDraw (cr, dirtyRect);
 		}
