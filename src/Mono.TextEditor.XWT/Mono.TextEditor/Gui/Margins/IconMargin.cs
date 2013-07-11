@@ -36,12 +36,12 @@ namespace Mono.TextEditor
 		TextEditor editor;
 		Color backgroundColor, separatorColor;
 		TextLayout layout;
-		int marginWidth = 18;
+		double marginWidth = 18;
 		
 		public IconMargin (TextEditor editor)
 		{
 			this.editor = editor;
-			layout = PangoUtil.CreateLayout (editor);
+			layout = new TextLayout (editor.TextArea);
 		}
 		
 		public override double Width {

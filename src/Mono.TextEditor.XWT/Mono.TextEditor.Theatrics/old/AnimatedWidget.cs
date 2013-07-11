@@ -29,18 +29,11 @@
 using System;
 using System.Collections.Generic;
 using Xwt;
+using Xwt.Drawing;
 
 namespace Mono.TextEditor.Theatrics
 {
-	internal enum AnimationState
-	{
-		Coming,
-		Idle,
-		IntendingToGo,
-		Going
-	}
-
-	internal class AnimatedWidget : Xwt.Widget
+	internal class AnimatedWidget : Canvas
 	{
 		public event EventHandler WidgetDestroyed;
 
@@ -60,11 +53,11 @@ namespace Mono.TextEditor.Theatrics
 		private readonly bool horizontal;
 		private double percent;
 		private Rectangle widget_alloc;
-		private Pixmap canvas;
+		private ImageBuilder canvas;
 
 		public AnimatedWidget (Widget widget, uint duration, Easing easing, Blocking blocking, bool horizontal)
 		{
-			Mono.TextEditor.GtkWorkarounds.FixContainerLeak (this);
+			//Mono.TextEditor.GtkWorkarounds.FixContainerLeak (this);
 			
 			this.horizontal = horizontal;
 			Widget = widget;
@@ -106,7 +99,7 @@ namespace Mono.TextEditor.Theatrics
 		}
 
 		#region Overrides
-
+		/*TODO
 		protected override void OnRemoved (Widget widget)
 		{
 			if (widget == Widget) {
@@ -189,7 +182,7 @@ namespace Mono.TextEditor.Theatrics
 				callback (Widget);
 			}
 		}
-		
+		*/
 		#endregion
 		
 	}

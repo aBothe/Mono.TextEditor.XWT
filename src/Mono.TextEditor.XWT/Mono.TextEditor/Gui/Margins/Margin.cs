@@ -113,7 +113,7 @@ namespace Mono.TextEditor
 		
 		public virtual void Dispose ()
 		{
-			cursor = cursor.Kill ();
+			//TODO cursor = cursor.Kill ();
 		}
 		
 		public event EventHandler<MarginMouseEventArgs> ButtonPressed;

@@ -87,7 +87,7 @@ namespace Mono.TextEditor
 			string GetCopiedPlainText ()
 			{
 				var plainText = new StringBuilder ();
-				bool first = true;
+				/*TODO	bool first = true;
 				foreach (var line in copiedColoredChunks) {
 					if (!first) {
 						plainText.AppendLine ();
@@ -98,7 +98,7 @@ namespace Mono.TextEditor
 					foreach (var chunk in line) {
 						plainText.Append (chunk.Text);
 					}
-				}
+				}*/
 				return plainText.ToString ();
 			}
 			/*
@@ -378,7 +378,7 @@ namespace Mono.TextEditor
 				//TODO: Shall this action be done asynchronously?
 				var text = Clipboard.GetText ();
 				if (string.IsNullOrEmpty (text))
-					return;
+					return -1;
 				result = PastePlainText (data, insertionOffset, text, preserveSelection);
 			}
 			

@@ -161,7 +161,7 @@ namespace Mono.TextEditor.Highlighting
 
 		public static string ColorToPangoMarkup (Color color)
 		{
-			return string.Format ("#{0:X2}{1:X2}{2:X2}", color.Red >> 8, color.Green >> 8, color.Blue >> 8);
+			return string.Format ("#{0:X2}{1:X2}{2:X2}", (int)color.Red >> 8, (int)color.Green >> 8, (int)color.Blue >> 8);
 		}
 
 		public static int GetIndentLength (TextDocument doc, int offset, int length, bool skipFirstLine)

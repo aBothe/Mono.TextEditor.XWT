@@ -238,8 +238,10 @@ namespace Mono.TextEditor.Utils
 		// Code taken from FileService.cs
 		static void SystemRename (string sourceFile, string destFile)
 		{
+			System.IO.File.Delete (destFile);
+			System.IO.File.Move (sourceFile, destFile);
 			//FIXME: use the atomic System.IO.File.Replace on NTFS
-			if (Platform.IsWindows) {
+			/*if (Platform.IsWindows) {
 				string wtmp = null;
 				if (File.Exists (destFile)) {
 					do {
@@ -267,7 +269,7 @@ namespace Mono.TextEditor.Utils
 				}
 			} else {
 				Mono.Unix.Native.Syscall.rename (sourceFile, destFile);
-			}
+			}*/
 		}
 
 		public static string ReadAllText (string fileName)

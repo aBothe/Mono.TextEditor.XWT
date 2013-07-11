@@ -68,7 +68,7 @@ namespace Mono.TextEditor
 		public SolidFoldMarkerMargin (TextEditor editor)
 		{
 			this.editor = editor;
-			layout = PangoUtil.CreateLayout (editor);
+			layout = new TextLayout (editor.TextArea);
 			editor.Caret.PositionChanged += HandleEditorCaretPositionChanged;
 			editor.Document.FoldTreeUpdated += HandleEditorDocumentFoldTreeUpdated;
 		}
@@ -164,16 +164,20 @@ namespace Mono.TextEditor
 				list.Sort ((x, y) => x.Offset.CompareTo (y.Offset));
 				foldings = list;
 				if (editor.TextViewMargin.BackgroundRenderer == null) {
-					timerId = GLib.Timeout.Add (150, SetBackgroundRenderer);
+					if (timerId == null){
+						timerId = new Timer (150);
+						timerId.Elapsed += SetBackgroundRenderer;
+					}
+					timerId.Start ();
 				} else {
-					SetBackgroundRenderer ();
+					SetBackgroundRenderer (null,null);
 				}
 			} else {
 				RemoveBackgroundRenderer ();
 			}
 		}
 		
-		bool SetBackgroundRenderer ()
+		void SetBackgroundRenderer (object s, ElapsedEventArgs ea)
 		{
 			editor.TextViewMargin.DisposeLayoutDict ();
 
@@ -182,26 +186,23 @@ namespace Mono.TextEditor
 				disposable.Dispose ();
 			
 			editor.TextViewMargin.BackgroundRenderer = new FoldingScreenbackgroundRenderer (editor, foldings);
-			editor.QueueDraw ();
-			timerId = 0;
-			return false;
+			editor.TextArea.QueueDraw ();
+			StopTimer ();
 		}
 		
 		void StopTimer ()
 		{
-			if (timerId != 0) {
-				GLib.Source.Remove (timerId);
-				timerId = 0;
-			}
+			if (timerId != null)
+				timerId.Stop ();
 		}
 		
-		uint timerId;
+		System.Timers.Timer timerId;
 		IEnumerable<FoldSegment> foldings;
 		void RemoveBackgroundRenderer ()
 		{
 			if (editor.TextViewMargin.BackgroundRenderer != null) {
 				editor.TextViewMargin.BackgroundRenderer = null;
-				editor.QueueDraw ();
+				editor.TextArea.QueueDraw ();
 			}
 		}
 		
@@ -219,14 +220,17 @@ namespace Mono.TextEditor
 		
 		internal protected override void OptionsChanged ()
 		{
-			foldBgGC = editor.ColorStyle.FoldLine.CairoBackgroundColor;
+			foldBgGC = editor.ColorStyle.FoldLineColor.SecondColor;
 
-			foldLineHighlightedGCBg = editor.ColorStyle.FoldMargin.CairoBackgroundColor;
-			foldLineHighlightedGC = editor.ColorStyle.FoldMargin.CairoColor;
+			foldLineHighlightedGCBg = editor.ColorStyle.FoldLineColor.SecondColor;
+			foldLineHighlightedGC = editor.ColorStyle.FoldLineColor.Color;
 
+			lineStateChangedGC = Colors.Azure;
+			lineStateDirtyGC = Colors.YellowGreen;
+			/*TODO
 			lineStateChangedGC = editor.ColorStyle.LineChangedBg;
 			lineStateDirtyGC = editor.ColorStyle.LineDirtyBg;
-			
+			*/
 			marginWidth = (int)(10 * editor.Options.Zoom);
 		}
 		
@@ -334,11 +338,11 @@ namespace Mono.TextEditor
 					bgGC = foldBgGC;
 				}
 			} else {
-				HslColor col = foldLineHighlightedGCBg;
-				if (col.L < 0.5) {
-					col.L = System.Math.Min (1.0, col.L + containingFoldings.Count / 15.0);
+				var col = foldLineHighlightedGCBg;
+				if (col.Light < 0.5) {
+					col.Light = System.Math.Min (1.0, col.Light + containingFoldings.Count / 15.0);
 				} else {
-					col.L = System.Math.Max (0.0, col.L - containingFoldings.Count / 15.0);
+					col.Light = System.Math.Max (0.0, col.Light - containingFoldings.Count / 15.0);
 				}
 				bgGC = col;
 			}
@@ -350,11 +354,11 @@ namespace Mono.TextEditor
 			if (editor.TextViewMargin.BackgroundRenderer == null) {
 				int delta = nextDepth - containingFoldings.Count ();
 				if (delta != 0) {
-					HslColor col = foldLineHighlightedGCBg;
-					if (col.L < 0.5) {
-						col.L = System.Math.Min (1.0, col.L + (nextDepth - delta * 1.5) / 15.0);
+					var col = foldLineHighlightedGCBg;
+					if (col.Light < 0.5) {
+						col.Light = System.Math.Min (1.0, col.Light + (nextDepth - delta * 1.5) / 15.0);
 					} else {
-						col.L = System.Math.Max (0.0, col.L - (nextDepth - delta * 1.5) / 15.0);
+						col.Light = System.Math.Max (0.0, col.Light - (nextDepth - delta * 1.5) / 15.0);
 					}
 					cr.SetColor(col);
 					cr.MoveTo (x, y + lineHeight - 0.5);

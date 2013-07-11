@@ -106,7 +106,7 @@ namespace Mono.TextEditor
 			int endOffset = metrics.TextEndOffset;
 			double startXPos = metrics.TextRenderStartPosition;
 			double endXPos = metrics.TextRenderEndPosition;
-			var layout = metrics.Layout;
+			var layout = metrics.Layout.Layout;
 			int markerStart = line.Offset + startColumn;
 			int markerEnd = line.Offset + endColumn;
 	
@@ -122,13 +122,13 @@ namespace Mono.TextEditor
 			} else {
 				int start = startOffset < markerStart ? markerStart : startOffset;
 				int end = endOffset < markerEnd ? endOffset : markerEnd;
-				int x_pos = layout (start - startOffset).X;
+				var x_pos = layout.GetCoordinateFromIndex (start - startOffset).X;
 	
-				@from = startXPos + (int)(x_pos / Pango.Scale.PangoScale);
+				@from = startXPos + (x_pos/* / Pango.Scale.PangoScale*/);
 	
-				x_pos = layout.IndexToPos (end - startOffset).X;
+				x_pos = layout.GetCoordinateFromIndex (end - startOffset).X;
 	
-				to = startXPos + (int)(x_pos / Pango.Scale.PangoScale);
+				to = startXPos + (x_pos/* / Pango.Scale.PangoScale*/);
 			}
 	
 			@from = System.Math.Max (@from, editor.TextViewMargin.XOffset);

@@ -33,7 +33,7 @@ namespace Mono.TextEditor.Vi
 	{
 		public static void CaretToScreenCenter (ViEditor ed)
 		{
-			var line = ed.Editor.PointToLocation (0, ed.Editor.Allocation.Height/2).Line;
+			var line = ed.Editor.PointToLocation (0, ed.Editor.Size.Height/2).Line;
 			if (line < 0)
 				line = ed.Data.Document.LineCount;
 			ed.Data.Caret.Line = line;
@@ -41,7 +41,7 @@ namespace Mono.TextEditor.Vi
 		
 		public static void CaretToScreenBottom (ViEditor ed)
 		{
-			int line = ed.Editor.PointToLocation (0, ed.Editor.Allocation.Height - ed.Editor.LineHeight * 2 - 2).Line;
+			int line = ed.Editor.PointToLocation (0, ed.Editor.Size.Height - ed.Editor.LineHeight * 2 - 2).Line;
 			if (line < 0)
 				line = ed.Data.Document.LineCount;
 			ed.Data.Caret.Line = line;

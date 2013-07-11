@@ -38,6 +38,9 @@ namespace Mono.TextEditor
 	{
 		CodeSegmentPreviewCanvas canvas;
 		TextEditor editor;
+		
+		const double DefaultPreviewWindowWidth = 320;
+		const double DefaultPreviewWindowHeight = 200;
 
 		
 		public static string CodeSegmentPreviewInformString {
@@ -65,7 +68,7 @@ namespace Mono.TextEditor
 		{
 		}
 		
-		public CodeSegmentPreviewWindow (TextEditor editor, bool hideCodeSegmentPreviewInformString, TextSegment segment, int width, int height, bool removeIndent = true) 
+		public CodeSegmentPreviewWindow (TextEditor editor, bool hideCodeSegmentPreviewInformString, TextSegment segment, double width, double height, bool removeIndent = true) 
 		{
 			canvas = new CodeSegmentPreviewCanvas (editor);
 			Content = canvas;
@@ -98,11 +101,11 @@ namespace Mono.TextEditor
 			canvas.QueueDraw ();
 		}
 		
-		public int PreviewInformStringHeight {
+		public double PreviewInformStringHeight {
 			get {return canvas.PreviewInformStringHeight; }
 		}
 		
-		public void CalculateSize (int defaultWidth = -1)
+		public void CalculateSize (double defaultWidth = -1)
 		{
 			canvas.CalculateSize (defaultWidth);
 		}
@@ -126,10 +129,8 @@ namespace Mono.TextEditor
 		Font fontDescription;
 		internal TextLayout layout;
 		TextLayout informLayout;
-		const int DefaultPreviewWindowWidth = 320;
-		const int DefaultPreviewWindowHeight = 200;
 
-		public int PreviewInformStringHeight {
+		public double PreviewInformStringHeight {
 			get; private set;
 		}
 
@@ -164,10 +165,10 @@ namespace Mono.TextEditor
 			//layout.Ellipsize = Pango.EllipsizeMode.End;
 		}
 
-		public void CalculateSize (int defaultWidth = -1)
+		public void CalculateSize (double defaultWidth = -1)
 		{
 			var sz = layout.GetSize ();
-			var h = sz.Height, w = sz.Width;
+			double h = sz.Height, w = sz.Width;
 
 			if (!HideCodeSegmentPreviewInformString) {
 				sz = informLayout.GetSize ();
@@ -202,7 +203,7 @@ namespace Mono.TextEditor
 			if (!HideCodeSegmentPreviewInformString) {
 				informLayout.Text = CodeSegmentPreviewWindow.CodeSegmentPreviewInformString;
 				var layoutSize = informLayout.GetSize ();
-				var h = layoutSize.Height, w = layoutSize.Width;
+				double h = layoutSize.Height, w = layoutSize.Width;
 				PreviewInformStringHeight = h;
 				ctx.SetColor (foldBgGC);
 				ctx.Rectangle (sz.Width - w - 3, sz.Height - h, w + 2, h - 1);
@@ -215,10 +216,10 @@ namespace Mono.TextEditor
 		{
 			layout = layout.Kill ();
 			informLayout = informLayout.Kill ();
-			fontDescription = fontDescription.Kill ();
-			if (textGC != null) {
+			fontDescription = null;
+			/*TODO if (textGC != null) {
 				textGC = textBgGC = foldGC = foldBgGC = null;
-			}
+			}*/
 			base.Dispose (disposing);
 		}
 	}

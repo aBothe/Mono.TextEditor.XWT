@@ -50,8 +50,8 @@ namespace Mono.TextEditor
 		SearchResult GetMatchAt (int offset);
 		SearchResult GetMatchAt (int offset, int length);
 		
-		SearchResult SearchForward (System.ComponentModel.BackgroundWorker worker, TextViewMargin.SearchWorkerArguments args, int fromOffset);
-		SearchResult SearchBackward (System.ComponentModel.BackgroundWorker worker, TextViewMargin.SearchWorkerArguments args, int fromOffset);
+		SearchResult SearchForward (System.ComponentModel.BackgroundWorker worker, SearchWorkerArguments args, int fromOffset);
+		SearchResult SearchBackward (System.ComponentModel.BackgroundWorker worker, SearchWorkerArguments args, int fromOffset);
 		
 		SearchResult SearchForward (int fromOffset);
 		SearchResult SearchBackward (int fromOffset);
@@ -114,17 +114,17 @@ namespace Mono.TextEditor
 		public abstract SearchResult GetMatchAt (int offset);
 		public abstract SearchResult GetMatchAt (int offset, int length);
 		
-		public abstract SearchResult SearchForward (System.ComponentModel.BackgroundWorker worker, TextViewMargin.SearchWorkerArguments args, int fromOffset);
-		public abstract SearchResult SearchBackward (System.ComponentModel.BackgroundWorker worker, TextViewMargin.SearchWorkerArguments args, int fromOffset);
+		public abstract SearchResult SearchForward (System.ComponentModel.BackgroundWorker worker, SearchWorkerArguments args, int fromOffset);
+		public abstract SearchResult SearchBackward (System.ComponentModel.BackgroundWorker worker, SearchWorkerArguments args, int fromOffset);
 		
 		public SearchResult SearchForward (int fromOffset)
 		{
-			return SearchForward (null, new TextViewMargin.SearchWorkerArguments () { Text = textEditorData.Text }, fromOffset);
+			return SearchForward (null, new SearchWorkerArguments () { Text = textEditorData.Text }, fromOffset);
 		}
 
 		public SearchResult SearchBackward (int fromOffset)
 		{
-			return SearchBackward (null, new TextViewMargin.SearchWorkerArguments () { Text = textEditorData.Text }, fromOffset);
+			return SearchBackward (null, new SearchWorkerArguments () { Text = textEditorData.Text }, fromOffset);
 		}
 		public abstract void Replace (SearchResult result, string pattern);
 
@@ -137,7 +137,7 @@ namespace Mono.TextEditor
 					offset = SearchRequest.SearchRegion.Offset;
 				SearchResult searchResult; 
 				var text = textEditorData.Text;
-				var args = new TextViewMargin.SearchWorkerArguments () { Text = text };
+				var args = new SearchWorkerArguments () { Text = text };
 				while (true) {
 					searchResult = SearchForward (null, args, offset);
 					if (searchResult == null || searchResult.SearchWrapped)
@@ -212,7 +212,7 @@ namespace Mono.TextEditor
 			return null;
 		}
 		
-		public override SearchResult SearchForward (System.ComponentModel.BackgroundWorker worker, TextViewMargin.SearchWorkerArguments args, int fromOffset)
+		public override SearchResult SearchForward (System.ComponentModel.BackgroundWorker worker, SearchWorkerArguments args, int fromOffset)
 		{
 			if (!string.IsNullOrEmpty (SearchRequest.SearchPattern)) {
 				// TODO: Optimize
@@ -227,7 +227,7 @@ namespace Mono.TextEditor
 			return null;
 		}
 		
-		public override SearchResult SearchBackward (System.ComponentModel.BackgroundWorker worker, TextViewMargin.SearchWorkerArguments args, int fromOffset)
+		public override SearchResult SearchBackward (System.ComponentModel.BackgroundWorker worker, SearchWorkerArguments args, int fromOffset)
 		{
 			if (!string.IsNullOrEmpty (SearchRequest.SearchPattern)) {
 				// TODO: Optimize
@@ -256,7 +256,7 @@ namespace Mono.TextEditor
 				offset = SearchRequest.SearchRegion.Offset;
 			SearchResult searchResult; 
 			var text = textEditorData.Text;
-			var args = new TextViewMargin.SearchWorkerArguments () { Text = text };
+			var args = new SearchWorkerArguments () { Text = text };
 			while (true) {
 				searchResult = SearchForward (null, args, offset);
 				if (searchResult == null || searchResult.SearchWrapped)
@@ -348,7 +348,7 @@ namespace Mono.TextEditor
 			return null;
 		}
 		
-		public override SearchResult SearchForward (System.ComponentModel.BackgroundWorker worker, TextViewMargin.SearchWorkerArguments args, int fromOffset)
+		public override SearchResult SearchForward (System.ComponentModel.BackgroundWorker worker, SearchWorkerArguments args, int fromOffset)
 		{
 			if (regex == null || String.IsNullOrEmpty (searchRequest.SearchPattern))
 				return null;
@@ -365,7 +365,7 @@ namespace Mono.TextEditor
 			return null;
 		}
 		
-		public override SearchResult SearchBackward (System.ComponentModel.BackgroundWorker worker, TextViewMargin.SearchWorkerArguments args,  int fromOffset)
+		public override SearchResult SearchBackward (System.ComponentModel.BackgroundWorker worker, SearchWorkerArguments args,  int fromOffset)
 		{
 			if (regex == null || String.IsNullOrEmpty (searchRequest.SearchPattern))
 				return null;

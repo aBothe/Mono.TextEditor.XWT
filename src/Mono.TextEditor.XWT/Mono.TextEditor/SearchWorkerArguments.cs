@@ -1,10 +1,10 @@
 //
-// IBackgroundMarker.cs
+// SearchWorkerArguments.cs
 //
 // Author:
-//       Mike Krüger <mkrueger@xamarin.com>
+//       Alexander Bothe <info@alexanderbothe.com>
 //
-// Copyright (c) 2013 Xamarin Inc. (http://xamarin.com)
+// Copyright (c) 2013 Alexander Bothe
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,27 +23,22 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
 using System;
-using Xwt.Drawing;
-using Mono.TextEditor.Highlighting;
+using System.Collections.Generic;
 
 namespace Mono.TextEditor
 {
-
-	/// <summary>
-	/// A specialized interface to draw text backgrounds.
-	/// </summary>
-	[Obsolete("This is obsolete - TextLineMarker now handles this")]
-	public interface IBackgroundMarker
+	public class SearchWorkerArguments
 	{
-		/// <summary>
-		/// Draws the backround of a line part.
-		/// </summary>
-		/// <returns>
-		/// true, when the text view should draw the text, false when the text view should not draw the text.
-		/// </returns>
-		bool DrawBackground (TextEditor Editor, Context cr, LayoutWrapper layout, int selectionStart, int selectionEnd, int startOffset, int endOffset, double y, double startXPos, double endXPos, ref bool drawBg);
+		public int FirstLine { get; set; }
+
+		public int LastLine { get; set; }
+
+		public List<TextSegment> OldRegions { get; set; }
+
+		public ISearchEngine Engine { get; set; }
+
+		public string Text { get; set; }
 	}
-	
 }
+

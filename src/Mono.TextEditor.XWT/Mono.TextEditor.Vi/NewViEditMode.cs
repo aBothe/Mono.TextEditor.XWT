@@ -75,11 +75,11 @@ namespace Mono.TextEditor.Vi
 				viTextEditor = null;
 			}
 		}
-
+		/*TODO
 		public override void AllocateTextArea (TextEditor textEditor, TextArea textArea, Rectangle allocation)
 		{
 			statusArea.AllocateArea (textArea, allocation);
-		}
+		}*/
 
 		protected override void HandleKeypress (Key key, uint unicodeKey, ModifierKeys modifier)
 		{

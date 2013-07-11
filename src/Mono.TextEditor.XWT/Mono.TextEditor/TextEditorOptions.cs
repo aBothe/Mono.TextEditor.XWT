@@ -349,12 +349,12 @@ namespace Mono.TextEditor
 		void DisposeFont ()
 		{
 			if (font != null) {
-				font.Dispose ();
+				//font.Dispose ();
 				font = null;
 			}
 
 			if (gutterFont != null) {
-				gutterFont.Dispose ();
+				//gutterFont.Dispose ();
 				gutterFont = null;
 			}
 		}
@@ -383,7 +383,7 @@ namespace Mono.TextEditor
 					if (font == null || String.IsNullOrEmpty (font.Family))
 						font = Font.FromName(DEFAULT_FONT);
 					if (font != null)
-						font.Size = (int)(font.Size * Zoom);
+						font = font.WithScaledSize(Zoom);
 				}
 				return font;
 			}
@@ -414,7 +414,7 @@ namespace Mono.TextEditor
 					if (gutterFont == null || String.IsNullOrEmpty (gutterFont.Family))
 						gutterFont = Font.SystemFont;
 					if (gutterFont != null)
-						gutterFont.Size = (int)(gutterFont.Size * Zoom);
+						gutterFont.WithScaledSize(Zoom);
 				}
 				return gutterFont;
 			}

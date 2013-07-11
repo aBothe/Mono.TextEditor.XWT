@@ -94,7 +94,7 @@ namespace Mono.TextEditor
 		}
 
 		#region Animated Widgets
-		Stage<AnimatedWidget> stage = new Stage<AnimatedWidget> ();
+		/*Stage<AnimatedWidget> stage = new Stage<AnimatedWidget> ();
 
 		bool OnActorStep (Actor<AnimatedWidget> actor)
 		{
@@ -176,7 +176,7 @@ namespace Mono.TextEditor
 			info.Y = y;
 			info.FixedPosition = true;
 			containerChildren.Add (info);
-		}
+		}*/
 		#endregion
 
 		
@@ -711,11 +711,11 @@ namespace Mono.TextEditor
 			add { textArea.LinkRequest += value; }
 			remove { textArea.LinkRequest -= value; }
 		}
-
+		/*TODO
 		public void ShowListWindow<T> (ListWindow<T> window, DocumentLocation loc)
 		{
 			textArea.ShowListWindow<T> (window, loc);
-		}
+		}*/
 
 		public Margin LockedMargin {
 			get {

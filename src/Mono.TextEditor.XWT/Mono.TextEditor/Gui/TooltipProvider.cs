@@ -37,7 +37,7 @@ namespace Mono.TextEditor
 			return false;
 		}
 
-		protected virtual void GetRequiredPosition (TextEditor editor, Window tipWindow, out int requiredWidth, out double xalign)
+		protected virtual void GetRequiredPosition (TextEditor editor, Window tipWindow, out double requiredWidth, out double xalign)
 		{
 			requiredWidth = tipWindow.Width;
 			xalign = 0.5;
@@ -54,7 +54,7 @@ namespace Mono.TextEditor
 			if (tipWindow == null)
 				return null;
 
-			int w;
+			double w;
 			double xalign;
 			GetRequiredPosition (editor, tipWindow, out w, out xalign);
 			w += 10;
@@ -74,7 +74,7 @@ namespace Mono.TextEditor
 			if (loc.X < geometry.Left)
 				loc.X = geometry.Left;
 			
-			int h = tipWindow.Height;
+			var h = tipWindow.Height;
 			if (loc.Y + h >= geometry.Y + geometry.Height)
 				loc.Y = geometry.Y + geometry.Height - h;
 			if (loc.Y < geometry.Top)

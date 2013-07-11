@@ -231,7 +231,7 @@ namespace Mono.TextEditor
 		
 		}
 		
-		public static ulong GetKeyCode (Key key, ModifierKeys modifier)
+		public static ulong GetKeyCode (Key key, ModifierKeys modifier = ModifierKeys.None)
 		{
 			return (ulong)key | ((ulong)modifier << 16);
 		}
@@ -239,19 +239,18 @@ namespace Mono.TextEditor
 		protected void HideMouseCursor ()
 		{
 			//should only be null during tests
-			if (editor != null)
-				editor.HideMouseCursor ();
+			//if (editor != null)		editor.HideMouseCursor ();
 		}
 
 		#region TextAreaControl
-		public virtual void AllocateTextArea (TextEditor textEditor, TextArea textArea, Rectangle allocation)
+		/*public virtual void AllocateTextArea (TextEditor textEditor, TextArea textArea, Rectangle allocation)
 		{
 			textArea.HeightRequest = allocation.Height;
 			textArea.WidthRequest = allocation.Width;
 			/*TODO
 			if (textArea. != allocation)
-				textArea.SizeAllocate (allocation);*/
-		}
+				textArea.SizeAllocate (allocation);* /
+		}*/
 		#endregion
 	}
 }

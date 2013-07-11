@@ -34,6 +34,7 @@ using System.Threading;
 using System.Xml;
 using System.Xml.Schema;
 using System.Linq;
+using Xwt;
 
 namespace Mono.TextEditor.Highlighting
 {
@@ -310,7 +311,7 @@ namespace Mono.TextEditor.Highlighting
 					Console.WriteLine ("Syntax highlighting exception:" + e);
 				}
 				if (doUpdate) {
-					Gtk.Application.Invoke (delegate {
+					Application.Invoke (delegate {
 						doc.RequestUpdate (new UpdateAll ());
 						doc.CommitDocumentUpdate ();
 					});

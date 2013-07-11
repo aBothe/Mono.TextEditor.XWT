@@ -46,6 +46,27 @@ namespace XwtExperiments
 			var vb = new VBox ();
 			w.Content = vb;
 
+			TooltipWindow ttw=null;
+			var b = new Button ("Show tooltip");
+			b.Clicked += (object s, EventArgs ea) => {
+				if(ttw != null)
+					ttw.Dispose();
+
+				ttw = new TooltipWindow();
+				ttw.TransientFor = w;
+				ttw.Show();
+			};
+
+			vb.PackStart (b);
+
+			b = new Button ("Hide tooltip");
+			b.Clicked += (object s, EventArgs ea) => {
+				if(ttw != null)
+					ttw.Dispose();
+			};
+
+			vb.PackStart (b);
+
 			var mc = new MyMainComponent ();
 			mc.LineColor = Colors.Green;
 			mc.ExpandHorizontal = true;

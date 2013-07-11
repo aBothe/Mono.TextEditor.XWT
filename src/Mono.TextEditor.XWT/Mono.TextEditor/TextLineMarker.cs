@@ -77,7 +77,7 @@ namespace Mono.TextEditor
 	public class LineMetrics
 	{
 		public DocumentLine LineSegment { get; internal set; }
-		public TextViewMargin.LayoutWrapper Layout { get; internal set; }
+		public LayoutWrapper Layout { get; internal set; }
 
 		public int SelectionStart { get; internal set; }
 		public int SelectionEnd { get; internal set; }

@@ -47,7 +47,7 @@ namespace Mono.TextEditor
 		}
 
 		readonly DateTime startTime;
-		uint timeout;
+		System.Timers.Timer timeout;
 		const uint animationLength = 250;
 		public bool AnimationFinished {
 			get {
@@ -62,13 +62,14 @@ namespace Mono.TextEditor
 			this.foldSegments = new List<FoldSegment> (foldSegments);
 			startTime = DateTime.Now;
 
-			timeout = GLib.Timeout.Add (30, delegate {
-				editor.QueueDraw ();
+			timeout = new System.Timers.Timer (30);
+			timeout.AutoReset = true;
+			timeout.Elapsed+=(object s, System.Timers.ElapsedEventArgs ea) => {
+				editor.TextArea.QueueDraw ();
 				var cont = (DateTime.Now - startTime).TotalMilliseconds < animationLength;
 				if (!cont)
-					timeout = 0;
-				return cont;
-			});
+					timeout.Stop();
+			};
 		}
 
 		Color GetColor (int i, double brightness, int colorCount)
@@ -90,11 +91,11 @@ namespace Mono.TextEditor
 			TextViewMargin textViewMargin = editor.TextViewMargin;
 			ISyntaxMode mode = Document.SyntaxMode != null && editor.Options.EnableSyntaxHighlighting ? Document.SyntaxMode : new SyntaxMode (Document);
 
-			TextViewMargin.LayoutWrapper lineLayout = null;
-			double brightness = HslColor.Brightness (editor.ColorStyle.PlainText.Background);
+			LayoutWrapper lineLayout = null;
+			double brightness = editor.ColorStyle.PlainText.Background.Brightness;
 
 			int colorCount = foldSegments.Count + 2;
-			cr.Color = GetColor (-1, brightness, colorCount);
+			cr.SetColor(GetColor (-1, brightness, colorCount));
 			cr.Rectangle (area);
 			cr.Fill ();
 			var rectangles = new Rectangle[foldSegments.Count];
@@ -114,9 +115,9 @@ namespace Mono.TextEditor
 					y = editor.LineToY (segmentStartLine.LineNumber);
 				}
 
-				for (var curLine = segmentStartLine; curLine != endLine && y < editor.VAdjustment.Value + editor.Allocation.Height; curLine = curLine.NextLine) {
+				for (var curLine = segmentStartLine; curLine != endLine && y < editor.VAdjustment.Value + editor.Size.Height; curLine = curLine.NextLine) {
 					var curLayout = textViewMargin.CreateLinePartLayout (mode, curLine, curLine.Offset, curLine.Length, -1, -1);
-					var width = (int)(curLayout.PangoWidth / Pango.Scale.PangoScale);
+					var width = curLayout.PangoWidth;//(int)(curLayout.PangoWidth / Pango.Scale.PangoScale);
 					curWidth = System.Math.Max (curWidth, width);
 					y += editor.GetLineHeight (curLine);
 				}
@@ -125,13 +126,13 @@ namespace Mono.TextEditor
 				double rectangleWidth = 0, rectangleHeight = 0;
 				
 				lineLayout = textViewMargin.CreateLinePartLayout (mode, segmentStartLine, segmentStartLine.Offset, segmentStartLine.Length, -1, -1);
-				var rectangleStart = lineLayout.Layout.IndexToPos (GetFirstNonWsIdx (lineLayout.Layout.Text));
-				xPos = System.Math.Max (textViewMargin.XOffset, (textViewMargin.XOffset + textViewMargin.TextStartPosition + rectangleStart.X / Pango.Scale.PangoScale) - xPadding);
+				var rectangleStart = lineLayout.Layout.GetCoordinateFromIndex (GetFirstNonWsIdx (lineLayout.Layout.Text));
+				xPos = System.Math.Max (textViewMargin.XOffset, (textViewMargin.XOffset + textViewMargin.TextStartPosition + rectangleStart.X/* / Pango.Scale.PangoScale*/) - xPadding);
 
 				lineLayout = textViewMargin.CreateLinePartLayout (mode, segmentEndLine, segmentEndLine.Offset, segmentEndLine.Length, -1, -1);
 				
-				var rectangleEnd = lineLayout.Layout.IndexToPos (GetFirstNonWsIdx (lineLayout.Layout.Text));
-				xPos = System.Math.Min (xPos, System.Math.Max (textViewMargin.XOffset, (textViewMargin.XOffset + textViewMargin.TextStartPosition + rectangleEnd.X / Pango.Scale.PangoScale) - xPadding));
+				var rectangleEnd = lineLayout.Layout.GetCoordinateFromIndex (GetFirstNonWsIdx (lineLayout.Layout.Text));
+				xPos = System.Math.Min (xPos, System.Math.Max (textViewMargin.XOffset, (textViewMargin.XOffset + textViewMargin.TextStartPosition + rectangleEnd.X/* / Pango.Scale.PangoScale*/) - xPadding));
 
 				rectangleWidth = textViewMargin.XOffset + textViewMargin.TextStartPosition + curWidth - xPos + xPadding * 2;
 
@@ -142,10 +143,10 @@ namespace Mono.TextEditor
 				y = editor.LineToY (segment.StartLine.LineNumber);
 				var yEnd = editor.LineToY (segment.EndLine.LineNumber + 1);
 				if (yEnd == 0)
-					yEnd = editor.VAdjustment.Upper;
+					yEnd = editor.VAdjustment.UpperValue;
 				rectangleHeight = yEnd - y;
 
-				rectangles[i] = new Cairo.Rectangle (xPos, y - yPadding, rectangleWidth, rectangleHeight + yPadding * 2);
+				rectangles[i] = new Rectangle (xPos, y - yPadding, rectangleWidth, rectangleHeight + yPadding * 2);
 			}
 
 			for (int i = 0; i < foldSegments.Count; i++) {
@@ -187,7 +188,7 @@ namespace Mono.TextEditor
 					}
 
 					var bg = editor.ColorStyle.PlainText.Foreground;
-					cr.Color = new Cairo.Color (bg.R, bg.G, bg.B, alpha);
+					cr.SetColor(new Color (bg.Red, bg.Green, bg.Blue, alpha));
 					DrawRoundRectangle (cr, true, true, rect.X - editor.HAdjustment.Value - curPadSize , rect.Y - editor.VAdjustment.Value - curPadSize, editor.LineHeight / 2, rect.Width + curPadSize * 2, rect.Height + curPadSize * 2);
 					cr.Fill ();
 
@@ -195,7 +196,7 @@ namespace Mono.TextEditor
 						var animationState = age / (double)animationLength;
 						curPadSize = (int)(2 + System.Math.Sin (System.Math.PI * animationState) * 2);
 						DrawRoundRectangle (cr, true, true, rect.X - editor.HAdjustment.Value - curPadSize, rect.Y - editor.VAdjustment.Value - curPadSize, editor.LineHeight / 2, rect.Width + curPadSize * 2, rect.Height + curPadSize * 2);
-						cr.Color = GetColor (i, brightness, colorCount);
+						cr.SetColor(GetColor (i, brightness, colorCount));
 						cr.Fill ();
 
 						continue;
@@ -204,7 +205,7 @@ namespace Mono.TextEditor
 
 				DrawRoundRectangle (cr, true, true, rect.X - editor.HAdjustment.Value, rect.Y - editor.VAdjustment.Value, editor.LineHeight / 2, rect.Width, rect.Height);
 				
-				cr.Color = GetColor (i, brightness, colorCount);
+				cr.SetColor(GetColor (i, brightness, colorCount));
 				cr.Fill ();
 			}
 		}
@@ -282,10 +283,8 @@ namespace Mono.TextEditor
 		#region IDisposable implementation
 		void IDisposable.Dispose ()
 		{
-			if (timeout != 0) {
-				GLib.Source.Remove (timeout);
-				timeout = 0;
-			}
+			if (timeout != null)
+				timeout.Dispose ();
 		}
 		#endregion
 	}

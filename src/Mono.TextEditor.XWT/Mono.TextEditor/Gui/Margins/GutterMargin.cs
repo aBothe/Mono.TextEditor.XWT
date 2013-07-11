@@ -35,7 +35,7 @@ namespace Mono.TextEditor
 	public class GutterMargin : Margin
 	{
 		TextEditor editor;
-		int width;
+		double width;
 		int oldLineCountLog10 = -1;
 
 		double fontHeight;
@@ -70,20 +70,23 @@ namespace Mono.TextEditor
 
 		void CalculateWidth ()
 		{
-			using (var layout = PangoUtil.CreateLayout (editor)) {
-				layout.FontDescription = gutterFont;
-				layout.SetText (LineCountMax.ToString ());
-				layout.Alignment = Pango.Alignment.Left;
+			using (var layout = new TextLayout(editor.TextArea)) {
+				layout.Font = gutterFont;
+				layout.Text = (LineCountMax.ToString ());
+				//layout.Alignment = Pango.Alignment.Left;
 				layout.Width = -1;
-				int height;
-				layout.GetPixelSize (out this.width, out height);
-				this.width += 4;
+
+				var sz = layout.GetSize ();
+				width = sz.Width + 4;
+				//var height = sz.Height;
+
 				if (!editor.Options.ShowFoldMargin)
 					this.width += 2;
-
+				fontHeight = sz.Height;
+				/*
 				using (var metrics = editor.PangoContext.GetMetrics (layout.FontDescription, editor.PangoContext.Language)) {
 					fontHeight = System.Math.Ceiling (0.5 + (metrics.Ascent + metrics.Descent) / Pango.Scale.PangoScale);
-				}
+				}*/
 
 			}
 		}
@@ -109,7 +112,7 @@ namespace Mono.TextEditor
 		{
 			base.MousePressed (args);
 			
-			if (args.Button != 1 || args.LineNumber < DocumentLocation.MinLine)
+			if (args.Button != PointerButton.Left || args.LineNumber < DocumentLocation.MinLine)
 				return;
 			editor.LockedMargin = this;
 			int lineNumber = args.LineNumber;
@@ -117,7 +120,7 @@ namespace Mono.TextEditor
 			if (lineNumber <= editor.Document.LineCount) {
 				DocumentLocation loc = new DocumentLocation (lineNumber, DocumentLocation.MinColumn);
 				DocumentLine line = args.LineSegment;
-				if (args.Type == EventType.TwoButtonPress) {
+				if (args.RawEvent.MultiplePress == 2) {
 					if (line != null)
 						editor.MainSelection = new Selection (loc, GetLineEndLocation (editor.GetTextEditorData (), lineNumber));
 				} else if (extendSelection) {
@@ -164,7 +167,7 @@ namespace Mono.TextEditor
 		{
 			base.MouseHover (args);
 			
-			if (!args.TriggersContextMenu () && args.Button == 1) {
+			if (!args.TriggersContextMenu () && args.Button == PointerButton.Left) {
 				//	DocumentLocation loc = editor.Document.LogicalToVisualLocation (editor.GetTextEditorData (), editor.Caret.Location);
 				
 				int lineNumber = args.LineNumber >= DocumentLocation.MinLine ? args.LineNumber : editor.Document.LineCount;
@@ -180,7 +183,7 @@ namespace Mono.TextEditor
 			if (base.cursor == null)
 				return;
 			
-			base.cursor.Dispose ();
+			//TODO base.cursor.Dispose ();
 			base.cursor = null;
 			
 			this.editor.Document.TextSet -= HandleEditorDocumenthandleTextSet;
@@ -239,7 +242,7 @@ namespace Mono.TextEditor
 			if (line <= editor.Document.LineCount) {
 				// Due to a mac? gtk bug I need to re-create the layout here
 				// otherwise I get pango exceptions.
-				using (var layout = PangoUtil.CreateLayout (editor)) {
+				/*TODO using (var layout = PangoUtil.CreateLayout (editor)) {
 					layout.FontDescription = gutterFont;
 					layout.Width = (int)Width;
 					layout.Alignment = Pango.Alignment.Right;
@@ -249,7 +252,7 @@ namespace Mono.TextEditor
 					cr.Color = lineNumberGC;
 					cr.ShowLayout (layout);
 					cr.Restore ();
-				}
+				}*/
 			}
 		}
 	}

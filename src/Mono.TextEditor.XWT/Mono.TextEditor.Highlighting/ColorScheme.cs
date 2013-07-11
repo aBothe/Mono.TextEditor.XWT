@@ -549,7 +549,16 @@ namespace Mono.TextEditor.Highlighting
 		
 		static Color ParseColor (string value)
 		{
-			return HslColor.Parse (value);
+			Color ret;
+			if(Color.TryParse(value, out ret))
+				return ret;
+
+			if (!value.StartsWith ("#"))
+				throw new InvalidDataException ("Wrong color value");
+
+			throw new NotImplementedException ();
+
+			return ret;
 		}
 
 		public static Color ParsePaletteColor (Dictionary<string, Color> palette, string value)
@@ -617,7 +626,7 @@ namespace Mono.TextEditor.Highlighting
 					result.CopyValues (baseScheme);
 			}
 
-			var palette = new Dictionary<string, Cairo.Color> ();
+			var palette = new Dictionary<string, Color> ();
 			foreach (var color in root.XPathSelectElements("palette/*")) {
 				var name = color.XPathSelectElement ("name").Value;
 				if (palette.ContainsKey (name))
@@ -780,7 +789,7 @@ namespace Mono.TextEditor.Highlighting
 			if (colorString == "0x02000000")
 				return new Color (0, 0, 0, 0);
 			string color = "#" + colorString.Substring (8, 2) + colorString.Substring (6, 2) + colorString.Substring (4, 2);
-			return HslColor.Parse (color);
+			return ParseColor (color);
 		}
 
 		public class VSSettingColor
@@ -874,9 +883,7 @@ namespace Mono.TextEditor.Highlighting
 			result.IndentationGuide.Colors.Add (Tuple.Create ("color", AlphaBlend (result.PlainText.Foreground, result.PlainText.Background, 0.3)));
 
 			result.TooltipText = result.PlainText.Clone ();
-			var h = (HslColor)result.TooltipText.Background;
-			h.L += 0.01;
-			result.TooltipText.Background = h;
+			result.TooltipText.Background = result.TooltipText.Background.WithIncreasedLight(0.01);
 
 			result.TooltipPagerTop = new AmbientColor ();
 			result.TooltipPagerTop.Colors.Add (Tuple.Create ("color", result.TooltipText.Background));
@@ -890,7 +897,7 @@ namespace Mono.TextEditor.Highlighting
 			result.TooltipBorder = new AmbientColor ();
 			result.TooltipBorder.Colors.Add (Tuple.Create ("color", AlphaBlend (result.PlainText.Foreground, result.PlainText.Background, 0.5)));
 
-			var defaultStyle = SyntaxModeService.GetColorStyle (HslColor.Brightness (result.PlainText.Background) < 0.5 ? "Monokai" : "Default");
+			var defaultStyle = SyntaxModeService.GetColorStyle (result.PlainText.Background.Brightness < 0.5 ? "Monokai" : "Default");
 
 			foreach (var color in textColors.Values) {
 				if (color.Info.GetValue (result, null) == null)

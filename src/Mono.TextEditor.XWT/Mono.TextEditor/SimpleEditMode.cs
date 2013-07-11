@@ -35,7 +35,7 @@ namespace Mono.TextEditor
 	public class SimpleEditMode : EditMode
 	{
 		Dictionary<ulong, Action<TextEditorData>> keyBindings = new Dictionary<ulong, Action<TextEditorData>> ();
-		public Dictionary<int, Action<TextEditorData>> KeyBindings { get { return keyBindings; } }
+		public Dictionary<ulong, Action<TextEditorData>> KeyBindings { get { return keyBindings; } }
 		
 		public SimpleEditMode ()
 		{

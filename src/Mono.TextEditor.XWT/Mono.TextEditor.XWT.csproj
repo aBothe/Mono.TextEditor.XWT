@@ -59,6 +59,12 @@
     <Folder Include="Mono.TextEditor.Vi\" />
     <Folder Include="Styles\" />
     <Folder Include="SyntaxModes\" />
+    <Folder Include="Mono.TextEditor.PopupWindow\old\" />
+    <Folder Include="Mono.TextEditor.Theatrics\old\" />
+    <Folder Include="Mono.TextEditor.Vi\old\" />
+    <Folder Include="Mono.TextEditor\Gui\old\" />
+    <Folder Include="Mono.TextEditor\old\" />
+    <Folder Include="Mono.TextEditor\Gui\Margins\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Mono.TextEditor\Annotatable.cs" />
@@ -76,7 +82,6 @@
     <Compile Include="Mono.TextEditor\ITextEditorOptions.cs" />
     <Compile Include="Mono.TextEditor\ITextPasteHandler.cs" />
     <Compile Include="Mono.TextEditor\IndentStyle.cs" />
-    <Compile Include="Mono.TextEditor\InsertionCursorEditMode.cs" />
     <Compile Include="Mono.TextEditor\LineBackgroundMarker.cs" />
     <Compile Include="Mono.TextEditor\LinkEventArgs.cs" />
     <Compile Include="Mono.TextEditor\MarginMarker.cs" />
@@ -89,7 +94,6 @@
     <Compile Include="Mono.TextEditor\TextEditorData.cs" />
     <Compile Include="Mono.TextEditor\TextEditorOptions.cs" />
     <Compile Include="Mono.TextEditor\TextLineMarker.cs" />
-    <Compile Include="Mono.TextEditor\TextLinkEditMode.cs" />
     <Compile Include="Mono.TextEditor\TextMarkerEvent.cs" />
     <Compile Include="Mono.TextEditor\TextSegmentMarker.cs" />
     <Compile Include="Mono.TextEditor\UnderlineMarker.cs" />
@@ -124,33 +128,11 @@
     <Compile Include="Mono.TextEditor\Document\SyntaxModeChangeEventArgs.cs" />
     <Compile Include="Mono.TextEditor\Document\TextDocument.cs" />
     <Compile Include="Mono.TextEditor\Document\TextSegment.cs" />
-    <Compile Include="Mono.TextEditor\Gui\CodeSegmentEditorWindow.cs" />
-    <Compile Include="Mono.TextEditor\Gui\CodeSegmentPreviewWindow.cs" />
-    <Compile Include="Mono.TextEditor\Gui\DashedLineMargin.cs" />
-    <Compile Include="Mono.TextEditor\Gui\FoldMarkerMargin.cs" />
-    <Compile Include="Mono.TextEditor\Gui\FoldingScreenbackgroundRenderer.cs" />
-    <Compile Include="Mono.TextEditor\Gui\GutterMargin.cs" />
     <Compile Include="Mono.TextEditor\Gui\IAnimationDrawer.cs" />
     <Compile Include="Mono.TextEditor\Gui\IBackgroundRenderer.cs" />
     <Compile Include="Mono.TextEditor\Gui\ITooltipProvider.cs" />
-    <Compile Include="Mono.TextEditor\Gui\IconMargin.cs" />
-    <Compile Include="Mono.TextEditor\Gui\Margin.cs" />
-    <Compile Include="Mono.TextEditor\Gui\MarginDrawer.cs" />
     <Compile Include="Mono.TextEditor\Gui\SolidFoldMarkerMargin.cs" />
-    <Compile Include="Mono.TextEditor\Gui\TextArea.cs" />
-    <Compile Include="Mono.TextEditor\Gui\TextEditor.cs" />
-    <Compile Include="Mono.TextEditor\Gui\TextEditorAccessibility.cs" />
-    <Compile Include="Mono.TextEditor\Gui\TextViewMargin.cs" />
     <Compile Include="Mono.TextEditor\Gui\TooltipProvider.cs" />
-    <Compile Include="Mono.TextEditor\Standalone\IDocument.cs" />
-    <Compile Include="Mono.TextEditor\Standalone\IDocumentLine.cs" />
-    <Compile Include="Mono.TextEditor\Standalone\ISegment.cs" />
-    <Compile Include="Mono.TextEditor\Standalone\ITextAnchor.cs" />
-    <Compile Include="Mono.TextEditor\Standalone\ITextSource.cs" />
-    <Compile Include="Mono.TextEditor\Standalone\StringTextSource.cs" />
-    <Compile Include="Mono.TextEditor\Standalone\TextChangeEventArgs.cs" />
-    <Compile Include="Mono.TextEditor\Standalone\TextLocation.cs" />
-    <Compile Include="Mono.TextEditor\Standalone\TextSourceVersionProvider.cs" />
     <Compile Include="Mono.TextEditor\Standalone\UnicodeNewline.cs" />
     <Compile Include="Mono.TextEditor.Highlighting\AmbientColor.cs" />
     <Compile Include="Mono.TextEditor.Highlighting\Chunk.cs" />
@@ -175,17 +157,8 @@
     <Compile Include="Mono.TextEditor.Highlighting.Regex\Regex.cs" />
     <Compile Include="Mono.TextEditor.Highlighting.Regex\RegexMatch.cs" />
     <Compile Include="Mono.TextEditor.PopupWindow\IListDataProvider.cs" />
-    <Compile Include="Mono.TextEditor.PopupWindow\ListWidget.cs" />
-    <Compile Include="Mono.TextEditor.PopupWindow\ListWindow.cs" />
-    <Compile Include="Mono.TextEditor.PopupWindow\ModeHelpWindow.cs" />
-    <Compile Include="Mono.TextEditor.PopupWindow\TooltipWindow.cs" />
-    <Compile Include="Mono.TextEditor.PopupWindow\WindowTransparencyDecorator.cs" />
     <Compile Include="Mono.TextEditor.Theatrics\Actor.cs" />
-    <Compile Include="Mono.TextEditor.Theatrics\AnimatedBox.cs" />
-    <Compile Include="Mono.TextEditor.Theatrics\AnimatedVBox.cs" />
-    <Compile Include="Mono.TextEditor.Theatrics\AnimatedWidget.cs" />
     <Compile Include="Mono.TextEditor.Theatrics\Animation.cs" />
-    <Compile Include="Mono.TextEditor.Theatrics\BounceFadePopupWindow.cs" />
     <Compile Include="Mono.TextEditor.Theatrics\Choreographer.cs" />
     <Compile Include="Mono.TextEditor.Theatrics\Pulsator.cs" />
     <Compile Include="Mono.TextEditor.Theatrics\SingleActorStage.cs" />
@@ -212,12 +185,39 @@
     <Compile Include="Mono.TextEditor.Vi\ViStatusArea.cs" />
     <Compile Include="Mono.TextEditor.Vi\ViWordFindStrategy.cs" />
     <Compile Include="Mono.TextEditor\Gui\PaintEventArgs.cs" />
-    <Compile Include="Mono.TextEditor\Gui\PangoUtil.cs" />
+    <Compile Include="Mono.TextEditor\Gui\TextArea.cs" />
+    <Compile Include="Mono.TextEditor\Gui\LayoutWrapper.cs" />
+    <Compile Include="Mono.TextEditor\SearchWorkerArguments.cs" />
+    <Compile Include="Mono.TextEditor.Theatrics\AnimationState.cs" />
+    <Compile Include="Mono.TextEditor\Gui\TextEditor.cs" />
+    <Compile Include="Mono.TextEditor\Gui\FoldingScreenbackgroundRenderer.cs" />
+    <Compile Include="Mono.TextEditor\Gui\Margins\DashedLineMargin.cs" />
+    <Compile Include="Mono.TextEditor\Gui\Margins\FoldMarkerMargin.cs" />
+    <Compile Include="Mono.TextEditor\Gui\Margins\GutterMargin.cs" />
+    <Compile Include="Mono.TextEditor\Gui\Margins\IconMargin.cs" />
+    <Compile Include="Mono.TextEditor\Gui\Margins\Margin.cs" />
+    <Compile Include="Mono.TextEditor\Gui\Margins\MarginDrawer.cs" />
+    <Compile Include="Mono.TextEditor\Gui\Margins\TextViewMargin.cs" />
+    <Compile Include="Mono.TextEditor\Gui\CodeSegmentEditorWindow.cs" />
+    <Compile Include="Mono.TextEditor\Gui\CodeSegmentPreviewWindow.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Mono.TextEditor\Gui\GtkGestures.cs" />
-    <None Include="Mono.TextEditor\Gui\GtkWorkarounds.cs" />
-    <None Include="Mono.TextEditor.Theatrics\SmartScrolledWindow.cs" />
+    <None Include="Mono.TextEditor.PopupWindow\old\WindowTransparencyDecorator.cs" />
+    <None Include="Mono.TextEditor.PopupWindow\old\ListWidget.cs" />
+    <None Include="Mono.TextEditor.PopupWindow\old\ListWindow.cs" />
+    <None Include="Mono.TextEditor.PopupWindow\old\ModeHelpWindow.cs" />
+    <None Include="Mono.TextEditor.PopupWindow\old\TooltipWindow.cs" />
+    <None Include="Mono.TextEditor.Theatrics\old\SmartScrolledWindow.cs" />
+    <None Include="Mono.TextEditor.Theatrics\old\AnimatedBox.cs" />
+    <None Include="Mono.TextEditor.Theatrics\old\AnimatedVBox.cs" />
+    <None Include="Mono.TextEditor.Theatrics\old\AnimatedWidget.cs" />
+    <None Include="Mono.TextEditor.Theatrics\old\BounceFadePopupWindow.cs" />
+    <None Include="Mono.TextEditor\Gui\old\GtkGestures.cs" />
+    <None Include="Mono.TextEditor\Gui\old\GtkWorkarounds.cs" />
+    <None Include="Mono.TextEditor\Gui\old\PangoUtil.cs" />
+    <None Include="Mono.TextEditor\Gui\old\TextEditorAccessibility.cs" />
+    <None Include="Mono.TextEditor\old\InsertionCursorEditMode.cs" />
+    <None Include="Mono.TextEditor\old\TextLinkEditMode.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Styles\DefaultStyle.json">

@@ -40,8 +40,8 @@ namespace Mono.TextEditor.PopupWindow
 	{
 		bool nudgeVertical = false;
 		bool nudgeHorizontal = false;
-		WindowTransparencyDecorator decorator;
-		FixedWidthWrapLabel label;
+		//WindowTransparencyDecorator decorator;
+		Label label;
 		
 		public string Markup {
 			get {
@@ -79,7 +79,8 @@ namespace Mono.TextEditor.PopupWindow
 		
 		public int SetMaxWidth (int maxWidth)
 		{
-			FixedWidthWrapLabel l = (FixedWidthWrapLabel)Child;
+
+			//FixedWidthWrapLabel l = (FixedWidthWrapLabel)Child;
 			l.MaxWidth = maxWidth;
 			return l.RealWidth;
 		}
@@ -93,7 +94,7 @@ namespace Mono.TextEditor.PopupWindow
 			get { return nudgeHorizontal; }
 			set { nudgeHorizontal = value; }
 		}
-		
+		/*
 		public bool EnableTransparencyControl {
 			get { return decorator != null; }
 			set {
@@ -102,8 +103,8 @@ namespace Mono.TextEditor.PopupWindow
 				else if (!value && decorator != null)
 					decorator.Detach ();
 			}
-		}
-		
+		}*/
+		/*
 		protected override bool OnExposeEvent (Gdk.EventExpose evnt)
 		{
 			int winWidth, winHeight;
@@ -112,47 +113,49 @@ namespace Mono.TextEditor.PopupWindow
 			foreach (var child in this.Children)
 				this.PropagateExpose (child, evnt);
 			return false;
-		}
-		
-		protected override void OnSizeAllocated (Gdk.Rectangle allocation)
+		}*/
+
+		protected override void OnShown ()
 		{
+			base.OnShown ();
+
 			if (nudgeHorizontal || nudgeVertical) {
-				int x, y;
-				this.GetPosition (out x, out y);
-				int oldY = y, oldX = x;
+				var loc = Location;
+				var sz = Size;
+				var x = loc.X;
+				var y = loc.Y;
+				var oldY = y, oldX = x;
 				const int edgeGap = 2;
-				
-//				int w = allocation.Width;
-//				
-//				if (fitWidthToScreen && (x + w >= screenW - edgeGap)) {
-//					int fittedWidth = screenW - x - edgeGap;
-//					if (fittedWidth < minFittedWidth) {
-//						x -= (minFittedWidth - fittedWidth);
-//						fittedWidth = minFittedWidth;
-//					}
-//					LimitWidth (fittedWidth);
-//				}
-				
-				Gdk.Rectangle geometry = Screen.GetUsableMonitorGeometry (Screen.GetMonitorAtPoint (x, y));
+
+				//				int w = allocation.Width;
+				//				
+				//				if (fitWidthToScreen && (x + w >= screenW - edgeGap)) {
+				//					int fittedWidth = screenW - x - edgeGap;
+				//					if (fittedWidth < minFittedWidth) {
+				//						x -= (minFittedWidth - fittedWidth);
+				//						fittedWidth = minFittedWidth;
+				//					}
+				//					LimitWidth (fittedWidth);
+				//				}
+
+				var geometry = Screen.VisibleBounds;
 				if (nudgeHorizontal) {
-					if (allocation.Width <= geometry.Width && x + allocation.Width >= geometry.Left + geometry.Width - edgeGap)
-						x = geometry.Left + (geometry.Width - allocation.Width - edgeGap);
+					if (sz.Width <= geometry.Width && x + sz.Width >= geometry.Left + geometry.Width - edgeGap)
+						x = geometry.Left + (geometry.Width - sz.Width - edgeGap);
 					if (x <= geometry.Left + edgeGap)
 						x = geometry.Left + edgeGap;
 				}
-				
+
 				if (nudgeVertical) {
-					if (allocation.Height <= geometry.Height && y + allocation.Height >= geometry.Top + geometry.Height - edgeGap)
-						y = geometry.Top + (geometry.Height - allocation.Height - edgeGap);
+					if (sz.Height <= geometry.Height && y + sz.Height >= geometry.Top + geometry.Height - edgeGap)
+						y = geometry.Top + (geometry.Height - sz.Height - edgeGap);
 					if (y <= geometry.Top + edgeGap)
 						y = geometry.Top + edgeGap;
 				}
-				
+
 				if (y != oldY || x != oldX)
-					Move (x, y);
+					Location = new Point (x, y);
 			}
-			
-			base.OnSizeAllocated (allocation);
 		}
 		
 //		void LimitWidth (int width)
@@ -184,6 +187,7 @@ namespace Mono.TextEditor.PopupWindow
 		}*/
 		
 		//static int tooltipTypeHint = -1;
+		/*
 		[System.ComponentModel.Category("MonoDevelop.Components")]
 		[System.ComponentModel.ToolboxItem(true)]
 		public class FixedWidthWrapLabel : Widget
@@ -443,5 +447,6 @@ namespace Mono.TextEditor.PopupWindow
 				QueueResize ();
 			}
 		}
+		*/
 	}
 }

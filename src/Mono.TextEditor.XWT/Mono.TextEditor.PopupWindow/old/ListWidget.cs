@@ -173,17 +173,18 @@ namespace Mono.TextEditor.PopupWindow
 
 		void SetAdjustments (Rectangle allocation)
 		{
+			/*TODO
 			hadj.SetBounds (0, allocation.Width, 0, 0, allocation.Width);
 			var height = System.Math.Max (allocation.Height, rowHeight * this.win.DataProvider.Count);
-			vadj.SetBounds (0, height, rowHeight, allocation.Height, allocation.Height);
+			vadj.SetBounds (0, height, rowHeight, allocation.Height, allocation.Height);*/
 		}
-
+		/*TODO
 		protected override void OnSizeAllocated (Rectangle allocation)
 		{
 			SetAdjustments (allocation);
 
 			base.OnSizeAllocated (allocation);
-		}
+		}*/
 
 		public int TextOffset {
 			get {
@@ -204,35 +205,36 @@ namespace Mono.TextEditor.PopupWindow
 		//FIXME: we could use the expose event's clipbox to make the drawing more efficient
 		void DrawList (Context ctx, Rectangle dirtyRect)
 		{
-			var window = args.Window;
+			//var window = args.Window;
 			
-			int winWidth, winHeight;
-			window.GetSize (out winWidth, out winHeight);
+			var winSize = Size;
 			
 			int ypos = margin;
-			int lineWidth = winWidth - margin*2;
+			int lineWidth = win.Width - margin*2;
 			int xpos = margin + padding;
 			
 			//avoid recreating the GC objects that we use multiple times
-			var textGCNormal = this.Style.TextGC (StateType.Normal);
-			var fgGCNormal = this.Style.ForegroundGC (StateType.Normal);
+			var textGCNormal = Colors.Black; //this.Style.TextGC (StateType.Normal);
+			var fgGCNormal = Colors.Black;//this.Style.ForegroundGC (StateType.Normal);
+			var selectionBgColor = Colors.LightBlue; // this.Style.BaseGC (StateType.Selected)
+			var selectionFgColor = textGCNormal;
 				
 			int n = 0;
 			n = (int)(vadj.Value / rowHeight);
 
-			while (ypos < winHeight - margin && n < win.DataProvider.Count)
+			while (ypos < winSize.Height - margin && n < win.DataProvider.Count)
 			{
 				bool hasMarkup = false;
 				IMarkupListDataProvider<T> markupListDataProvider = win.DataProvider as IMarkupListDataProvider<T>;
 				if (markupListDataProvider != null) {
 					if (markupListDataProvider.HasMarkup (n)) {
-						layout.SetMarkup (markupListDataProvider.GetMarkup (n) ?? "&lt;null&gt;");
+						layout.Markup = markupListDataProvider.GetMarkup (n) ?? "&lt;null&gt;";
 						hasMarkup = true;
 					}
 				}
 				
 				if (!hasMarkup)
-					layout.SetText (win.DataProvider.GetText (n) ?? "<null>");
+					layout.Text = win.DataProvider.GetText (n) ?? "<null>";
 				
 				Image icon = win.DataProvider.GetIcon (n);
 				int iconHeight, iconWidth;
@@ -240,40 +242,43 @@ namespace Mono.TextEditor.PopupWindow
 				if (icon != null) {
 					iconWidth = icon.Width;
 					iconHeight = icon.Height;
-				} else if (!Gtk.Icon.SizeLookup (Gtk.IconSize.Menu, out iconWidth, out iconHeight)) {
+				} else //TODO if (!Gtk.Icon.SizeLookup (Gtk.IconSize.Menu, out iconWidth, out iconHeight))
+				{
 					iconHeight = iconWidth = 24;
 				}
-				
-				int wi, he, typos, iypos;
-				layout.GetPixelSize (out wi, out he);
-				typos = he < rowHeight ? ypos + (rowHeight - he) / 2 : ypos;
+
+				int typos, iypos;
+				var iSz = layout.GetSize ();
+				typos = iSz.Height < rowHeight ? ypos + (rowHeight - iSz.Height) / 2 : ypos;
 				iypos = iconHeight < rowHeight ? ypos + (rowHeight - iconHeight) / 2 : ypos;
 				
 				if (n == selection) {
 					if (!disableSelection) {
-						args.Window.DrawRectangle (this.Style.BaseGC (StateType.Selected),
-						                              true, margin, ypos, lineWidth, he + padding);
-						window.DrawLayout (this.Style.TextGC (StateType.Selected),
-							                           xpos + iconWidth + 2, typos, layout);
+						ctx.SetColor (selectionBgColor);
+						ctx.Rectangle (margin, ypos, lineWidth, iSz.Height + padding);
+						ctx.SetColor (selectionFgColor);
+						ctx.DrawTextLayout (layout, xpos + iconWidth + 2, typos);
 					}
 					else {
-						window.DrawRectangle (this.Style.BaseGC (StateType.Selected),
-						                              false, margin, ypos, lineWidth, he + padding);
-						window.DrawLayout (textGCNormal, xpos + iconWidth + 2, typos, layout);
+						ctx.SetColor (selectionBgColor);
+						ctx.Rectangle (margin, ypos, lineWidth, iSz.Height + padding);
+						ctx.DrawTextLayout (textGCNormal, xpos + iconWidth + 2, typos, layout);
 					}
 				}
-				else
-					window.DrawLayout (textGCNormal, xpos + iconWidth + 2, typos, layout);
+				else{
+					ctx.SetColor (textGCNormal);
+					ctx.DrawTextLayout(layout, xpos + iconWidth + 2, typos);
+				}
 				
 				if (icon != null)
-					window.DrawPixbuf (fgGCNormal, icon, 0, 0, xpos, iypos, iconWidth, iconHeight, Gdk.RgbDither.None, 0, 0);
+					ctx.DrawImage (icon, xpos, iypos, iconWidth, iconHeight);
 				
 				ypos += rowHeight;
 				n++;
 				
 				//reset the markup or it carries over to the next SetText
 				if (hasMarkup)
-					layout.SetMarkup (string.Empty);
+					layout.Markup = (string.Empty);
 			}
 		}
 		
@@ -284,7 +289,7 @@ namespace Mono.TextEditor.PopupWindow
 		
 		public Rectangle GetRowArea (int row)
 		{
-			return new Rectangle (0, row * rowHeight, Allocation.Width, rowHeight);
+			return new Rectangle (0, row * rowHeight, Size.Width, rowHeight);
 		}
 
 		public int VisibleRows
@@ -298,13 +303,12 @@ namespace Mono.TextEditor.PopupWindow
 		void CalcVisibleRows ()
 		{
 			//int winHeight = 200;
-			int lvWidth, lvHeight;
-			int rowWidth;
-			
-			this.GetSizeRequest (out lvWidth, out lvHeight);
+			double lvWidth = WidthRequest, lvHeight = HeightRequest;
 
-			layout.GetPixelSize (out rowWidth, out rowHeight);
-			rowHeight += padding;
+			double rowWidth;
+			var rowSize = layout.GetSize();
+			rowWidth = rowSize.Width;
+			rowHeight = rowSize.Height + padding;
 			visibleRows = 7;//(winHeight + padding - margin * 2) / rowHeight;
 			
 			int newHeight;
@@ -314,26 +318,28 @@ namespace Mono.TextEditor.PopupWindow
 			else
 				newHeight = (rowHeight * this.win.DataProvider.Count) + margin * 2;
 			
-			if (lvWidth != listWidth || lvHeight != newHeight)
-				this.SetSizeRequest (listWidth, newHeight);
+			if (lvWidth != listWidth)
+				WidthRequest = listWidth;
+			if (lvHeight != newHeight)
+				HeightRequest = newHeight;
 		} 
-
+		/*
 		protected override void OnRealized ()
 		{
 			base.OnRealized ();
 			UpdateStyle ();
 			UpdatePage ();
-		}
+		}*/
 		
 		void UpdateStyle ()
 		{
-			this.GdkWindow.Background = this.Style.Base (StateType.Normal);
+			//this.BackgroundColor = this.Style.Base (StateType.Normal);
 			if (layout != null)
 				layout.Dispose ();
-			layout = PangoUtil.CreateLayout (this);
-			layout.Wrap = Pango.WrapMode.Char;
-
-			layout.Font = this.Style.FontDescription.Copy();
+			layout = new TextLayout (this);
+			//layout.Wrap = Pango.WrapMode.Char;
+			layout.Trimming = TextTrimming.Word;
+			//layout.Font = this.Style.FontDescription.Copy();
 			CalcVisibleRows ();
 		}
 	}

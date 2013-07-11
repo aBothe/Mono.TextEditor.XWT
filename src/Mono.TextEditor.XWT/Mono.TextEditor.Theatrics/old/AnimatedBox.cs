@@ -58,9 +58,9 @@ namespace Mono.TextEditor.Theatrics
 
 		protected AnimatedBox (bool horizontal)
 		{
-			Mono.TextEditor.GtkWorkarounds.FixContainerLeak (this);
-			
-			WidgetFlags |= WidgetFlags.NoWindow;
+			//Mono.TextEditor.GtkWorkarounds.FixContainerLeak (this);
+
+			//WidgetFlags |= WidgetFlags.NoWindow;
 			this.horizontal = horizontal;
 			stage.ActorStep += OnActorStep;
 			border_stage.Iteration += OnBorderIteration;
@@ -171,23 +171,23 @@ namespace Mono.TextEditor.Theatrics
 		#endregion
 
 		#region Protected Overrides
-
+		/*TODO
 		protected override void OnAdded (Widget widget)
 		{
 			PackStart (widget, duration, easing, blocking);
 		}
 
-		protected override void OnSizeRequested (ref Requisition requisition)
+		protected override Size OnGetPreferredSize (SizeConstraint widthConstraint, SizeConstraint heightConstraint)
 		{
 			int width = 0;
 			int height = 0;
-			
+
 			if (horizontal) {
 				width = start_border + end_border;
 			} else {
 				height = start_border + end_border;
 			}
-			
+
 			foreach (AnimatedWidget widget in Widgets) {
 				Requisition req = widget.SizeRequest ();
 				if (horizontal) {
@@ -198,9 +198,8 @@ namespace Mono.TextEditor.Theatrics
 					height += req.Height;
 				}
 			}
-			
-			requisition.Width = width;
-			requisition.Height = height;
+
+			return new Size(width, height);
 		}
 
 		protected override void OnSizeAllocated (Rectangle allocation)
@@ -235,7 +234,7 @@ namespace Mono.TextEditor.Theatrics
 				callback (child);
 			}
 		}
-
+		*/
 		#endregion
 
 		#region Public

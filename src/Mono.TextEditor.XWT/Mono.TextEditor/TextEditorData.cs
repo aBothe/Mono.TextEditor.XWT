@@ -200,9 +200,9 @@ namespace Mono.TextEditor
 		void HandleDocTextSet (object sender, EventArgs e)
 		{
 			if (vadjustment != null)
-				vadjustment.Value = vadjustment.Lower;
+				vadjustment.Value = vadjustment.LowerValue;
 			if (hadjustment != null)
-				hadjustment.Value = hadjustment.Lower;
+				hadjustment.Value = hadjustment.LowerValue;
 			HeightTree.Rebuild ();
 			ClearSelection ();
 			caret.SetDocument (document);
@@ -305,7 +305,7 @@ namespace Mono.TextEditor
 						chunkStyle.FontStyle != FontStyle.Normal;
 					bool setUnderline = chunkStyle.Underline && (styleStack.Count == 0 || !styleStack.Peek ().Underline) ||
 							!chunkStyle.Underline && (styleStack.Count == 0 || styleStack.Peek ().Underline);
-					bool setColor = styleStack.Count == 0 || TextViewMargin.GetPixel (styleStack.Peek ().Foreground) != TextViewMargin.GetPixel (chunkStyle.Foreground);
+					bool setColor = styleStack.Count == 0; //TODO || TextViewMargin.GetPixel (styleStack.Peek ().Foreground) != TextViewMargin.GetPixel (chunkStyle.Foreground);
 					if (setColor || setBold || setItalic || setUnderline) {
 						if (styleStack.Count > 0) {
 							result.Append ("</span>");
@@ -406,7 +406,7 @@ namespace Mono.TextEditor
 					break;
 				case '\t':
 					if (convertTabs) {
-						int tabWidth = TextViewMargin.GetNextTabstop (this, loc.Column) - loc.Column;
+						int tabWidth = 4;//TODO TextViewMargin.GetNextTabstop (this, loc.Column) - loc.Column;
 						sb.Append (new string (' ', tabWidth));
 						loc = new DocumentLocation (loc.Line, loc.Column + tabWidth);
 					} else 

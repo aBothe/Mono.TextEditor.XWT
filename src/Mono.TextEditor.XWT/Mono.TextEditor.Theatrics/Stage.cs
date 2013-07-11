@@ -36,7 +36,7 @@ namespace Mono.TextEditor.Theatrics
         public delegate bool ActorStepHandler (Actor<T> actor);
 
         private Dictionary<T, Actor<T>> actors = new Dictionary<T, Actor<T>> ();
-        private uint timeout_id;
+        private System.Timers.Timer timeout_id;
 
         private uint update_frequency = 30;
         private uint default_duration = 1000;
@@ -164,26 +164,30 @@ namespace Mono.TextEditor.Theatrics
 
         private void CheckTimeout ()
         {
-            if ((!Playing || actors.Count == 0) && timeout_id > 0) {
-                GLib.Source.Remove (timeout_id);
-                timeout_id = 0;
+            if ((!Playing || actors.Count == 0) && timeout_id  != null) {
+				timeout_id.Stop ();
                 return;
-            } else if (Playing && actors.Count > 0 && timeout_id <= 0) {
-                timeout_id = GLib.Timeout.Add (update_frequency, OnTimeout);
+            } else if (Playing && actors.Count > 0 && (timeout_id == null || !timeout_id.Enabled)) {
+				if (timeout_id == null){
+					timeout_id = new System.Timers.Timer (update_frequency);
+					timeout_id.Elapsed += OnTimeout;
+					timeout_id.AutoReset = true;
+				}
+				timeout_id.Start ();
                 return;
             }
         }
 
-        private bool OnTimeout ()
+        private void OnTimeout (Object s, System.Timers.ElapsedEventArgs ea)
         {
             if (!Playing || this.actors.Count == 0) {
-                timeout_id = 0;
-                return false;
+				timeout_id.Stop ();
+				return;
             }
 
-            Queue<Actor<T>> actors = new Queue<Actor<T>> (this.actors.Values);
+            var actors = new Queue<Actor<T>> (this.actors.Values);
             while (actors.Count > 0) {
-                Actor<T> actor = actors.Dequeue ();
+                var actor = actors.Dequeue ();
                 actor.Step ();
 
                 if (!OnActorStep (actor) || actor.Expired) {
@@ -192,8 +196,6 @@ namespace Mono.TextEditor.Theatrics
             }
 
             OnIteration ();
-
-            return true;
         }
 
         protected virtual bool OnActorStep (Actor<T> actor)

@@ -102,7 +102,7 @@ namespace Mono.TextEditor.Utils
 						htmlText.Append ("font-weight:" + ((int)chunkStyle.FontWeight) + ";");
 					if (chunkStyle.FontStyle != Xwt.Drawing.FontStyle.Normal)
 						htmlText.Append ("font-style:" + chunkStyle.FontStyle.ToString ().ToLower () + ";");
-					htmlText.Append ("color:" + ((HslColor)chunkStyle.Foreground).ToPangoString () + ";");
+					htmlText.Append ("color:" + (chunkStyle.Foreground).ToString/*FIXME - Invalid ToString() method!*/ () + ";");
 					htmlText.Append ("'>");
 					AppendHtmlText (htmlText, chunk.Text, options);
 					htmlText.Append ("</SPAN>");

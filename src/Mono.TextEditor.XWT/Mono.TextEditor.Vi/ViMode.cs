@@ -243,11 +243,11 @@ namespace Mono.TextEditor.Vi
 				viTextEditor = null;
 			}
 		}
-
+		/*TODO
 		public override void AllocateTextArea (TextEditor textEditor, TextArea textArea, Rectangle allocation)
 		{
 			statusArea.AllocateArea (textArea, allocation);
-		}
+		}*/
 		
 		void Reset (string status)
 		{
@@ -268,7 +268,7 @@ namespace Mono.TextEditor.Vi
 		{
 		
 			// Reset on Esc, Ctrl-C, Ctrl-[
-			if (key == Gdk.Key.Escape) {
+			if (key == Key.Escape) {
 				if (currentMacro != null) {
 					// Record Escapes into the macro since it actually does something
 					ViMacro.KeySet toAdd = new ViMacro.KeySet();
@@ -462,13 +462,13 @@ namespace Mono.TextEditor.Vi
 						RunAction (ViActions.Join);
 						return;
 					case 'L':
-						int line = Editor.PointToLocation (0, Editor.Allocation.Height - Editor.LineHeight * 2 - 2).Line;
+						var line = Editor.PointToLocation (0, Editor.Size.Height - Editor.LineHeight * 2 - 2).Line;
 						if (line < DocumentLocation.MinLine)
 							line = Document.LineCount;
 						Caret.Line = line;
 						return;
 					case 'M':
-						line = Editor.PointToLocation (0, Editor.Allocation.Height/2).Line;
+						line = Editor.PointToLocation (0, Editor.Size.Height/2).Line;
 						if (line < DocumentLocation.MinLine)
 							line = Document.LineCount;
 						Caret.Line = line;
@@ -637,7 +637,7 @@ namespace Mono.TextEditor.Vi
 				return;
 
 			case State.VisualLine:
-				if (key == Gdk.Key.Delete)
+				if (key == Key.Delete)
 					unicodeKey = 'x';
 				switch ((char)unicodeKey) {
 				case 'p':
@@ -673,7 +673,7 @@ namespace Mono.TextEditor.Vi
 					}
 				}
 
-				if (key == Gdk.Key.Delete)
+				if (key == Key.Delete)
 					unicodeKey = 'x';
 				switch ((char)unicodeKey) {
 				case 'p':
@@ -1032,10 +1032,8 @@ namespace Mono.TextEditor.Vi
 		{
 			TextEditorData data = Data;
 			using (var undo = Document.OpenUndoGroup ()) {
-				
-				Gtk.Clipboard.Get (ClipboardActions.CopyOperation.CLIPBOARD_ATOM).RequestText 
-					(delegate (Gtk.Clipboard cb, string contents) {
-					if (contents == null)
+				var contents = Clipboard.GetText ();
+				if (contents == null)
 						return;
 					if (contents.EndsWith ("\r") || contents.EndsWith ("\n")) {
 						// Line mode paste
@@ -1068,7 +1066,6 @@ namespace Mono.TextEditor.Vi
 						RunAction (ViActions.Left);
 					}
 					Reset (string.Empty);
-				});
 			}
 		}
 
@@ -1081,9 +1078,8 @@ namespace Mono.TextEditor.Vi
 			TextEditorData data = Data;
 			
 			using (var undo = Document.OpenUndoGroup ()) {
-				Gtk.Clipboard.Get (ClipboardActions.CopyOperation.CLIPBOARD_ATOM).RequestText 
-					(delegate (Gtk.Clipboard cb, string contents) {
-					if (contents == null)
+				var contents = Clipboard.GetText ();
+				if (contents == null)
 						return;
 					if (contents.EndsWith ("\r") || contents.EndsWith ("\n")) {
 						// Line mode paste
@@ -1115,7 +1111,6 @@ namespace Mono.TextEditor.Vi
 						RunAction (ViActions.Left);
 					}
 					Reset (string.Empty);
-				});
 			}
 		}
 

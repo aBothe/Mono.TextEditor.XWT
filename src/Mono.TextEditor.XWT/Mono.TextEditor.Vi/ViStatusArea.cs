@@ -43,8 +43,8 @@ namespace Mono.TextEditor.Vi
 			editor.TextViewMargin.CaretBlink += HandleCaretBlink;
 			editor.Caret.PositionChanged += HandlePositionChanged;
 
-			editor.AddTopLevelWidget (this, 0, 0);
-			((TextEditor.EditorContainerChild)editor[this]).FixedPosition = true;
+			editor.PackStart (this, false, true);
+			//((TextEditor.EditorContainerChild)editor[this]).FixedPosition = true;
 			Show ();
 		}
 
@@ -122,7 +122,7 @@ namespace Mono.TextEditor.Vi
 				layout.Font = editor.Options.Font;
 
 				layout.Text = "000,00-00";
-				int minstatusw, minstatush;
+				double minstatusw, minstatush;
 				var sz = layout.GetSize();
 				minstatusw = sz.Width;
 				minstatush = sz.Height;
@@ -136,7 +136,7 @@ namespace Mono.TextEditor.Vi
 					layout.Text = editor.Caret.Line + "," + editor.Caret.Column;
 				}
 
-				int statusw, statush;
+				double statusw, statush;
 				sz = layout.GetSize();
 				statusw = sz.Width;
 				statush = sz.Height;
@@ -144,21 +144,19 @@ namespace Mono.TextEditor.Vi
 				statusw = System.Math.Max (statusw, minstatusw);
 
 				statusw += 8;
-				cr.MoveTo (WidthRequest - statusw, 0);
-				statusw += 8;
 				cr.SetColor(editor.ColorStyle.PlainText.Foreground);
-				cr.ShowLayout (layout);
+				cr.DrawTextLayout (layout, WidthRequest - statusw, 0);
+				statusw += 8;
 
-				layout.Text (statusText ?? "");
-				int w, h;
+				layout.Text = (statusText ?? "");
+				double w, h;
 				sz = layout.GetSize();
 				w = sz.Width;
 				h = sz.Height;
 
 				var x = System.Math.Min (0, -w + WidthRequest - editor.TextViewMargin.CharWidth - statusw);
-				cr.MoveTo (x, 0);
 				cr.SetColor(editor.ColorStyle.PlainText.Foreground);
-				cr.ShowLayout (layout);
+				cr.DrawTextLayout (layout, x, 0);
 				if (ShowCaret) {
 					if (editor.TextViewMargin.caretBlink) {
 						cr.Rectangle (w + x, 0, (int)editor.TextViewMargin.CharWidth, (int)editor.LineHeight);

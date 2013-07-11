@@ -115,7 +115,7 @@ namespace Mono.TextEditor.PopupWindow
 				word = new StringBuilder ();
 				curPos = 0;
 			}
-			
+
 			list.Reset ();
 			if (provider == null)
 				return;
@@ -127,7 +127,7 @@ namespace Mono.TextEditor.PopupWindow
 		
 		void ResetSizes ()
 		{
-			this.Resize(this.list.WidthRequest, this.list.HeightRequest);
+			Size = new Size(this.list.WidthRequest, this.list.HeightRequest);
 		}
 		
 		public IListDataProvider<T> DataProvider
@@ -189,72 +189,73 @@ namespace Mono.TextEditor.PopupWindow
 		{
 			switch (key)
 			{
-				case Gdk.Key.Up:
+				case Key.Up:
 					if (list.SelectionDisabled)
 						list.SelectionDisabled = false;
 					else
 						list.Selection --;
 					return ListWindowKeyAction.Ignore;
 					
-				case Gdk.Key.Down:
+				case Key.Down:
 					if (list.SelectionDisabled)
 						list.SelectionDisabled = false;
 					else
 						list.Selection ++;
 					return ListWindowKeyAction.Ignore;
 					
-				case Gdk.Key.Page_Up:
+				case Key.PageUp:
 					list.Selection -= list.VisibleRows - 1;
 					return ListWindowKeyAction.Ignore;
 					
-				case Gdk.Key.Page_Down:
+				case Key.PageDown:
 					list.Selection += list.VisibleRows - 1;
 					return ListWindowKeyAction.Ignore;
 					
-				case Gdk.Key.Left:
+				case Key.Left:
 					//if (curPos == 0) return KeyAction.CloseWindow | KeyAction.Process;
 					//curPos--;
 					return ListWindowKeyAction.Process;
 					
-				case Gdk.Key.BackSpace:
-					if (curPos == 0 || (modifier & Gdk.ModifierType.ControlMask) != 0)
+				case Key.BackSpace:
+					if (curPos == 0 || (modifier & ModifierKeys.Control) != 0)
 						return ListWindowKeyAction.CloseWindow | ListWindowKeyAction.Process;
 					curPos--;
 					word.Remove (curPos, 1);
 					UpdateWordSelection ();
 					return ListWindowKeyAction.Process;
 					
-				case Gdk.Key.Right:
+				case Key.Right:
 					//if (curPos == word.Length) return KeyAction.CloseWindow | KeyAction.Process;
 					//curPos++;
 					return ListWindowKeyAction.Process;
 				
-				case Gdk.Key.Caps_Lock:
-				case Gdk.Key.Num_Lock:
-				case Gdk.Key.Scroll_Lock:
+				case Key.CapsLock:
+				case Key.NumLock:
+				case Key.ScrollLock:
 					return ListWindowKeyAction.Ignore;
 					
-				case Gdk.Key.Return:
-				case Gdk.Key.ISO_Enter:
-				case Gdk.Key.Key_3270_Enter:
-				case Gdk.Key.KP_Enter:
+				case Key.Return:
+				//HACK? case Key.ISO_Enter:
+				//case Key.Key_3270_Enter:
+				case Key.NumPadEnter:
 					return (list.SelectionDisabled? ListWindowKeyAction.Process : (ListWindowKeyAction.Complete | ListWindowKeyAction.Ignore))
 						| ListWindowKeyAction.CloseWindow;
 				
-				case Gdk.Key.Escape:
+				case Key.Escape:
 					return ListWindowKeyAction.CloseWindow | ListWindowKeyAction.Ignore;
 				
-				case Gdk.Key.Home:
-				case Gdk.Key.End:
+				case Key.Home:
+				case Key.End:
 					return ListWindowKeyAction.CloseWindow | ListWindowKeyAction.Process;
 					
-				case Gdk.Key.Control_L:
-				case Gdk.Key.Control_R:
-				case Gdk.Key.Alt_L:
-				case Gdk.Key.Alt_R:
-				case Gdk.Key.Shift_L:
-				case Gdk.Key.Shift_R:
-				case Gdk.Key.ISO_Level3_Shift:	// AltGr
+				case Key.ControlLeft:
+				case Key.ControlRight:
+				case Key.AltLeft:
+				case Key.AltRight:
+				case Key.ShiftLeft:
+				case Key.ShiftRight:
+				case Key.ShiftLock: //TODO: Is this AltGr?
+					//case Gdk.Key.ISO_Level3_Shift:	// AltGr
 					return ListWindowKeyAction.Process;
 			}
 			

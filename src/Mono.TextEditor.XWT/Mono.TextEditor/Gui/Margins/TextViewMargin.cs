@@ -42,7 +42,8 @@ namespace Mono.TextEditor
 	public class TextViewMargin : Margin
 	{
 		readonly TextEditor textEditor;
-		TabArray tabArray;
+		double tabWidth;
+		//TabArray tabArray;
 		TextLayout markerLayout, defaultLayout;
 		TextLayout eofEolLayout;
 		Size eofEolLayoutSize;
@@ -216,18 +217,7 @@ namespace Mono.TextEditor
 			selectedRegions.Clear ();
 		}
 
-		public class SearchWorkerArguments
-		{
-			public int FirstLine { get; set; }
 
-			public int LastLine { get; set; }
-
-			public List<TextSegment> OldRegions { get; set; }
-
-			public ISearchEngine Engine { get; set; }
-
-			public string Text { get; set; }
-		}
 
 		public void RefreshSearchMarker ()
 		{
@@ -1192,113 +1182,7 @@ namespace Mono.TextEditor
 			return Encoding.UTF8.GetString (bytes, 0, index).Length;
 		}
 
-		public class LayoutWrapper : IDisposable
-		{
-			public int IndentSize {
-				get;
-				set;
-			}
 
-			public TextLayout Layout {
-				get;
-				private set;
-			}
-
-			public bool IsUncached {
-				get;
-				set;
-			}
-
-			public bool StartSet {
-				get;
-				set;
-			}
-
-			public IEnumerable<Chunk> Chunks {
-				get;
-				set;
-			}
-
-			public char[] LineChars {
-				get;
-				set;
-			}
-
-			public CloneableStack<Mono.TextEditor.Highlighting.Span> EolSpanStack {
-				get;
-				set;
-			}
-
-			int selectionStartIndex;
-
-			public int SelectionStartIndex {
-				get {
-					return selectionStartIndex;
-				}
-				set {
-					selectionStartIndex = value;
-					StartSet = true;
-				}
-			}
-
-			public int SelectionEndIndex {
-				get;
-				set;
-			}
-
-			public int PangoWidth {
-				get;
-				set;
-			}
-
-			public LayoutWrapper (TextLayout layout)
-			{
-				this.Layout = layout;
-				this.IsUncached = false;
-			}
-
-			public void Dispose ()
-			{
-				if (Layout != null) {
-					Layout.Dispose ();
-					Layout = null;
-				}
-			}
-
-			public class BackgroundColor
-			{
-				public readonly Color Color;
-				public readonly int FromIdx;
-				public readonly int ToIdx;
-
-				public BackgroundColor (Color color, int fromIdx, int toIdx)
-				{
-					this.Color = color;
-					this.FromIdx = fromIdx;
-					this.ToIdx = toIdx;
-				}
-			}
-
-			List<BackgroundColor> backgroundColors = null;
-
-			public List<BackgroundColor> BackgroundColors {
-				get {
-					return backgroundColors ?? new List<BackgroundColor> ();
-				}
-			}
-
-			public void AddBackground (Color color, int fromIdx, int toIdx)
-			{
-				if (backgroundColors == null)
-					backgroundColors = new List<BackgroundColor> ();
-				BackgroundColors.Add (new BackgroundColor (color, fromIdx, toIdx));
-			}
-
-			public uint TranslateToUTF8Index (uint textIndex, ref uint curIndex, ref uint byteIndex)
-			{
-				return TextViewMargin.TranslateToUTF8Index (LineChars, textIndex, ref curIndex, ref byteIndex);
-			}
-		}
 
 		ChunkStyle selectionColor;
 		ChunkStyle SelectionColor {
@@ -1967,11 +1851,11 @@ namespace Mono.TextEditor
 			base.MouseReleased (args);
 		}
 
-		CodeSegmentPreviewWindow previewWindow = null;
+		//TODO CodeSegmentPreviewWindow previewWindow = null;
 
 		public bool IsCodeSegmentPreviewWindowShown {
 			get {
-				return previewWindow != null;
+				return false; //TODO previewWindow != null;
 			}
 		}
 
@@ -2736,7 +2620,7 @@ namespace Mono.TextEditor
 				this.margin = margin;
 			}
 
-			TextViewMargin.LayoutWrapper layoutWrapper;
+			LayoutWrapper layoutWrapper;
 			int index;
 
 			bool ConsumeLayout (int xp, int yp)
