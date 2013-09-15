@@ -24,8 +24,7 @@
 // THE SOFTWARE.
 
 using System;
-using Xwt;
-using Xwt.Drawing;
+using Gdk;
 using Mono.TextEditor.Highlighting;
 
 namespace Mono.TextEditor
@@ -33,7 +32,7 @@ namespace Mono.TextEditor
 	public interface IExtendingTextLineMarker 
 	{
 		double GetLineHeight (TextEditor editor);
-		void Draw (TextEditor editor, Context cr, int lineNr, Xwt.Rectangle lineArea);
+		void Draw (TextEditor editor, Cairo.Context cr, int lineNr, Cairo.Rectangle lineArea);
 	}
 	
 	public interface IActionTextLineMarker
@@ -54,8 +53,8 @@ namespace Mono.TextEditor
 			get { return isCursorSet;}
 		}
 
-		CursorType cursor;
-		public CursorType Cursor {
+		Gdk.Cursor cursor;
+		public Gdk.Cursor Cursor {
 			get {
 				return cursor;
 			}
@@ -77,7 +76,7 @@ namespace Mono.TextEditor
 	public class LineMetrics
 	{
 		public DocumentLine LineSegment { get; internal set; }
-		public LayoutWrapper Layout { get; internal set; }
+		public TextViewMargin.LayoutWrapper Layout { get; internal set; }
 
 		public int SelectionStart { get; internal set; }
 		public int SelectionEnd { get; internal set; }
@@ -91,6 +90,13 @@ namespace Mono.TextEditor
 		public double LineHeight { get; internal set; }
 
 		public double WholeLineWidth { get; internal set; }
+	}
+
+	public class EndOfLineMetrics
+	{
+		public DocumentLine LineSegment { get; internal set; }
+		public double TextRenderEndPosition { get; internal set; }
+		public double LineHeight { get; internal set; }
 	}
 
 	public class TextLineMarker
@@ -123,13 +129,15 @@ namespace Mono.TextEditor
 		}
 
 		[Obsolete("Use Draw (TextEditor editor, Cairo.Context cr, double y, LineMetrics metrics) instead.")]
-		public virtual void Draw (TextEditor editor, Context cr, TextLayout layout, bool selected, int startOffset, int endOffset, double y, double startXPos, double endXPos)
+		public virtual void Draw (TextEditor editor, Cairo.Context cr, Pango.Layout layout, bool selected, int startOffset, int endOffset, double y, double startXPos, double endXPos)
 		{
 		}
 		
-		public virtual void Draw (TextEditor editor, Context cr, double y, LineMetrics metrics)
+		public virtual void Draw (TextEditor editor, Cairo.Context cr, double y, LineMetrics metrics)
 		{
+#pragma warning disable 618
 			Draw (editor, cr, metrics.Layout.Layout, false, metrics.TextStartOffset, metrics.TextEndOffset, y, metrics.TextRenderStartPosition, metrics.TextRenderEndPosition);
+#pragma warning restore 618
 		}
 		
 		public virtual ChunkStyle GetStyle (ChunkStyle baseStyle)
@@ -145,9 +153,16 @@ namespace Mono.TextEditor
 		/// <param name="cr">The cairo context.</param>
 		/// <param name="y">The y coordinate.</param>
 		/// <param name="metrics">The line metrics.</param>
-		public virtual bool DrawBackground (TextEditor editor, Context cr, double y, LineMetrics metrics)
+		public virtual bool DrawBackground (TextEditor editor, Cairo.Context cr, double y, LineMetrics metrics)
 		{
 			return false;
+		}
+
+		/// <summary>
+		/// Is used to draw in the area after the visible text.
+		/// </summary>
+		public virtual void DrawAfterEol (TextEditor textEditor, Cairo.Context cr, double y, EndOfLineMetrics lineHeight)
+		{
 		}
 	}
 

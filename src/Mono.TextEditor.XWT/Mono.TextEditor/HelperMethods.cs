@@ -31,7 +31,6 @@ using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
-using Xwt.Drawing;
 
 namespace Mono.TextEditor
 {
@@ -69,11 +68,11 @@ namespace Mono.TextEditor
 			return default(T);
 		}
 		
-		/*
+		
 		[DllImport("libpangocairo-1.0-0.dll", CallingConvention=CallingConvention.Cdecl)]
 		static extern void pango_cairo_show_layout (IntPtr cr, IntPtr layout);
 
-		public static void ShowLayout (this Context cr, Pango.Layout layout)
+		public static void ShowLayout (this Cairo.Context cr, Pango.Layout layout)
 		{
 			pango_cairo_show_layout (cr == null ? IntPtr.Zero : cr.Handle, layout == null ? IntPtr.Zero : layout.Handle);
 		}
@@ -105,38 +104,66 @@ namespace Mono.TextEditor
 
 		[DllImport("libpangocairo-1.0-0.dll", CallingConvention=CallingConvention.Cdecl)]
 		static extern IntPtr pango_layout_get_context (IntPtr layout);
-		*/
-		public static string GetColorString (Color color)
+
+		public static string GetColorString (Gdk.Color color)
 		{
 			return string.Format ("#{0:X02}{1:X02}{2:X02}", color.Red / 256, color.Green / 256, color.Blue / 256);
 		}
-		
-		public static void DrawLine (this Context cr, Color color, double x1, double y1, double x2, double y2)
+
+		public static Pango.Context LayoutGetContext (this Pango.Layout layout)
 		{
-			cr.SetColor (color);
+			IntPtr handle = pango_layout_get_context (layout.Handle);
+			return handle.Equals (IntPtr.Zero) ? null : GLib.Object.GetObject (handle) as Pango.Context;
+		}
+		
+		public static void DrawLine (this Cairo.Context cr, Cairo.Color color, double x1, double y1, double x2, double y2)
+		{
+			cr.SetSourceColor (color);
 			cr.MoveTo (x1, y1);
 			cr.LineTo (x2, y2);
 			cr.Stroke ();
 		}
 		
-		public static void Line (this Context cr, double x1, double y1, double x2, double y2)
+		public static void Line (this Cairo.Context cr, double x1, double y1, double x2, double y2)
 		{
 			cr.MoveTo (x1, y1);
 			cr.LineTo (x2, y2);
 		}
 		
-		public static void SharpLineX (this Context cr, double x1, double y1, double x2, double y2)
+		public static void SharpLineX (this Cairo.Context cr, double x1, double y1, double x2, double y2)
 		{
 			cr.MoveTo (x1 + 0.5, y1);
 			cr.LineTo (x2 + 0.5, y2);
 		}
 		
-		public static void SharpLineY (this Context cr, double x1, double y1, double x2, double y2)
+		public static void SharpLineY (this Cairo.Context cr, double x1, double y1, double x2, double y2)
 		{
 			cr.MoveTo (x1, y1 + 0.5);
 			cr.LineTo (x2, y2 + 0.5);
 		}
 
+		public static void SetSourceColor (this Cairo.Context cr, Cairo.Color color)
+		{
+			cr.SetSourceRGBA (color.R, color.G, color.B, color.A);
+		}
 
+		//this is needed for building against old Mono.Cairo versions
+		[Obsolete]
+		public static void SetSource (this Cairo.Context cr, Cairo.Pattern pattern)
+		{
+			cr.Pattern = pattern;
+		}
+
+		[Obsolete]
+		public static Cairo.Surface GetTarget (this Cairo.Context cr)
+		{
+			return cr.Target;
+		}
+
+		[Obsolete]
+		public static void Dispose (this Cairo.Context cr)
+		{
+			((IDisposable)cr).Dispose ();
+		}
 	}
 }

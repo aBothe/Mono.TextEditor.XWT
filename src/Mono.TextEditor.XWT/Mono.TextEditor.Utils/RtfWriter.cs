@@ -27,24 +27,23 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using Mono.TextEditor.Highlighting;
-using Xwt.Drawing;
 
 namespace Mono.TextEditor.Utils
 {
 	public static class RtfWriter
 	{
-		static string CreateColorTable (List<Color> colorList)
+		static string CreateColorTable (List<Cairo.Color> colorList)
 		{
 			var colorTable = new StringBuilder ();
 			colorTable.Append (@"{\colortbl ;");
 			for (int i = 0; i < colorList.Count; i++) {
 				var color = colorList [i];
 				colorTable.Append (@"\red");
-				colorTable.Append ((int)(255  * color.Red));
+				colorTable.Append ((int)(255  * color.R));
 				colorTable.Append (@"\green");
-				colorTable.Append ((int)(255  * color.Green));
+				colorTable.Append ((int)(255  * color.G));
 				colorTable.Append (@"\blue");
-				colorTable.Append ((int)(255  * color.Blue));
+				colorTable.Append ((int)(255  * color.B));
 				colorTable.Append (";");
 			}
 			colorTable.Append ("}");
@@ -96,7 +95,7 @@ namespace Mono.TextEditor.Utils
 		internal static string GenerateRtf (List<List<ColoredSegment>> chunks, Mono.TextEditor.Highlighting.ColorScheme style, ITextEditorOptions options)
 		{
 			var rtfText = new StringBuilder ();
-			var colorList = new List<Color> ();
+			var colorList = new List<Cairo.Color> ();
 
 			bool isItalic = false;
 			bool isBold = false;

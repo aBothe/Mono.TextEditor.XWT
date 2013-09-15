@@ -138,9 +138,7 @@ namespace Mono.TextEditor
 			textEditor.GetTextEditorData ().SearchChanged += HandleSearchChanged;
 			markerLayout = new TextLayout (textEditor.TextArea);
 			defaultLayout = new TextLayout (textEditor.TextArea);
-			/*markerLayout = PangoUtil.CreateLayout (textEditor);
-			defaultLayout = PangoUtil.CreateLayout (textEditor);
-			*/
+
 			textEditor.Document.EndUndo += HandleEndUndo;
 			textEditor.SelectionChanged += UpdateBracketHighlighting;
 			textEditor.Document.Undone += HandleUndone; 
@@ -483,7 +481,7 @@ namespace Mono.TextEditor
 
 			if (eolMarkerLayout == null) {
 				eolMarkerLayout = new TextLayout[8];
-				eolMarkerLayoutSize = new Rectangle[8];
+				eolMarkerLayoutSize = new Size[8];
 				for (int i = 0; i < eolMarkerLayout.Length; i++)
 					eolMarkerLayout[i] = new TextLayout (textEditor.TextArea);
 				eofEolLayout = new TextLayout (textEditor.TextArea);
@@ -508,20 +506,13 @@ namespace Mono.TextEditor
 			if (textEditor.Options.HighlightMatchingBracket && !Document.ReadOnly)
 				DecorateLineBg += DecorateMatchingBracket;
 
-			if (tabArray != null) {
-				tabArray.Dispose ();
-				tabArray = null;
-			}
-
-			var tabWidthLayout = new TextLayout (textEditor) { 
+			var tabWidthLayout = new TextLayout (textEditor.TextArea) { 
 				Text = new string (' ', textEditor.Options.TabSize),
 				Font = textEditor.Options.Font
 			};
 			//tabWidthLayout.Alignment = Pango.Alignment.Left;
 			var tabWidth = tabWidthLayout.GetSize ().Width;
 			tabWidthLayout.Dispose ();
-			tabArray = new Pango.TabArray (1, false);
-			tabArray.SetTab (0, Pango.TabAlign.Left, tabWidth);
 
 			textEditor.UpdatePreeditLineHeight ();
 
@@ -549,14 +540,11 @@ namespace Mono.TextEditor
 			textEditor.Document.Redone -= HandleUndone;
 			
 			textEditor.Document.EndUndo -= UpdateBracketHighlighting;
-			textEditor.TextArea.FocusInEvent -= HandleFocusInEvent;
-			textEditor.TextArea.FocusOutEvent -= HandleFocusOutEvent;
+			textEditor.TextArea.GotFocus -= HandleFocusInEvent;
+			textEditor.TextArea.LostFocus -= HandleFocusOutEvent;
 			Caret.PositionChanged -= UpdateBracketHighlighting;
 
 			textEditor.GetTextEditorData ().SearchChanged -= HandleSearchChanged;
-
-			textLinkCursor.Dispose ();
-			xtermCursor.Dispose ();
 
 			DisposeGCs ();
 			if (markerLayout != null)
@@ -572,14 +560,12 @@ namespace Mono.TextEditor
 			}
 			
 			DisposeLayoutDict ();
-			if (tabArray != null)
-				tabArray.Dispose ();
 			base.Dispose ();
 		}
 
 		#region Caret blinking
 		internal bool caretBlink = true;
-		uint blinkTimeout = 0, startBlinkTimeout = 0;
+		System.Timers.Timer blinkTimeout, startBlinkTimeout;
 
 		// constants taken from gtk.
 		const int cursorOnMultiplier = 2;
@@ -589,42 +575,40 @@ namespace Mono.TextEditor
 		public void ResetCaretBlink (uint delay = 0)
 		{
 			StopCaretThread ();
-			blinkTimeout = GLib.Timeout.Add ((uint)(Gtk.Settings.Default.CursorBlinkTime * cursorOnMultiplier / cursorDivider), UpdateCaret);
+			if (blinkTimeout == null) {
+				blinkTimeout = new Timer (300 * cursorOnMultiplier / cursorDivider);
+				blinkTimeout.Elapsed += UpdateCaret;
+				blinkTimeout.AutoReset = true;
+			}
+			blinkTimeout.Start ();
 			caretBlink = true;
 		}
 
 		internal void StopCaretThread ()
 		{
-			if (startBlinkTimeout != 0) {
-				GLib.Source.Remove (startBlinkTimeout);
-				startBlinkTimeout = 0;
+			if (startBlinkTimeout != null) {
+				startBlinkTimeout.Stop ();
 			}
 
-			if (blinkTimeout == 0)
+			if (blinkTimeout == null)
 				return;
-			GLib.Source.Remove (blinkTimeout);
-			blinkTimeout = 0;
+			blinkTimeout.Stop ();
 			caretBlink = false;
 		}
 
-		bool UpdateCaret ()
+		void UpdateCaret (object s, ElapsedEventArgs ea)
 		{
 			caretBlink = !caretBlink;
 			textEditor.TextArea.QueueDrawArea (caretRectangle.X - (int)textEditor.Options.Zoom,
 			                          (int)(caretRectangle.Y + (textEditor.VAdjustment.Value - caretVAdjustmentValue)),
 			                          caretRectangle.Width + 2 * (int)textEditor.Options.Zoom,
 			                          caretRectangle.Height);
-			OnCaretBlink (EventArgs.Empty);
-			return true;
+
+			if (CaretBlink != null)
+				CaretBlink (this, ea);
 		}
 
 		internal event EventHandler CaretBlink;
-		void OnCaretBlink (EventArgs e)
-		{
-			var handler = CaretBlink;
-			if (handler != null)
-				handler (this, e);
-		}
 		#endregion
 		
 		internal double caretX, caretY, nonPreeditX, nonPreeditY;
@@ -644,10 +628,11 @@ namespace Mono.TextEditor
 			this.nonPreeditX = nonPreeditX;
 			this.nonPreeditY = nonPreeditY;
 
+			/*
 			GtkWorkarounds.SetImCursorLocation (
 				textEditor.IMContext,
 				textEditor.GdkWindow,
-				new Rectangle ((int)nonPreeditX, (int)nonPreeditY, 0, (int)(LineHeight - 1)));
+				new Rectangle ((int)nonPreeditX, (int)nonPreeditY, 0, (int)(LineHeight - 1)));*/
 		}
 
 		public static Rectangle EmptyRectangle = new Rectangle (0, 0, 0, 0);
@@ -1235,10 +1220,9 @@ namespace Mono.TextEditor
 		{
 			uint curIndex = 0, byteIndex = 0;
 			bool first = true, oldSelected = false;
-			int index, trailing;
-			layout.Layout.XyToIndex ((int)textEditor.HAdjustment.Value, 0, out index, out trailing);
+			var index = layout.Layout.GetIndexFromCoordinates(textEditor.HAdjustment.Value, 0);
 			var curchunk = layout.Chunks != null ? layout.Chunks.FirstOrDefault () : null;
-			for (int i = index; i < layout.LineChars.Length; i++) {
+			for (var i = index; i < layout.LineChars.Length; i++) {
 				char ch = layout.LineChars [i];
 				if (ch != ' ' && ch != '\t')
 					continue;
@@ -1253,13 +1237,13 @@ namespace Mono.TextEditor
 				}
 				if (!selected && textEditor.Options.ShowWhitespaces != ShowWhitespaces.Always)
 					continue;
-				Pango.Rectangle pos = layout.Layout.IndexToPos ((int)TranslateToUTF8Index (layout.LineChars, (uint)i, ref curIndex, ref byteIndex));
-				double xpos = xPos + pos.X / PangoUtil.PangoScale;
-				if (xpos > textEditor.Allocation.Width)
+				var pos = layout.Layout.GetCoordinateFromIndex ((int)TranslateToUTF8Index (layout.LineChars, (uint)i, ref curIndex, ref byteIndex));
+				var xpos = xPos + pos.X /*/ PangoUtil.PangoScale*/;
+				if (xpos > textEditor.Size.Width)
 					break;
-				Pango.Rectangle pos2 = layout.Layout.IndexToPos ((int)TranslateToUTF8Index (layout.LineChars, (uint)i + 1, ref curIndex, ref byteIndex));
-				double xpos2 = xPos + pos2.X / PangoUtil.PangoScale;
-				Cairo.Color col = new Cairo.Color (0, 0, 0);
+				var pos2 = layout.Layout.GetCoordinateFromIndex ((int)TranslateToUTF8Index (layout.LineChars, (uint)i + 1, ref curIndex, ref byteIndex));
+				var xpos2 = xPos + pos2.X/* / PangoUtil.PangoScale*/;
+				var col = Colors.Black;
 				if (SelectionColor.TransparentForeground) {
 					while (curchunk != null && curchunk.EndOffset < offset + i)
 						curchunk = curchunk.Next;
@@ -1273,7 +1257,7 @@ namespace Mono.TextEditor
 				} else {
 					col = selected ? SelectionColor.Foreground : col = ColorStyle.PlainText.Foreground;
 				}
-				ctx.Color = new Cairo.Color (col.R, col.G, col.B, whitespaceMarkerAlpha);
+				ctx.SetColor(col.WithAlpha(whitespaceMarkerAlpha));
 
 				if (ch == '\t') {
 					DrawTabMarker (ctx, selected, xpos, xpos2, y);
@@ -1288,9 +1272,10 @@ namespace Mono.TextEditor
 			uint curIndex = 0, byteIndex = 0;
 			if (offset <= highlightBracketOffset && highlightBracketOffset <= offset + length) {
 				int index = highlightBracketOffset - offset;
-				Rectangle rect = layout.Layout.IndexToPos ((int)TranslateToUTF8Index (layout.LineChars, (uint)index, ref curIndex, ref byteIndex));
+				var rect = layout.Layout.GetCoordinateFromIndex ((int)TranslateToUTF8Index (layout.LineChars, (uint)index, ref curIndex, ref byteIndex));
+				var sz = layout.Layout.GetSize ();
 				
-				var bracketMatch = new Rectangle (xPos + rect.X / PangoUtil.PangoScale + 0.5, y + 0.5, (rect.Width / PangoUtil.PangoScale) - 1, (rect.Height / PangoUtil.PangoScale) - 1);
+				var bracketMatch = new Rectangle (xPos /*+ rect.X / PangoUtil.PangoScale*/ + 0.5, y + 0.5, (sz.Width/* / PangoUtil.PangoScale*/) - 1, (sz.Height/* / PangoUtil.PangoScale*/) - 1);
 				if (BackgroundRenderer == null) {
 					ctx.SetColor(this.ColorStyle.BraceMatchingRectangle.Color);
 					ctx.Rectangle (bracketMatch);
@@ -1382,12 +1367,12 @@ namespace Mono.TextEditor
 			//		if (!(HighlightCaretLine || textEditor.Options.HighlightCaretLine) || Document.GetLine(Caret.Line) != line) {
 			if (BackgroundRenderer == null) {
 				foreach (var bg in layout.BackgroundColors) {
-					int x1, x2;
-					x1 = layout.Layout.IndexToPos (bg.FromIdx).X;
-					x2 = layout.Layout.IndexToPos (bg.ToIdx).X;
+					double x1, x2;
+					x1 = layout.Layout.GetCoordinateFromIndex (bg.FromIdx).X;
+					x2 = layout.Layout.GetCoordinateFromIndex (bg.ToIdx).X;
 					DrawRectangleWithRuler (
 						cr, xPos + textEditor.HAdjustment.Value - TextStartPosition,
-						new Rectangle ((x1 + pangoPosition) / PangoUtil.PangoScale, y, (x2 - x1) / PangoUtil.PangoScale + 1, _lineHeight),
+						new Rectangle ((x1 + pangoPosition)/* / PangoUtil.PangoScale*/, y, (x2 - x1)/* / PangoUtil.PangoScale*/ + 1, _lineHeight),
 						bg.Color, true);
 				}
 			}
@@ -1438,10 +1423,10 @@ namespace Mono.TextEditor
 				double endX;
 
 				if (selectionStart != offset + length) {
-					var start = layout.Layout.IndexToPos ((int)layout.SelectionStartIndex);
-					startX = System.Math.Floor (start.X / PangoUtil.PangoScale);
-					var end = layout.Layout.IndexToPos ((int)layout.SelectionEndIndex);
-					endX = System.Math.Ceiling (end.X / PangoUtil.PangoScale);
+					var start = layout.Layout.GetCoordinateFromIndex ((int)layout.SelectionStartIndex);
+					startX = System.Math.Floor (start.X /*/ PangoUtil.PangoScale*/);
+					var end = layout.Layout.GetCoordinateFromIndex ((int)layout.SelectionEndIndex);
+					endX = System.Math.Ceiling (end.X /*/ PangoUtil.PangoScale*/);
 				} else {
 					startX = width;
 					endX = startX;
@@ -1450,7 +1435,7 @@ namespace Mono.TextEditor
 				if (textEditor.MainSelection.SelectionMode == SelectionMode.Block && startX == endX) {
 					endX = startX + 2;
 				}
-				DrawRectangleWithRuler (cr, xPos + textEditor.HAdjustment.Value - TextStartPosition, new Cairo.Rectangle (xPos + startX, y, endX - startX, _lineHeight), this.SelectionColor.Background, true);
+				DrawRectangleWithRuler (cr, xPos + textEditor.HAdjustment.Value - TextStartPosition, new Rectangle (xPos + startX, y, endX - startX, _lineHeight), this.SelectionColor.Background, true);
 			}
 
 			// highlight search results
@@ -1484,10 +1469,8 @@ namespace Mono.TextEditor
 				}
 			}
 			
-			cr.Save ();
-			cr.Translate (xPos, y);
-			cr.ShowLayout (layout.Layout);
-			cr.Restore ();
+			cr.DrawTextLayout (layout.Layout, xPos, y);
+
 			if (offset == line.Offset) {
 				DrawIndent (cr, layout, line, xPos, y);
 			}

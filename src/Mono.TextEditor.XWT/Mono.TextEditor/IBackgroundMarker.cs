@@ -25,7 +25,7 @@
 // THE SOFTWARE.
 
 using System;
-using Xwt.Drawing;
+using Gdk;
 using Mono.TextEditor.Highlighting;
 
 namespace Mono.TextEditor
@@ -43,7 +43,7 @@ namespace Mono.TextEditor
 		/// <returns>
 		/// true, when the text view should draw the text, false when the text view should not draw the text.
 		/// </returns>
-		bool DrawBackground (TextEditor Editor, Context cr, LayoutWrapper layout, int selectionStart, int selectionEnd, int startOffset, int endOffset, double y, double startXPos, double endXPos, ref bool drawBg);
+		bool DrawBackground (TextEditor Editor, Cairo.Context cr, TextViewMargin.LayoutWrapper layout, int selectionStart, int selectionEnd, int startOffset, int endOffset, double y, double startXPos, double endXPos, ref bool drawBg);
 	}
 	
 }

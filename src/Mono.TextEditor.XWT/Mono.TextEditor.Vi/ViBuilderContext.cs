@@ -26,7 +26,7 @@
 // THE SOFTWARE.
 
 using System;
-using Xwt;
+using Gdk;
 using System.Collections.Generic;
 using System.Text;
 using Mono.TextEditor;
@@ -51,7 +51,7 @@ namespace Mono.TextEditor.Vi
 			Multiplier = 1;
 		}
 		
-		public void ProcessKey (Key key, char ch, ModifierKeys modifiers)
+		public void ProcessKey (Key key, char ch, ModifierType modifiers)
 		{
 			var k = ch == '\0'? new ViKey (modifiers, key) : new ViKey (modifiers, ch);
 			Keys.Add (k);
@@ -210,10 +210,10 @@ namespace Mono.TextEditor.Vi
 			{ 'R', Replace, true },
 			{ 'o', Open, true },
 			{ 'O', OpenAbove, true },
-			{ new ViKey (ModifierKeys.Control, Key.Up),       ScrollActions.Up },
-			{ new ViKey (ModifierKeys.Control, Key.NumPadUp),    ScrollActions.Up },
-			{ new ViKey (ModifierKeys.Control, Key.Down),     ScrollActions.Down },
-			{ new ViKey (ModifierKeys.Control, Key.NumPadDown),  ScrollActions.Down },
+			{ new ViKey (ModifierType.ControlMask, Key.Up),       ScrollActions.Up },
+			{ new ViKey (ModifierType.ControlMask, Key.KP_Up),    ScrollActions.Up },
+			{ new ViKey (ModifierType.ControlMask, Key.Down),     ScrollActions.Down },
+			{ new ViKey (ModifierType.ControlMask, Key.KP_Down),  ScrollActions.Down },
 		};
 		
 		static ViCommandMap motions = new ViCommandMap () {
@@ -238,46 +238,46 @@ namespace Mono.TextEditor.Vi
 		
 		static ViCommandMap nonCharMotions = new ViCommandMap () {
 			{ Key.Left,         ViActions.Left },
-			{ Key.NumPadLeft,      ViActions.Left },
+			{ Key.KP_Left,      ViActions.Left },
 			{ Key.Right,        ViActions.Right },
-			{ Key.NumPadRight,     ViActions.Right },
+			{ Key.KP_Right,     ViActions.Right },
 			{ Key.Up,           ViActions.Up },
-			{ Key.NumPadUp,        ViActions.Up },
+			{ Key.KP_Up,        ViActions.Up },
 			{ Key.Down,         ViActions.Down },
-			{ Key.NumPadDown,      ViActions.Down },
-			{ Key.NumPadHome,      CaretMoveActions.LineHome },
+			{ Key.KP_Down,      ViActions.Down },
+			{ Key.KP_Home,      CaretMoveActions.LineHome },
 			{ Key.Home,         CaretMoveActions.LineHome },
-			{ Key.NumPadEnd,       ViActions.LineEnd },
+			{ Key.KP_End,       ViActions.LineEnd },
 			{ Key.End,          ViActions.LineEnd },
-			{ Key.PageUp,      CaretMoveActions.PageUp },
-			//{ Key.NumPadPage_Up,   CaretMoveActions.PageUp },
-			{ Key.PageDown,    CaretMoveActions.PageDown },
-			//{ Key.NumPadPage_Down, CaretMoveActions.PageDown },
-			{ new ViKey (ModifierKeys.Control, Key.Left),     CaretMoveActions.PreviousWord },
-			{ new ViKey (ModifierKeys.Control, Key.NumPadLeft),  CaretMoveActions.PreviousWord },
-			{ new ViKey (ModifierKeys.Control, Key.Right),    CaretMoveActions.NextWord },
-			{ new ViKey (ModifierKeys.Control, Key.NumPadRight), CaretMoveActions.NextWord },
-			{ new ViKey (ModifierKeys.Control, Key.Home),     CaretMoveActions.ToDocumentStart },
-			{ new ViKey (ModifierKeys.Control, Key.NumPadHome),  CaretMoveActions.ToDocumentStart },
-			{ new ViKey (ModifierKeys.Control, Key.End),      CaretMoveActions.ToDocumentEnd },
-			{ new ViKey (ModifierKeys.Control, Key.NumPadEnd),   CaretMoveActions.ToDocumentEnd },
-			{ new ViKey (ModifierKeys.Control, 'u'),  CaretMoveActions.PageUp },
-			{ new ViKey (ModifierKeys.Control, 'd'),  CaretMoveActions.PageDown },
+			{ Key.Page_Up,      CaretMoveActions.PageUp },
+			{ Key.KP_Page_Up,   CaretMoveActions.PageUp },
+			{ Key.Page_Down,    CaretMoveActions.PageDown },
+			{ Key.KP_Page_Down, CaretMoveActions.PageDown },
+			{ new ViKey (ModifierType.ControlMask, Key.Left),     CaretMoveActions.PreviousWord },
+			{ new ViKey (ModifierType.ControlMask, Key.KP_Left),  CaretMoveActions.PreviousWord },
+			{ new ViKey (ModifierType.ControlMask, Key.Right),    CaretMoveActions.NextWord },
+			{ new ViKey (ModifierType.ControlMask, Key.KP_Right), CaretMoveActions.NextWord },
+			{ new ViKey (ModifierType.ControlMask, Key.Home),     CaretMoveActions.ToDocumentStart },
+			{ new ViKey (ModifierType.ControlMask, Key.KP_Home),  CaretMoveActions.ToDocumentStart },
+			{ new ViKey (ModifierType.ControlMask, Key.End),      CaretMoveActions.ToDocumentEnd },
+			{ new ViKey (ModifierType.ControlMask, Key.KP_End),   CaretMoveActions.ToDocumentEnd },
+			{ new ViKey (ModifierType.ControlMask, 'u'),  CaretMoveActions.PageUp },
+			{ new ViKey (ModifierType.ControlMask, 'd'),  CaretMoveActions.PageDown },
 		};
 		
 		static ViCommandMap insertEditActions = new ViCommandMap () {
 			{ Key.Tab,       MiscActions.InsertTab },
 			{ Key.Return,    MiscActions.InsertNewLine },
-			{ Key.NumPadEnter,  MiscActions.InsertNewLine },
+			{ Key.KP_Enter,  MiscActions.InsertNewLine },
 			{ Key.BackSpace, DeleteActions.Backspace },
 			{ Key.Delete,    DeleteActions.Delete },
-			{ Key.NumPadDelete, DeleteActions.Delete },
+			{ Key.KP_Delete, DeleteActions.Delete },
 			{ Key.Insert,    MiscActions.SwitchCaretMode },
-			{ new ViKey (ModifierKeys.Control, Key.BackSpace), DeleteActions.PreviousWord },
-			{ new ViKey (ModifierKeys.Control, Key.Delete),    DeleteActions.NextWord },
-			{ new ViKey (ModifierKeys.Control, Key.NumPadDelete), DeleteActions.NextWord },
-			{ new ViKey (ModifierKeys.Shift,   Key.Tab),       MiscActions.RemoveTab },
-			{ new ViKey (ModifierKeys.Shift,   Key.BackSpace),       DeleteActions.Backspace },
+			{ new ViKey (ModifierType.ControlMask, Key.BackSpace), DeleteActions.PreviousWord },
+			{ new ViKey (ModifierType.ControlMask, Key.Delete),    DeleteActions.NextWord },
+			{ new ViKey (ModifierType.ControlMask, Key.KP_Delete), DeleteActions.NextWord },
+			{ new ViKey (ModifierType.ShiftMask,   Key.Tab),       MiscActions.RemoveTab },
+			{ new ViKey (ModifierType.ShiftMask,   Key.BackSpace),       DeleteActions.Backspace },
 		};
 		
 		static bool Insert (ViBuilderContext ctx)

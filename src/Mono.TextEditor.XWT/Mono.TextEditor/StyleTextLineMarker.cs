@@ -25,7 +25,7 @@
 // THE SOFTWARE.
 
 using System;
-using Xwt.Drawing;
+using Gdk;
 using Mono.TextEditor.Highlighting;
 
 namespace Mono.TextEditor
@@ -42,8 +42,8 @@ namespace Mono.TextEditor
 			Italic = 8
 		}
 		
-		Color color;
-		Color backColor;
+		Cairo.Color color;
+		Cairo.Color backColor;
 		bool bold;
 		bool italic;
 		
@@ -62,7 +62,7 @@ namespace Mono.TextEditor
 			set;
 		}
 		
-		public virtual Color Color {
+		public virtual Cairo.Color Color {
 			get {
 				return color;
 			}
@@ -82,7 +82,7 @@ namespace Mono.TextEditor
 			}
 		}
 		
-		public virtual Color BackgroundColor {
+		public virtual Cairo.Color BackgroundColor {
 			get {
 				return backColor;
 			}
@@ -92,7 +92,7 @@ namespace Mono.TextEditor
 			}
 		}
 		
-		protected virtual ChunkStyle CreateStyle (ChunkStyle baseStyle, Color color, Color bgColor)
+		protected virtual ChunkStyle CreateStyle (ChunkStyle baseStyle, Cairo.Color color, Cairo.Color bgColor)
 		{
 			var style = new ChunkStyle (baseStyle);
 			if ((IncludedStyles & StyleFlag.Color) != 0)

@@ -25,7 +25,7 @@
 // THE SOFTWARE.
 
 using System;
-using Xwt.Drawing;
+using Gdk;
 using Mono.TextEditor.Highlighting;
 
 namespace Mono.TextEditor
@@ -33,18 +33,18 @@ namespace Mono.TextEditor
 
 	public class LineBackgroundMarker: TextLineMarker
 	{
-		Color color;
+		Cairo.Color color;
 		
-		public LineBackgroundMarker (Color color)
+		public LineBackgroundMarker (Cairo.Color color)
 		{
 			this.color = color;
 		}
 
-		public override bool DrawBackground (TextEditor editor, Context cr, double y, LineMetrics metrics)
+		public override bool DrawBackground (TextEditor editor, Cairo.Context cr, double y, LineMetrics metrics)
 		{
 			if (metrics.SelectionStart > 0)
 				return true;
-			cr.SetColor(color);
+			cr.SetSourceColor (color);
 			cr.Rectangle (metrics.TextRenderStartPosition, y, metrics.TextRenderEndPosition - metrics.TextRenderStartPosition, editor.LineHeight);
 			cr.Fill ();
 			return true;

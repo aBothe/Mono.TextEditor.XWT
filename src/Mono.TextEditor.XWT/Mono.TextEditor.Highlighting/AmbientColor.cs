@@ -31,7 +31,6 @@ using System.Linq;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using System.Reflection;
-using Xwt.Drawing;
 
 namespace Mono.TextEditor.Highlighting
 {
@@ -39,9 +38,9 @@ namespace Mono.TextEditor.Highlighting
 	public class AmbientColor
 	{
 		public string Name { get; private set; }
-		public readonly List<Tuple<string, Color>> Colors = new List<Tuple<string, Color>> ();
+		public readonly List<Tuple<string, Cairo.Color>> Colors = new List<Tuple<string, Cairo.Color>> ();
 
-		public Color Color {
+		public Cairo.Color Color {
 			get {
 				return GetColor ("color");
 			}
@@ -57,7 +56,7 @@ namespace Mono.TextEditor.Highlighting
 			}
 		}
 
-		public Color SecondColor {
+		public Cairo.Color SecondColor {
 			get {
 				return GetColor ("secondcolor");
 			}
@@ -79,7 +78,7 @@ namespace Mono.TextEditor.Highlighting
 			}
 		}
 
-		public Color BorderColor {
+		public Cairo.Color BorderColor {
 			get {
 				return GetColor ("bordercolor");
 			}
@@ -101,17 +100,17 @@ namespace Mono.TextEditor.Highlighting
 			}
 		}
 
-		public Color GetColor (string name)
+		public Cairo.Color GetColor (string name)
 		{
 			foreach (var color in Colors) {
 				if (color.Item1 == name)
 					return color.Item2;
 			}
 
-			return new Color (0, 0, 0);
+			return new Cairo.Color (0, 0, 0);
 		}
 
-		public static AmbientColor Create (XElement element, Dictionary<string, Color> palette)
+		public static AmbientColor Create (XElement element, Dictionary<string, Cairo.Color> palette)
 		{
 			var result = new AmbientColor ();
 			foreach (var node in element.DescendantNodes ()) {

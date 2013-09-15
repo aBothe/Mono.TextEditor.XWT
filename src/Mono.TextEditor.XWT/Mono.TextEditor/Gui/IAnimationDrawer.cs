@@ -25,17 +25,16 @@
 // THE SOFTWARE.
 
 using System;
-using Xwt.Drawing;
-using Xwt;
+using Gdk;
 
 namespace Mono.TextEditor
 {
 	public interface IAnimationDrawer
 	{
-		Rectangle AnimationBounds {
+		Gdk.Rectangle AnimationBounds {
 			get;
 		}
 		double Percent { get; set; }
-		void Draw (Context cr);
+		void Draw (Cairo.Context cr);
 	}
 }

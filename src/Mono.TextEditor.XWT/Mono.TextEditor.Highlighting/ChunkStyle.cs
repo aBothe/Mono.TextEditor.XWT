@@ -39,18 +39,18 @@ namespace Mono.TextEditor.Highlighting
 	public class ChunkStyle
 	{
 		public string Name { get; set; }
-		public Color Foreground { get; set; }
-		public Color Background { get; set; }
+		public Cairo.Color Foreground { get; set; }
+		public Cairo.Color Background { get; set; }
 
 		public bool TransparentForeground {
 			get {
-				return Foreground.Alpha == 0.0;
+				return Foreground.A == 0.0;
 
 			}
 		}
 		public bool TransparentBackground {
 			get {
-				return Background.Alpha == 0.0;
+				return Background.A == 0.0;
 			}
 		}
 
@@ -103,7 +103,7 @@ namespace Mono.TextEditor.Highlighting
 
 		public ChunkStyle ()
 		{
-			Foreground = Background = new Color (0, 0, 0, 0);
+			Foreground = Background = new Cairo.Color (0, 0, 0, 0);
 			FontWeight = FontWeight.Normal;
 			FontStyle = FontStyle.Normal;
 		}
@@ -137,7 +137,7 @@ namespace Mono.TextEditor.Highlighting
 			}
 		}
 
-		public static ChunkStyle Create (XElement element, Dictionary<string, Color> palette)
+		public static ChunkStyle Create (XElement element, Dictionary<string, Cairo.Color> palette)
 		{
 			var result = new ChunkStyle ();
 
@@ -174,7 +174,7 @@ namespace Mono.TextEditor.Highlighting
 
 			return result;
 		}
-		/*
+
 		public Gdk.GC CreateBgGC (Gdk.Drawable drawable)
 		{
 			return new Gdk.GC (drawable) { RgbBgColor = (HslColor)Foreground, RgbFgColor = (HslColor)Background };
@@ -183,11 +183,11 @@ namespace Mono.TextEditor.Highlighting
 		public Gdk.GC CreateFgGC (Gdk.Drawable drawable)
 		{
 			return new Gdk.GC (drawable) { RgbBgColor = (HslColor)Background, RgbFgColor = (HslColor)Foreground };
-		}*/
+		}
 
-		static string ColorToString (Color cairoColor)
+		static string ColorToString (Cairo.Color cairoColor)
 		{
-			return "R:" + cairoColor.Red + " G:" + cairoColor.Green + " B:" + cairoColor.Blue + " A:" + cairoColor.Alpha;
+			return "R:" + cairoColor.R + " G:" + cairoColor.G + " B:" + cairoColor.B + " A:" + cairoColor.A;
 		}
 
 		public override string ToString ()
@@ -202,7 +202,7 @@ namespace Mono.TextEditor.Highlighting
 			if (!string.IsNullOrEmpty (vsc.Foreground) && vsc.Foreground != "0x02000000") {
 				textColor.Foreground = ColorScheme.ImportVsColor (vsc.Foreground);
 				if (textColor.TransparentForeground && name != "Selected Text" && name != "Selected Text(Inactive)")
-					textColor.Foreground = new Color (0, 0, 0);
+					textColor.Foreground = new Cairo.Color (0, 0, 0);
 			}
 			if (!string.IsNullOrEmpty (vsc.Background) && vsc.Background != "0x02000000")
 				textColor.Background = ColorScheme.ImportVsColor (vsc.Background);

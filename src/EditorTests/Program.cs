@@ -24,6 +24,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
+using Xwt;
 
 namespace EditorTests
 {
@@ -31,7 +32,11 @@ namespace EditorTests
 	{
 		public static void Main (string[] args)
 		{
-			Console.WriteLine ("Hello World!");
+			Application.Initialize ();
+			var w = new EditorTestWindow ();
+			w.Show ();
+			Application.Run ();
+			w.Dispose ();
 		}
 	}
 }

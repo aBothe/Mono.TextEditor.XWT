@@ -31,7 +31,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Linq;
-using Xwt;
 
 namespace Mono.TextEditor.Vi
 {
@@ -243,11 +242,11 @@ namespace Mono.TextEditor.Vi
 				viTextEditor = null;
 			}
 		}
-		/*TODO
-		public override void AllocateTextArea (TextEditor textEditor, TextArea textArea, Rectangle allocation)
+
+		public override void AllocateTextArea (TextEditor textEditor, TextArea textArea, Gdk.Rectangle allocation)
 		{
 			statusArea.AllocateArea (textArea, allocation);
-		}*/
+		}
 		
 		void Reset (string status)
 		{
@@ -258,17 +257,17 @@ namespace Mono.TextEditor.Vi
 			Status = status;
 		}
 		
-		protected virtual Action<TextEditorData> GetInsertAction (Key key, ModifierKeys modifier)
+		protected virtual Action<TextEditorData> GetInsertAction (Gdk.Key key, Gdk.ModifierType modifier)
 		{
 			return ViActionMaps.GetInsertKeyAction (key, modifier) ??
 				ViActionMaps.GetDirectionKeyAction (key, modifier);
 		}
 
-		protected override void HandleKeypress (Key key, uint unicodeKey, ModifierKeys modifier)
+		protected override void HandleKeypress (Gdk.Key key, uint unicodeKey, Gdk.ModifierType modifier)
 		{
 		
 			// Reset on Esc, Ctrl-C, Ctrl-[
-			if (key == Key.Escape) {
+			if (key == Gdk.Key.Escape) {
 				if (currentMacro != null) {
 					// Record Escapes into the macro since it actually does something
 					ViMacro.KeySet toAdd = new ViMacro.KeySet();
@@ -279,7 +278,7 @@ namespace Mono.TextEditor.Vi
 				}
 				Reset(string.Empty);
 				return;
-			} else if (((key == Key.c || false/*TODO key == Gdk.Key.bracketleft*/) && (modifier & ModifierKeys.Control) != 0)) {
+			} else if (((key == Gdk.Key.c || key == Gdk.Key.bracketleft) && (modifier & Gdk.ModifierType.ControlMask) != 0)) {
 				Reset (string.Empty);
 				if (currentMacro != null) {
 					// Otherwise remove the macro from the pool
@@ -287,7 +286,7 @@ namespace Mono.TextEditor.Vi
 					currentMacro = null;
 				}
 				return;
-			} else if (currentMacro != null && !((char)unicodeKey == 'q' && modifier == ModifierKeys.None)) {
+			} else if (currentMacro != null && !((char)unicodeKey == 'q' && modifier == Gdk.ModifierType.None)) {
 				ViMacro.KeySet toAdd = new ViMacro.KeySet();
 				toAdd.Key = key;
 				toAdd.Modifiers = modifier;
@@ -303,8 +302,8 @@ namespace Mono.TextEditor.Vi
 				Reset (string.Empty);
 				goto case State.Normal;
 			case State.Normal:
-				if (((modifier & (ModifierKeys.Control)) == 0)) {
-					if (key == Key.Delete)
+				if (((modifier & (Gdk.ModifierType.ControlMask)) == 0)) {
+					if (key == Gdk.Key.Delete)
 						unicodeKey = 'x';
 					switch ((char)unicodeKey) {
 					case '?':
@@ -363,7 +362,7 @@ namespace Mono.TextEditor.Vi
 
 					case 'Y':
 						CurState = State.Yank;
-						HandleKeypress (Key.y, (int)'y', ModifierKeys.None);
+						HandleKeypress (Gdk.Key.y, (int)'y', Gdk.ModifierType.None);
 						return;
 						
 					case 'O':
@@ -462,13 +461,13 @@ namespace Mono.TextEditor.Vi
 						RunAction (ViActions.Join);
 						return;
 					case 'L':
-						var line = Editor.PointToLocation (0, Editor.Size.Height - Editor.LineHeight * 2 - 2).Line;
+						int line = Editor.PointToLocation (0, Editor.Allocation.Height - Editor.LineHeight * 2 - 2).Line;
 						if (line < DocumentLocation.MinLine)
 							line = Document.LineCount;
 						Caret.Line = line;
 						return;
 					case 'M':
-						line = Editor.PointToLocation (0, Editor.Size.Height/2).Line;
+						line = Editor.PointToLocation (0, Editor.Allocation.Height/2).Line;
 						if (line < DocumentLocation.MinLine)
 							line = Document.LineCount;
 						Caret.Line = line;
@@ -533,7 +532,7 @@ namespace Mono.TextEditor.Vi
 				if (motion != Motion.None) {
 					action = ViActionMaps.GetEditObjectCharAction((char) unicodeKey, motion);
 				}
-				else if (((modifier & (ModifierKeys.Shift | ModifierKeys.Control)) == 0 
+				else if (((modifier & (Gdk.ModifierType.ShiftMask | Gdk.ModifierType.ControlMask)) == 0 
 				     && unicodeKey == 'd'))
 				{
 					action = SelectionActions.LineActionFromMoveAction (CaretMoveActions.LineEnd);
@@ -565,7 +564,7 @@ namespace Mono.TextEditor.Vi
 				if (motion != Motion.None) {
 					action = ViActionMaps.GetEditObjectCharAction((char) unicodeKey, motion);
 				}
-				else if (((modifier & (ModifierKeys.Shift | ModifierKeys.Control)) == 0
+				else if (((modifier & (Gdk.ModifierType.ShiftMask | Gdk.ModifierType.ControlMask)) == 0
 				     && unicodeKey == 'y'))
 				{
 					action = SelectionActions.LineActionFromMoveAction (CaretMoveActions.LineEnd);
@@ -598,7 +597,7 @@ namespace Mono.TextEditor.Vi
 					action = ViActionMaps.GetEditObjectCharAction((char) unicodeKey, motion);
 				}
 				//copied from delete action
-				else if (((modifier & (ModifierKeys.Shift | ModifierKeys.Control)) == 0 
+				else if (((modifier & (Gdk.ModifierType.ShiftMask | Gdk.ModifierType.ControlMask)) == 0 
 				     && unicodeKey == 'c'))
 				{
 					action = SelectionActions.LineActionFromMoveAction (CaretMoveActions.LineEnd);
@@ -637,7 +636,7 @@ namespace Mono.TextEditor.Vi
 				return;
 
 			case State.VisualLine:
-				if (key == Key.Delete)
+				if (key == Gdk.Key.Delete)
 					unicodeKey = 'x';
 				switch ((char)unicodeKey) {
 				case 'p':
@@ -673,7 +672,7 @@ namespace Mono.TextEditor.Vi
 					}
 				}
 
-				if (key == Key.Delete)
+				if (key == Gdk.Key.Delete)
 					unicodeKey = 'x';
 				switch ((char)unicodeKey) {
 				case 'p':
@@ -700,15 +699,15 @@ namespace Mono.TextEditor.Vi
 				
 			case State.Command:
 				switch (key) {
-				case Key.Return:
-				case Key.NumPadEnter:
+				case Gdk.Key.Return:
+				case Gdk.Key.KP_Enter:
 					Status = RunExCommand (commandBuffer.ToString ());
 					commandBuffer.Length = 0;
 					CurState = State.Normal;
 					break;
-				case Key.BackSpace:
-				case Key.Delete:
-				case Key.NumPadDelete:
+				case Gdk.Key.BackSpace:
+				case Gdk.Key.Delete:
+				case Gdk.Key.KP_Delete:
 					if (0 < commandBuffer.Length) {
 						commandBuffer.Remove (commandBuffer.Length-1, 1);
 						Status = commandBuffer.ToString ();
@@ -738,7 +737,7 @@ namespace Mono.TextEditor.Vi
 				return;
 				
 			case State.Indent:
-				if (((modifier & (ModifierKeys.Control)) == 0 && unicodeKey == '>'))
+				if (((modifier & (Gdk.ModifierType.ControlMask)) == 0 && unicodeKey == '>'))
 				{
 					RunAction (MiscActions.IndentSelection);
 					Reset ("");
@@ -758,7 +757,7 @@ namespace Mono.TextEditor.Vi
 				return;
 				
 			case State.Unindent:
-				if (((modifier & (ModifierKeys.Control)) == 0 && ((char)unicodeKey) == '<'))
+				if (((modifier & (Gdk.ModifierType.ControlMask)) == 0 && ((char)unicodeKey) == '<'))
 				{
 					RunAction (MiscActions.RemoveIndentSelection);
 					Reset ("");
@@ -778,7 +777,7 @@ namespace Mono.TextEditor.Vi
 				return;
 
 			case State.G:
-				if (((modifier & (ModifierKeys.Control)) == 0)) {
+				if (((modifier & (Gdk.ModifierType.ControlMask)) == 0)) {
 					switch ((char)unicodeKey) {
 					case 'g':
 						Caret.Offset = 0;
@@ -851,7 +850,7 @@ namespace Mono.TextEditor.Vi
 			}
 				
 			case State.Fold:
-				if (((modifier & (ModifierKeys.Control)) == 0)) {
+				if (((modifier & (Gdk.ModifierType.ControlMask)) == 0)) {
 					switch ((char)unicodeKey) {
 						case 'A':
 						// Recursive fold toggle
@@ -957,9 +956,9 @@ namespace Mono.TextEditor.Vi
 			return "Performed replacement.";
 		}
 
-		public void ApplyActionToSelection (ModifierKeys modifier, uint unicodeKey)
+		public void ApplyActionToSelection (Gdk.ModifierType modifier, uint unicodeKey)
 		{
-			if (Data.IsSomethingSelected && (modifier & (ModifierKeys.Control)) == 0) {
+			if (Data.IsSomethingSelected && (modifier & (Gdk.ModifierType.ControlMask)) == 0) {
 				switch ((char)unicodeKey) {
 				case 'x':
 				case 'd':
@@ -1032,8 +1031,10 @@ namespace Mono.TextEditor.Vi
 		{
 			TextEditorData data = Data;
 			using (var undo = Document.OpenUndoGroup ()) {
-				var contents = Clipboard.GetText ();
-				if (contents == null)
+				
+				Gtk.Clipboard.Get (ClipboardActions.CopyOperation.CLIPBOARD_ATOM).RequestText 
+					(delegate (Gtk.Clipboard cb, string contents) {
+					if (contents == null)
 						return;
 					if (contents.EndsWith ("\r") || contents.EndsWith ("\n")) {
 						// Line mode paste
@@ -1066,6 +1067,7 @@ namespace Mono.TextEditor.Vi
 						RunAction (ViActions.Left);
 					}
 					Reset (string.Empty);
+				});
 			}
 		}
 
@@ -1078,8 +1080,9 @@ namespace Mono.TextEditor.Vi
 			TextEditorData data = Data;
 			
 			using (var undo = Document.OpenUndoGroup ()) {
-				var contents = Clipboard.GetText ();
-				if (contents == null)
+				Gtk.Clipboard.Get (ClipboardActions.CopyOperation.CLIPBOARD_ATOM).RequestText 
+					(delegate (Gtk.Clipboard cb, string contents) {
+					if (contents == null)
 						return;
 					if (contents.EndsWith ("\r") || contents.EndsWith ("\n")) {
 						// Line mode paste
@@ -1111,6 +1114,7 @@ namespace Mono.TextEditor.Vi
 						RunAction (ViActions.Left);
 					}
 					Reset (string.Empty);
+				});
 			}
 		}
 

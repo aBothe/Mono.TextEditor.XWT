@@ -29,7 +29,7 @@ using Xwt;
 
 namespace Mono.TextEditor
 {
-	public class PaintEventArgs
+	public class PaintEventArgs : EventArgs
 	{
 		public readonly Context Context;
 		public readonly Rectangle DirtyRectangle;

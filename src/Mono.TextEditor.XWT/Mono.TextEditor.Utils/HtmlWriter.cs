@@ -50,7 +50,7 @@ namespace Mono.TextEditor.Utils
 			var copiedColoredChunks = new List<List<ColoredSegment>> ();
 			foreach (var line in data.Document.GetLinesBetween (startLineNumber, endLineNumber)) {
 				var offset = System.Math.Max (selectedSegment.Offset, line.Offset);
-				var length = System.Math.Min (selectedSegment.EndOffset - offset, line.Length);
+				var length = System.Math.Min (selectedSegment.EndOffset, line.EndOffset) - offset;
 				copiedColoredChunks.Add (
 					data.GetChunks (
 					line, 
@@ -102,7 +102,7 @@ namespace Mono.TextEditor.Utils
 						htmlText.Append ("font-weight:" + ((int)chunkStyle.FontWeight) + ";");
 					if (chunkStyle.FontStyle != Xwt.Drawing.FontStyle.Normal)
 						htmlText.Append ("font-style:" + chunkStyle.FontStyle.ToString ().ToLower () + ";");
-					htmlText.Append ("color:" + (chunkStyle.Foreground).ToString/*FIXME - Invalid ToString() method!*/ () + ";");
+					htmlText.Append ("color:" + ((HslColor)chunkStyle.Foreground).ToPangoString () + ";");
 					htmlText.Append ("'>");
 					AppendHtmlText (htmlText, chunk.Text, options);
 					htmlText.Append ("</SPAN>");

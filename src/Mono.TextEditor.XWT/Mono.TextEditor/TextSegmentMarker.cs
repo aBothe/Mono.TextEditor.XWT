@@ -24,8 +24,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
+using Cairo;
 using Mono.TextEditor.Highlighting;
-using Xwt.Drawing;
+using System.Collections.Generic;
 
 namespace Mono.TextEditor
 {
@@ -52,7 +53,7 @@ namespace Mono.TextEditor
 		{
 		}
 		
-		public virtual void Draw (TextEditor editor, Context cr, TextLayout layout, bool selected, int startOffset, int endOffset, double y, double startXPos, double endXPos)
+		public virtual void Draw (TextEditor editor, Cairo.Context cr, Pango.Layout layout, bool selected, int startOffset, int endOffset, double y, double startXPos, double endXPos)
 		{
 		}
 		
@@ -64,12 +65,14 @@ namespace Mono.TextEditor
 
 	public interface IChunkMarker
 	{
-		void ChangeForeColor (TextEditor editor, Chunk chunk, ref Color color);
+		void TransformChunks (List<Chunk> chunks);
+
+		void ChangeForeColor (TextEditor editor, Chunk chunk, ref Cairo.Color color);
 	}
 
 	public class UnderlineTextSegmentMarker : TextSegmentMarker
 	{
-		public UnderlineTextSegmentMarker (Color color, TextSegment textSegment) : base (textSegment)
+		public UnderlineTextSegmentMarker (Cairo.Color color, TextSegment textSegment) : base (textSegment)
 		{
 			this.Color = color;
 			this.Wave = true;
@@ -82,10 +85,10 @@ namespace Mono.TextEditor
 		}
 
 		public string ColorName { get; set; }
-		public Color Color { get; set; }
+		public Cairo.Color Color { get; set; }
 		public bool Wave { get; set; }
 		
-		public override void Draw (TextEditor editor, Context cr, TextLayout layout, bool selected, int startOffset, int endOffset, double y, double startXPos, double endXPos)
+		public override void Draw (TextEditor editor, Cairo.Context cr, Pango.Layout layout, bool selected, int startOffset, int endOffset, double y, double startXPos, double endXPos)
 		{
 			int markerStart = Segment.Offset;
 			int markerEnd = Segment.EndOffset;
@@ -118,7 +121,7 @@ namespace Mono.TextEditor
 			InternalDraw (markerStart, markerEnd, editor, cr, layout, false, startOffset, endOffset, y, startXPos, endXPos);
 		}
 		
-		void InternalDraw (int markerStart, int markerEnd, TextEditor editor, Context cr, TextLayout layout, bool selected, int startOffset, int endOffset, double y, double startXPos, double endXPos)
+		void InternalDraw (int markerStart, int markerEnd, TextEditor editor, Cairo.Context cr, Pango.Layout layout, bool selected, int startOffset, int endOffset, double y, double startXPos, double endXPos)
 		{
 			if (markerStart >= markerEnd)
 				return;
@@ -130,30 +133,30 @@ namespace Mono.TextEditor
 			} else {
 				int start = startOffset < markerStart ? markerStart : startOffset;
 				int end = endOffset < markerEnd ? endOffset : markerEnd;
-				double /*lineNr,*/ x_pos;
+				int /*lineNr,*/ x_pos;
 				
-				x_pos = layout.GetCoordinateFromIndex(start - startOffset).X;
-				@from = startXPos + (x_pos/* / Pango.Scale.PangoScale*/);
+				x_pos = layout.IndexToPos (start - startOffset).X;
+				@from = startXPos + (int)(x_pos / Pango.Scale.PangoScale);
 				
-				x_pos = layout.GetCoordinateFromIndex (end - startOffset).X;
+				x_pos = layout.IndexToPos (end - startOffset).X;
 				
-				to = startXPos + (x_pos/* / Pango.Scale.PangoScale*/);
+				to = startXPos + (int)(x_pos / Pango.Scale.PangoScale);
 			}
 			@from = System.Math.Max (@from, editor.TextViewMargin.XOffset);
 			to = System.Math.Max (to, editor.TextViewMargin.XOffset);
 			if (@from >= to) {
 				return;
 			}
-			var height = editor.LineHeight / 5;
+			double height = editor.LineHeight / 5;
 			if (selected) {
-				cr.SetColor(editor.ColorStyle.SelectedText.Foreground);
+				cr.SetSourceColor (editor.ColorStyle.SelectedText.Foreground);
 			} else {
-				cr.SetColor(ColorName == null ? Color : editor.ColorStyle.GetChunkStyle (ColorName).Foreground);
+				cr.SetSourceColor (ColorName == null ? Color : editor.ColorStyle.GetChunkStyle (ColorName).Foreground);
 			}
 			if (Wave) {	
-				//TODO Pango.CairoHelper.ShowErrorUnderline (cr, @from, y + editor.LineHeight - height, to - @from, height);
+				Pango.CairoHelper.ShowErrorUnderline (cr, @from, y + editor.LineHeight - height, to - @from, height);
 			} else {
-				cr.SetLineWidth(1.0);
+				cr.LineWidth = 1;
 				cr.MoveTo (@from, y + editor.LineHeight - 1.5);
 				cr.LineTo (to, y + editor.LineHeight - 1.5);
 				cr.Stroke ();

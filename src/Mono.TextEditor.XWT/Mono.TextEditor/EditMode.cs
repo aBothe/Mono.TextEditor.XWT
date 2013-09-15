@@ -28,8 +28,7 @@
 
 using System;
 using System.Collections.Generic;
-using Xwt;
-using Xwt.Drawing;
+using Gdk;
 
 namespace Mono.TextEditor
 {
@@ -41,8 +40,8 @@ namespace Mono.TextEditor
 		protected TextEditor editor;
 	//	string status;
 		
-		public void InternalHandleKeypress (TextEditor editor, TextEditorData data, Key key, 
-		                                      uint unicodeChar, ModifierKeys modifier)
+		public void InternalHandleKeypress (TextEditor editor, TextEditorData data, Gdk.Key key, 
+		                                      uint unicodeChar, Gdk.ModifierType modifier)
 		{
 			this.editor = editor; 
 			this.textEditorData = data;
@@ -88,10 +87,10 @@ namespace Mono.TextEditor
 		{
 		}
 
-		public virtual void SelectValidShortcut (Tuple<Key,ModifierKeys>[] accels, out Key key, out ModifierKeys mod)
+		public virtual void SelectValidShortcut (KeyboardShortcut[] accels, out Gdk.Key key, out ModifierType mod)
 		{
-			key = accels [0].Item1;
-			mod = accels [0].Item2;
+			key = accels [0].Key;
+			mod = accels [0].Modifier;
 		}
 
 		protected Caret Caret { get { return textEditorData.Caret; } }
@@ -99,7 +98,7 @@ namespace Mono.TextEditor
 		protected TextEditor Editor { get { return editor; } }
 		protected TextEditorData Data { get { return textEditorData; } }
 		
-		protected abstract void HandleKeypress (Key key, uint unicodeKey, ModifierKeys modifier);
+		protected abstract void HandleKeypress (Gdk.Key key, uint unicodeKey, Gdk.ModifierType modifier);
 		
 		public virtual bool WantsToPreemptIM {
 			get { return false; }
@@ -231,26 +230,49 @@ namespace Mono.TextEditor
 		
 		}
 		
-		public static ulong GetKeyCode (Key key, ModifierKeys modifier = ModifierKeys.None)
+		static Dictionary<Gdk.Key, Gdk.Key> keyMappings = new Dictionary<Gdk.Key, Gdk.Key> ();
+		static EditMode ()
 		{
-			return (ulong)key | ((ulong)modifier << 16);
+			for (char ch = 'a'; ch <= 'z'; ch++) {
+				keyMappings[(Gdk.Key)ch] = (Gdk.Key)(ch -'a' + 'A');
+			}
+		}
+		
+		
+		public virtual bool PreemptIM (Gdk.Key key, uint unicodeKey, Gdk.ModifierType modifier)
+		{
+			return false;
+		}
+		
+		public static int GetKeyCode (Gdk.Key key)
+		{
+			return (int)(keyMappings.ContainsKey (key) ? keyMappings[key] : key);
+		}
+		
+		public static int GetKeyCode (Gdk.Key key, Gdk.ModifierType modifier)
+		{
+			uint m =       (uint)(((modifier & Gdk.ModifierType.ControlMask) != 0)? 1 : 0);
+			m = (m << 1) | (uint)(((modifier & Gdk.ModifierType.ShiftMask)   != 0)? 1 : 0);
+			m = (m << 1) | (uint)(((modifier & Gdk.ModifierType.MetaMask)    != 0)? 1 : 0);
+			m = (m << 1) | (uint)(((modifier & Gdk.ModifierType.Mod1Mask)    != 0)? 1 : 0);
+			m = (m << 1) | (uint)(((modifier & Gdk.ModifierType.SuperMask)   != 0)? 1 : 0);
+			
+			return GetKeyCode (key) | (int)(m << 16);
 		}
 		
 		protected void HideMouseCursor ()
 		{
 			//should only be null during tests
-			//if (editor != null)		editor.HideMouseCursor ();
+			if (editor != null)
+				editor.HideMouseCursor ();
 		}
 
 		#region TextAreaControl
-		/*public virtual void AllocateTextArea (TextEditor textEditor, TextArea textArea, Rectangle allocation)
+		public virtual void AllocateTextArea (TextEditor textEditor, TextArea textArea, Rectangle allocation)
 		{
-			textArea.HeightRequest = allocation.Height;
-			textArea.WidthRequest = allocation.Width;
-			/*TODO
-			if (textArea. != allocation)
-				textArea.SizeAllocate (allocation);* /
-		}*/
+			if (textArea.Allocation != allocation)
+				textArea.SizeAllocate (allocation);
+		}
 		#endregion
 	}
 }

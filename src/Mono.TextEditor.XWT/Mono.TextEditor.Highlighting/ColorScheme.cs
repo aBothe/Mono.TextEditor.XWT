@@ -107,10 +107,10 @@ namespace Mono.TextEditor.Highlighting
 		[ColorDescription("Brace Matching(Rectangle)", VSSetting="color=Brace Matching (Rectangle)/Background,secondcolor=Brace Matching (Rectangle)/Foreground")]
 		public AmbientColor BraceMatchingRectangle { get; private set; }
 		
-		[ColorDescription("Usages(Rectangle)", VSSetting="color=MarkerFormatDefinition/HighlightedReference/Background,secondcolor=MarkerFormatDefinition/HighlightedReference/Background")]
+		[ColorDescription("Usages(Rectangle)", VSSetting="color=MarkerFormatDefinition/HighlightedReference/Background,secondcolor=MarkerFormatDefinition/HighlightedReference/Background,bordercolor=MarkerFormatDefinition/HighlightedReference/Background")]
 		public AmbientColor UsagesRectangle { get; private set; }
 
-		[ColorDescription("Changing usages(Rectangle)", VSSetting="color=MarkerFormatDefinition/HighlightedReference/Background,secondcolor=MarkerFormatDefinition/HighlightedReference/Background")]
+		[ColorDescription("Changing usages(Rectangle)", VSSetting="color=MarkerFormatDefinition/HighlightedReference/Background,secondcolor=MarkerFormatDefinition/HighlightedReference/Background,bordercolor=MarkerFormatDefinition/HighlightedReference/Background")]
 		public AmbientColor ChangingUsagesRectangle { get; private set; }
 
 		[ColorDescription("Breakpoint Marker")]
@@ -164,6 +164,9 @@ namespace Mono.TextEditor.Highlighting
 		[ColorDescription("Message Bubble Error Tag")]
 		public AmbientColor MessageBubbleErrorTag { get; private set; }
 
+		[ColorDescription("Message Bubble Error Tooltip")]
+		public AmbientColor MessageBubbleErrorTooltip { get; private set; }
+
 		[ColorDescription("Message Bubble Error Line")]
 		public AmbientColor MessageBubbleErrorLine { get; private set; }
 
@@ -178,6 +181,9 @@ namespace Mono.TextEditor.Highlighting
 
 		[ColorDescription("Message Bubble Warning Tag")]
 		public AmbientColor MessageBubbleWarningTag { get; private set; }
+
+		[ColorDescription("Message Bubble Warning Tooltip")]
+		public AmbientColor MessageBubbleWarningTooltip { get; private set; }
 
 		[ColorDescription("Message Bubble Warning Line")]
 		public AmbientColor MessageBubbleWarningLine { get; private set; }
@@ -244,6 +250,9 @@ namespace Mono.TextEditor.Highlighting
 
 		[ColorDescription("Preprocessor", VSSetting = "Preprocessor Keyword")]
 		public ChunkStyle Preprocessor { get; private set; }
+
+		[ColorDescription("Preprocessor(Region Name)", VSSetting = "Plain Text")]
+		public ChunkStyle PreprocessorRegionName { get; private set; }
 
 		[ColorDescription("Xml Text", VSSetting = "XML Text")]
 		public ChunkStyle XmlText { get; private set; }
@@ -388,6 +397,9 @@ namespace Mono.TextEditor.Highlighting
 
 		[ColorDescription("Syntax Error", VSSetting = "Syntax Error")]
 		public ChunkStyle SyntaxError { get; private set; }
+
+		[ColorDescription("String Format Items", VSSetting = "String")]
+		public ChunkStyle StringFormatItems { get; private set; }
 
 		[ColorDescription("Breakpoint Text", VSSetting = "Breakpoint (Enabled)")]
 		public ChunkStyle BreakpointText { get; private set; }
@@ -547,23 +559,14 @@ namespace Mono.TextEditor.Highlighting
 			return result;
 		}
 		
-		static Color ParseColor (string value)
+		static Cairo.Color ParseColor (string value)
 		{
-			Color ret;
-			if(Color.TryParse(value, out ret))
-				return ret;
-
-			if (!value.StartsWith ("#"))
-				throw new InvalidDataException ("Wrong color value");
-
-			throw new NotImplementedException ();
-
-			return ret;
+			return HslColor.Parse (value);
 		}
 
-		public static Color ParsePaletteColor (Dictionary<string, Color> palette, string value)
+		public static Cairo.Color ParsePaletteColor (Dictionary<string, Cairo.Color> palette, string value)
 		{
-			Color result;
+			Cairo.Color result;
 			if (palette.TryGetValue (value, out result))
 				return result;
 			return ParseColor (value);
@@ -626,7 +629,7 @@ namespace Mono.TextEditor.Highlighting
 					result.CopyValues (baseScheme);
 			}
 
-			var palette = new Dictionary<string, Color> ();
+			var palette = new Dictionary<string, Cairo.Color> ();
 			foreach (var color in root.XPathSelectElements("palette/*")) {
 				var name = color.XPathSelectElement ("name").Value;
 				if (palette.ContainsKey (name))
@@ -676,12 +679,12 @@ namespace Mono.TextEditor.Highlighting
 			return result;
 		}
 
-		public static string ColorToMarkup (Color color)
+		public static string ColorToMarkup (Cairo.Color color)
 		{
-			var r = (byte)(color.Red * byte.MaxValue);
-			var g = (byte)(color.Green * byte.MaxValue);
-			var b = (byte)(color.Blue * byte.MaxValue);
-			var a = (byte)(color.Alpha * byte.MaxValue);
+			var r = (byte)(color.R * byte.MaxValue);
+			var g = (byte)(color.G * byte.MaxValue);
+			var b = (byte)(color.B * byte.MaxValue);
+			var a = (byte)(color.A * byte.MaxValue);
 
 			if (a == 255)
 				return string.Format ("#{0:X2}{1:X2}{2:X2}", r, g, b);
@@ -784,12 +787,12 @@ namespace Mono.TextEditor.Highlighting
 			}
 		}
 
-		internal static Color ImportVsColor (string colorString)
+		internal static Cairo.Color ImportVsColor (string colorString)
 		{
 			if (colorString == "0x02000000")
-				return new Color (0, 0, 0, 0);
+				return new Cairo.Color (0, 0, 0, 0);
 			string color = "#" + colorString.Substring (8, 2) + colorString.Substring (6, 2) + colorString.Substring (4, 2);
-			return ParseColor (color);
+			return HslColor.Parse (color);
 		}
 
 		public class VSSettingColor
@@ -810,12 +813,12 @@ namespace Mono.TextEditor.Highlighting
 			}
 		}
 
-		public static Color AlphaBlend (Color fore, Color back, double alpha)
+		public static Cairo.Color AlphaBlend (Cairo.Color fore, Cairo.Color back, double alpha)
 		{
-			return new Color (
-				(1.0 - alpha) * back.Red + alpha * fore.Red,
-				(1.0 - alpha) * back.Green + alpha * fore.Green,
-				(1.0 - alpha) * back.Blue + alpha * fore.Blue);
+			return new Cairo.Color (
+				(1.0 - alpha) * back.R + alpha * fore.R,
+				(1.0 - alpha) * back.G + alpha * fore.G,
+				(1.0 - alpha) * back.B + alpha * fore.B);
 		}
 
 		public static ColorScheme Import (string fileName, Stream stream)
@@ -883,7 +886,9 @@ namespace Mono.TextEditor.Highlighting
 			result.IndentationGuide.Colors.Add (Tuple.Create ("color", AlphaBlend (result.PlainText.Foreground, result.PlainText.Background, 0.3)));
 
 			result.TooltipText = result.PlainText.Clone ();
-			result.TooltipText.Background = result.TooltipText.Background.WithIncreasedLight(0.01);
+			var h = (HslColor)result.TooltipText.Background;
+			h.L += 0.01;
+			result.TooltipText.Background = h;
 
 			result.TooltipPagerTop = new AmbientColor ();
 			result.TooltipPagerTop.Colors.Add (Tuple.Create ("color", result.TooltipText.Background));
@@ -897,7 +902,7 @@ namespace Mono.TextEditor.Highlighting
 			result.TooltipBorder = new AmbientColor ();
 			result.TooltipBorder.Colors.Add (Tuple.Create ("color", AlphaBlend (result.PlainText.Foreground, result.PlainText.Background, 0.5)));
 
-			var defaultStyle = SyntaxModeService.GetColorStyle (result.PlainText.Background.Brightness < 0.5 ? "Monokai" : "Default");
+			var defaultStyle = SyntaxModeService.GetColorStyle (HslColor.Brightness (result.PlainText.Background) < 0.5 ? "Monokai" : "Default");
 
 			foreach (var color in textColors.Values) {
 				if (color.Info.GetValue (result, null) == null)
@@ -908,11 +913,11 @@ namespace Mono.TextEditor.Highlighting
 					color.Info.SetValue (result, color.Info.GetValue (defaultStyle, null), null);
 			}
 			if (result.PlainText.TransparentForeground)
-				result.PlainText.Foreground = new Color (0, 0, 0);
+				result.PlainText.Foreground = new Cairo.Color (0, 0, 0);
 			return result;
 		}
 
-		public Color GetForeground (ChunkStyle chunkStyle)
+		public Cairo.Color GetForeground (ChunkStyle chunkStyle)
 		{
 			if (chunkStyle.TransparentForeground)
 				return PlainText.Foreground;

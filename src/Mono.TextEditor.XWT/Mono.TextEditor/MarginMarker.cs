@@ -25,9 +25,8 @@
 // THE SOFTWARE.
 
 using System;
-using Xwt.Drawing;
+using Gdk;
 using Mono.TextEditor.Highlighting;
-using Xwt;
 
 namespace Mono.TextEditor
 {
@@ -44,7 +43,7 @@ namespace Mono.TextEditor
 		/// <summary>
 		/// The area that needs to be redrawn.
 		/// </summary>
-		public Rectangle Area { get; private set; }
+		public Cairo.Rectangle Area { get; private set; }
 
 		/// <summary>
 		/// The line segment the margin should draw (can be null).
@@ -86,7 +85,7 @@ namespace Mono.TextEditor
 		/// </summary>
 		public double Bottom { get { return Y + Height; } }
 
-		internal MarginDrawMetrics (Margin margin, Rectangle area, DocumentLine lineSegment, long lineNumber, double x, double y, double height)
+		internal MarginDrawMetrics (Margin margin, Cairo.Rectangle area, DocumentLine lineSegment, long lineNumber, double x, double y, double height)
 		{
 			this.Margin = margin;
 			this.Area = area;
@@ -129,7 +128,7 @@ namespace Mono.TextEditor
 		/// <summary>
 		/// Draws the foreground of the specified margin.
 		/// </summary>
-		public virtual void DrawForeground (TextEditor editor, Context cr, MarginDrawMetrics metrics)
+		public virtual void DrawForeground (TextEditor editor, Cairo.Context cr, MarginDrawMetrics metrics)
 		{
 		}
 
@@ -137,7 +136,7 @@ namespace Mono.TextEditor
 		/// Draws the background of the specified margin.
 		/// </summary>
 		/// <returns>true, if the background is drawn. false if the margin should fallback to the default background renderer. </returns>
-		public virtual bool DrawBackground (TextEditor editor, Context cr, MarginDrawMetrics metrics)
+		public virtual bool DrawBackground (TextEditor editor, Cairo.Context cr, MarginDrawMetrics metrics)
 		{
 			return false;
 		}

@@ -27,7 +27,6 @@
 using System;
 using System.Diagnostics;
 using Mono.TextEditor.Highlighting;
-using Xwt.Drawing;
 
 namespace Mono.TextEditor
 {
@@ -64,7 +63,7 @@ namespace Mono.TextEditor
 		bool useAntiAliasing = true;
 		string fontName = DEFAULT_FONT;
 		string colorStyle = "Default";
-		Font font, gutterFont;
+		Pango.FontDescription font, gutterFont;
 		
 		double zoom = 1d;
 		IWordFindStrategy wordFindStrategy = new EmacsWordFindStrategy (true);
@@ -349,12 +348,12 @@ namespace Mono.TextEditor
 		void DisposeFont ()
 		{
 			if (font != null) {
-				//font.Dispose ();
+				font.Dispose ();
 				font = null;
 			}
 
 			if (gutterFont != null) {
-				//gutterFont.Dispose ();
+				gutterFont.Dispose ();
 				gutterFont = null;
 			}
 		}
@@ -372,18 +371,18 @@ namespace Mono.TextEditor
 			}
 		}
 		
-		public Font Font {
+		public Pango.FontDescription Font {
 			get {
 				if (font == null) {
 					try {
-						font = Font.FromName (FontName);
+						font = Pango.FontDescription.FromString (FontName);
 					} catch {
 						Console.WriteLine ("Could not load font: {0}", FontName);
 					}
 					if (font == null || String.IsNullOrEmpty (font.Family))
-						font = Font.FromName(DEFAULT_FONT);
+						font = Pango.FontDescription.FromString (DEFAULT_FONT);
 					if (font != null)
-						font = font.WithScaledSize(Zoom);
+						font.Size = (int)(font.Size * Zoom);
 				}
 				return font;
 			}
@@ -402,19 +401,19 @@ namespace Mono.TextEditor
 			}
 		}
 
-		public Font GutterFont {
+		public Pango.FontDescription GutterFont {
 			get {
 				if (gutterFont == null) {
 					try {
 						if (!string.IsNullOrEmpty (GutterFontName))
-							gutterFont = Font.FromName (GutterFontName);
+							gutterFont = Pango.FontDescription.FromString (GutterFontName);
 					} catch {
 						Console.WriteLine ("Could not load gutter font: {0}", GutterFontName);
 					}
 					if (gutterFont == null || String.IsNullOrEmpty (gutterFont.Family))
-						gutterFont = Font.SystemFont;
+						gutterFont = Gtk.Widget.DefaultStyle.FontDescription.Copy ();
 					if (gutterFont != null)
-						gutterFont.WithScaledSize(Zoom);
+						gutterFont.Size = (int)(gutterFont.Size * Zoom);
 				}
 				return gutterFont;
 			}
@@ -499,7 +498,6 @@ namespace Mono.TextEditor
 		bool wrapLines = false;
 		public virtual bool WrapLines {
 			get {
-				// Doesn't work atm
 				return false;
 //				return wrapLines;
 			}

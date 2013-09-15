@@ -1,7 +1,9 @@
 */obj/*
 */bin/*
 src/Mono.TextEditor.XWT/bin/*
+src/Mono.TextEditor.XWT2/bin/*
 src/Mono.TextEditor.XWT/obj/*
+src/Mono.TextEditor.XWT2/obj/*
 src/EditorTests/bin/*
 src/EditorTests/obj/*
 src/XwtExperiments/bin/*

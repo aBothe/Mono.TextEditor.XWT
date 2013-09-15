@@ -201,9 +201,9 @@ namespace Mono.TextEditor.Utils
 				throw new ArgumentNullException ("text");
 			if (encoding == null)
 				throw new ArgumentNullException ("encoding");
-
+			// atomic rename only works in the same directory on linux. The tmp files may be on another partition -> breaks save.
 			string tmpPath = Path.Combine (Path.GetDirectoryName (fileName), ".#" + Path.GetFileName (fileName));
-			using (var stream = new FileStream (tmpPath, FileMode.Create, FileAccess.Write, FileShare.Write)) {
+			using (var stream = new FileStream (tmpPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write)) {
 				if (hadBom) {
 					var bom = encoding.GetPreamble ();
 					if (bom != null && bom.Length > 0)
@@ -212,11 +212,20 @@ namespace Mono.TextEditor.Utils
 				byte[] bytes = encoding.GetBytes (text);
 				stream.Write (bytes, 0, bytes.Length);
 			}
-			SystemRename (tmpPath, fileName);
+			try {
+				SystemRename (tmpPath, fileName);
+			} catch (Exception) {
+				try {
+					System.IO.File.Delete (tmpPath);
+				} catch {
+					// nothing
+				}
+				throw;
+			}
 		}
 
 		/// <summary>
-		/// Returns a byte array containing the text encoded by a specified encoding & bom.
+		/// Returns a byte array containing the text encoded by a specified encoding &amp; bom.
 		/// </summary>
 		/// <param name="text">The text to encode.</param>
 		/// <param name="encoding">The encoding.</param>
@@ -238,10 +247,8 @@ namespace Mono.TextEditor.Utils
 		// Code taken from FileService.cs
 		static void SystemRename (string sourceFile, string destFile)
 		{
-			System.IO.File.Delete (destFile);
-			System.IO.File.Move (sourceFile, destFile);
 			//FIXME: use the atomic System.IO.File.Replace on NTFS
-			/*if (Platform.IsWindows) {
+			if (Platform.IsWindows) {
 				string wtmp = null;
 				if (File.Exists (destFile)) {
 					do {
@@ -269,7 +276,7 @@ namespace Mono.TextEditor.Utils
 				}
 			} else {
 				Mono.Unix.Native.Syscall.rename (sourceFile, destFile);
-			}*/
+			}
 		}
 
 		public static string ReadAllText (string fileName)
@@ -753,4 +760,7 @@ namespace Mono.TextEditor.Utils
 		#endregion
 	}
 }
+
+
+
 

@@ -26,7 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Xwt;
+using Gtk;
 using System.IO;
 using System.Diagnostics;
 using Mono.TextEditor.Highlighting;
@@ -46,10 +46,10 @@ namespace Mono.TextEditor
 		TextDocument document; 
 		readonly Caret        caret;
 		
-		static ScrollAdjustment emptyAdjustment = new ScrollAdjustment { LowerValue = 0, PageIncrement = 0, PageSize = 0, UpperValue = 0, Value = 0 };
+		static Adjustment emptyAdjustment = new Adjustment (0, 0, 0, 0, 0, 0);
 		
-		ScrollAdjustment hadjustment = emptyAdjustment; 
-		public ScrollAdjustment HAdjustment {
+		Adjustment hadjustment = emptyAdjustment; 
+		public Adjustment HAdjustment {
 			get {
 				return hadjustment;
 			}
@@ -58,8 +58,8 @@ namespace Mono.TextEditor
 			}
 		}
 		
-		ScrollAdjustment vadjustment = emptyAdjustment;
-		public ScrollAdjustment VAdjustment {
+		Adjustment vadjustment = emptyAdjustment;
+		public Adjustment VAdjustment {
 			get {
 				return vadjustment;
 			}
@@ -190,6 +190,7 @@ namespace Mono.TextEditor
 
 			HeightTree = new HeightTree (this);
 			HeightTree.Rebuild ();
+			IndentationTracker = new DefaultIndentationTracker (document);
 		}
 
 		void HandleFoldTreeUpdated (object sender, EventArgs e)
@@ -200,9 +201,9 @@ namespace Mono.TextEditor
 		void HandleDocTextSet (object sender, EventArgs e)
 		{
 			if (vadjustment != null)
-				vadjustment.Value = vadjustment.LowerValue;
+				vadjustment.Value = vadjustment.Lower;
 			if (hadjustment != null)
-				hadjustment.Value = hadjustment.LowerValue;
+				hadjustment.Value = hadjustment.Lower;
 			HeightTree.Rebuild ();
 			ClearSelection ();
 			caret.SetDocument (document);
@@ -305,7 +306,7 @@ namespace Mono.TextEditor
 						chunkStyle.FontStyle != FontStyle.Normal;
 					bool setUnderline = chunkStyle.Underline && (styleStack.Count == 0 || !styleStack.Peek ().Underline) ||
 							!chunkStyle.Underline && (styleStack.Count == 0 || styleStack.Peek ().Underline);
-					bool setColor = styleStack.Count == 0; //TODO || TextViewMargin.GetPixel (styleStack.Peek ().Foreground) != TextViewMargin.GetPixel (chunkStyle.Foreground);
+					bool setColor = styleStack.Count == 0 || TextViewMargin.GetPixel (styleStack.Peek ().Foreground) != TextViewMargin.GetPixel (chunkStyle.Foreground);
 					if (setColor || setBold || setItalic || setUnderline) {
 						if (styleStack.Count > 0) {
 							result.Append ("</span>");
@@ -406,7 +407,7 @@ namespace Mono.TextEditor
 					break;
 				case '\t':
 					if (convertTabs) {
-						int tabWidth = 4;//TODO TextViewMargin.GetNextTabstop (this, loc.Column) - loc.Column;
+						int tabWidth = TextViewMargin.GetNextTabstop (this, loc.Column) - loc.Column;
 						sb.Append (new string (' ', tabWidth));
 						loc = new DocumentLocation (loc.Line, loc.Column + tabWidth);
 					} else 
@@ -512,6 +513,8 @@ namespace Mono.TextEditor
 			options = options.Kill ();
 			HeightTree.Dispose ();
 			DetachDocument ();
+			ClearTooltipProviders ();
+			tooltipProviders = null;
 		}
 
 		/// <summary>
@@ -1004,6 +1007,9 @@ namespace Mono.TextEditor
 		
 		public SearchResult FindNext (bool setSelection)
 		{
+			if (SearchEngine.SearchRequest == null || string.IsNullOrEmpty (SearchEngine.SearchRequest.SearchPattern))
+				return null;
+
 			int startOffset = Caret.Offset;
 			if (IsSomethingSelected && IsMatchAt (startOffset)) {
 				startOffset = MainSelection.GetLeadOffset (this);
@@ -1020,6 +1026,8 @@ namespace Mono.TextEditor
 		
 		public SearchResult FindPrevious (bool setSelection)
 		{
+			if (SearchEngine.SearchRequest == null || string.IsNullOrEmpty (SearchEngine.SearchRequest.SearchPattern))
+				return null;
 			int startOffset = Caret.Offset - SearchEngine.SearchRequest.SearchPattern.Length;
 			if (IsSomethingSelected && IsMatchAt (MainSelection.GetAnchorOffset (this))) 
 				startOffset = MainSelection.GetAnchorOffset (this);
@@ -1136,7 +1144,6 @@ namespace Mono.TextEditor
 
 		int EnsureIsNotVirtual (int line, int column)
 		{
-			Debug.Assert (document.IsInAtomicUndo);
 			DocumentLine documentLine = Document.GetLine (line);
 			if (documentLine == null)
 				return 0;
@@ -1200,7 +1207,13 @@ namespace Mono.TextEditor
 		public int PasteText (int offset, string text, byte[] copyData, ref IDisposable undoGroup)
 		{
 			if (TextPasteHandler != null) {
-				var newText = TextPasteHandler.FormatPlainText (offset, text, copyData);
+				string newText;
+				try {
+					newText = TextPasteHandler.FormatPlainText (offset, text, copyData);
+				} catch (Exception e) {
+					Console.WriteLine ("Text paste handler exception:" + e);
+					newText = text;
+				}
 				if (newText != text) {
 					var inserted = Insert (offset, text);
 					undoGroup.Dispose ();
@@ -1354,6 +1367,11 @@ namespace Mono.TextEditor
 		public IDisposable OpenUndoGroup()
 		{
 			return Document.OpenUndoGroup ();
+		}
+
+		public IDisposable OpenUndoGroup(OperationType operationType)
+		{
+			return Document.OpenUndoGroup (operationType);
 		}
 		#endregion
 		

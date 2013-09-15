@@ -6,7 +6,7 @@
     <ProductVersion>10.0.0</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{B5C72C27-8C17-4F3C-8D15-EF3D9053E9DB}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <RootNamespace>EditorTests</RootNamespace>
     <AssemblyName>EditorTests</AssemblyName>
   </PropertyGroup>
@@ -18,8 +18,8 @@
     <DefineConstants>DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Externalconsole>true</Externalconsole>
     <PlatformTarget>x86</PlatformTarget>
+    <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>full</DebugType>
@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
+    <Compile Include="EditorTestWindow.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -47,7 +48,7 @@
       <Name>Xwt</Name>
     </ProjectReference>
     <ProjectReference Include="..\Mono.TextEditor.XWT\Mono.TextEditor.XWT.csproj">
-      <Project>{68716AB8-0B2A-47EC-977B-DEFAD8CF6944}</Project>
+      <Project>{D10E3BA7-F7FA-4CAB-8EAD-49D1AF5778E9}</Project>
       <Name>Mono.TextEditor.XWT</Name>
     </ProjectReference>
   </ItemGroup>

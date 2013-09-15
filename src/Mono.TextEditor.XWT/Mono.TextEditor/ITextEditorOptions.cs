@@ -26,7 +26,6 @@
 
 using System;
 using Mono.TextEditor.Highlighting;
-using Xwt.Drawing;
 
 namespace Mono.TextEditor
 {
@@ -83,10 +82,10 @@ namespace Mono.TextEditor
 		bool UseAntiAliasing { get; set; }
 		bool WrapLines { get; set; }
 		string FontName { get;  set; }
-		Font Font { get;  }
+		Pango.FontDescription Font { get;  }
 
 		string GutterFontName { get; set; }
-		Font GutterFont { get; }
+		Pango.FontDescription GutterFont { get; }
 		
 		string ColorScheme { get; set;  }
 		string DefaultEolMarker { get; set; }

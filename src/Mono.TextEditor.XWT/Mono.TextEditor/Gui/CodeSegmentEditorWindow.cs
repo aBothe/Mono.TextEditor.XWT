@@ -25,12 +25,9 @@
 // THE SOFTWARE.
 using System;
 using Mono.TextEditor.Highlighting;
-using Xwt;
-
-
 namespace Mono.TextEditor
 {
-	public class CodeSegmentEditorWindow : Window
+	public class CodeSegmentEditorWindow : Gtk.Window
 	{
 		TextEditor codeSegmentEditor = new TextEditor ();
 		
@@ -52,16 +49,14 @@ namespace Mono.TextEditor
 			}
 		}
 		
-		public CodeSegmentEditorWindow (TextEditor editor)
+		public CodeSegmentEditorWindow (TextEditor editor) : base (Gtk.WindowType.Toplevel)
 		{
-			//TODO: Set to top level
-
-			ScrollView scrolledWindow = new ScrollView ();
-			scrolledWindow.Content = codeSegmentEditor;
-			//scrolledWindow.ShadowType = Gtk.ShadowType.In;
-			Content = scrolledWindow;
-			codeSegmentEditor.Show ();
-			((SimpleEditMode)codeSegmentEditor.CurrentMode).AddBinding (Key.Escape, Close);
+			Gtk.ScrolledWindow scrolledWindow = new Gtk.ScrolledWindow ();
+			scrolledWindow.Child = codeSegmentEditor;
+			scrolledWindow.ShadowType = Gtk.ShadowType.In;
+			Child = scrolledWindow;
+			codeSegmentEditor.Realize ();
+			((SimpleEditMode)codeSegmentEditor.CurrentMode).AddBinding (Gdk.Key.Escape, Close);
 			TextEditorOptions options = new TextEditorOptions ();
 			options.FontName = editor.Options.FontName;
 			options.ColorScheme = editor.Options.ColorScheme;
@@ -74,37 +69,31 @@ namespace Mono.TextEditor
 			codeSegmentEditor.Document.ReadOnly = true;
 			codeSegmentEditor.Options = options;
 			
-			codeSegmentEditor.KeyPressed += delegate(object o, KeyEventArgs args) {
-				if (args.Key == Key.Escape)
-					Dispose ();
+			codeSegmentEditor.KeyPressEvent += delegate(object o, Gtk.KeyPressEventArgs args) {
+				if (args.Event.Key == Gdk.Key.Escape)
+					Destroy ();
 				
 			};
-			var parent = editor.Parent;
-			while (parent != null && !(parent is Window))
+			Gtk.Widget parent = editor.Parent;
+			while (parent != null && !(parent is Gtk.Window))
 				parent = parent.Parent;
-			if (parent is Window)
-				this.TransientFor = (Window)parent;
-			//this.SkipTaskbarHint = true;
-			ShowInTaskbar = false;
+			if (parent is Gtk.Window)
+				this.TransientFor = (Gtk.Window)parent;
+			this.SkipTaskbarHint = true;
 			this.Decorated = false;
-			/*Gdk.Pointer.Grab (this.GdkWindow, true, Gdk.EventMask.ButtonPressMask | Gdk.EventMask.ButtonReleaseMask | Gdk.EventMask.PointerMotionMask | Gdk.EventMask.EnterNotifyMask | Gdk.EventMask.LeaveNotifyMask, null, null, Gtk.Global.CurrentEventTime);
+			Gdk.Pointer.Grab (this.GdkWindow, true, Gdk.EventMask.ButtonPressMask | Gdk.EventMask.ButtonReleaseMask | Gdk.EventMask.PointerMotionMask | Gdk.EventMask.EnterNotifyMask | Gdk.EventMask.LeaveNotifyMask, null, null, Gtk.Global.CurrentEventTime);
 			Gtk.Grab.Add (this);
 			GrabBrokenEvent += delegate {
 				Destroy ();
-			};*/
-
-			codeSegmentEditor.LostFocus += (object o, EventArgs ea) => { Visible = false; Dispose(); };
-
-			codeSegmentEditor.SetFocus ();
+			};
+			codeSegmentEditor.GrabFocus ();
 		}
 		
 		public void Close (TextEditorData data)
 		{
-			Dispose ();
+			Destroy ();
 		}
-
-
-		/*
+		
 		protected override bool OnFocusOutEvent (Gdk.EventFocus evnt)
 		{
 			Destroy ();
@@ -116,7 +105,7 @@ namespace Mono.TextEditor
 			Gtk.Grab.Remove (this);
 			Gdk.Pointer.Ungrab (Gtk.Global.CurrentEventTime);
 			base.OnDestroyed ();
-		}*/
+		}
 	}
 }
 

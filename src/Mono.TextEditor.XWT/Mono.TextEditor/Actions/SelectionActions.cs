@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
+using Gtk;
 using Mono.TextEditor.Highlighting;
 
 namespace Mono.TextEditor
@@ -229,6 +230,11 @@ namespace Mono.TextEditor
 			data.Caret.Offset = selection.EndOffset;
 			data.Caret.PreserveSelection = false;
 			data.SelectionRange = selection;
+		}
+
+		public static void ClearSelection (TextEditorData data)
+		{
+			data.ClearSelection ();
 		}
 	}
 }

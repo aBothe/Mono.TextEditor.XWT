@@ -129,6 +129,7 @@ namespace XwtExperiments
 		public MyMainComponent()
 		{
 			base.CanGetFocus = true;
+			Cursor = CursorType.IBeam;
 
 			cm = new Menu ();
 			cm.Items.Add (new MenuItem("Morning!"));

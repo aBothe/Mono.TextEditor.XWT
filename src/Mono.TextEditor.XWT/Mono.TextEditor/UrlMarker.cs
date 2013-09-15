@@ -25,9 +25,8 @@
 // THE SOFTWARE.
 
 using System;
-using Xwt;
+using Gdk;
 using Mono.TextEditor.Highlighting;
-using Xwt.Drawing;
 
 namespace Mono.TextEditor
 {
@@ -100,7 +99,7 @@ namespace Mono.TextEditor
 			line = null;
 		}
 		
-		public override void Draw (TextEditor editor, Context cr, double y, LineMetrics metrics)
+		public override void Draw (TextEditor editor, Cairo.Context cr, double y, LineMetrics metrics)
 		{
 			var startOffset = metrics.TextStartOffset;
 			int endOffset = metrics.TextEndOffset;
@@ -122,13 +121,13 @@ namespace Mono.TextEditor
 			} else {
 				int start = startOffset < markerStart ? markerStart : startOffset;
 				int end = endOffset < markerEnd ? endOffset : markerEnd;
-				var x_pos = layout.GetCoordinateFromIndex (start - startOffset).X;
+				int x_pos = layout.IndexToPos (start - startOffset).X;
 	
-				@from = startXPos + (x_pos/* / Pango.Scale.PangoScale*/);
+				@from = startXPos + (int)(x_pos / Pango.Scale.PangoScale);
 	
-				x_pos = layout.GetCoordinateFromIndex (end - startOffset).X;
+				x_pos = layout.IndexToPos (end - startOffset).X;
 	
-				to = startXPos + (x_pos/* / Pango.Scale.PangoScale*/);
+				to = startXPos + (int)(x_pos / Pango.Scale.PangoScale);
 			}
 	
 			@from = System.Math.Max (@from, editor.TextViewMargin.XOffset);

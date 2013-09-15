@@ -25,7 +25,7 @@
 // THE SOFTWARE.
 
 using System;
-using Xwt.Drawing;
+using Gdk;
 using Mono.TextEditor.Highlighting;
 
 namespace Mono.TextEditor
@@ -38,9 +38,9 @@ namespace Mono.TextEditor
 	public interface IIconBarMarker
 	{
 		bool CanDrawBackground { get; }
-		void DrawBackground (TextEditor editor, Context cr, DocumentLine line, int lineNumber, double xPos, double yPos, double width, double height);
+		void DrawBackground (TextEditor editor, Cairo.Context cr, DocumentLine line, int lineNumber, double xPos, double yPos, double width, double height);
 
-		void DrawIcon (TextEditor editor, Context cr, DocumentLine line, int lineNumber, double xPos, double yPos, double width, double height);
+		void DrawIcon (TextEditor editor, Cairo.Context cr, DocumentLine line, int lineNumber, double xPos, double yPos, double width, double height);
 		void MousePress (MarginMouseEventArgs args);
 		void MouseRelease (MarginMouseEventArgs args);
 		void MouseHover (MarginMouseEventArgs args);

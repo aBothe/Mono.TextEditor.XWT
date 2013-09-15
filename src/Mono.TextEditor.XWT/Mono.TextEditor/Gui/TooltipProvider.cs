@@ -24,7 +24,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
-using Xwt;
 
 namespace Mono.TextEditor
 {
@@ -32,57 +31,58 @@ namespace Mono.TextEditor
 	{
 		public abstract TooltipItem GetItem (TextEditor editor, int offset);
 
-		public virtual bool IsInteractive (TextEditor editor, Window tipWindow)
+		public virtual bool IsInteractive (TextEditor editor, Gtk.Window tipWindow)
 		{
 			return false;
 		}
 
-		protected virtual void GetRequiredPosition (TextEditor editor, Window tipWindow, out double requiredWidth, out double xalign)
+		protected virtual void GetRequiredPosition (TextEditor editor, Gtk.Window tipWindow, out int requiredWidth, out double xalign)
 		{
-			requiredWidth = tipWindow.Width;
+			requiredWidth = tipWindow.SizeRequest ().Width;
 			xalign = 0.5;
 		}
 
-		protected virtual Window CreateTooltipWindow (TextEditor editor, int offset, ModifierKeys modifierState, TooltipItem item)
+		protected virtual Gtk.Window CreateTooltipWindow (TextEditor editor, int offset, Gdk.ModifierType modifierState, TooltipItem item)
 		{
 			return null;
 		}
 
-		public virtual Window ShowTooltipWindow (TextEditor editor, int offset, ModifierKeys modifierState, int mouseX, int mouseY, TooltipItem item)
+		public virtual Gtk.Window ShowTooltipWindow (TextEditor editor, int offset, Gdk.ModifierType modifierState, int mouseX, int mouseY, TooltipItem item)
 		{
-			Window tipWindow = CreateTooltipWindow (editor, offset, modifierState, item);
+			Gtk.Window tipWindow = CreateTooltipWindow (editor, offset, modifierState, item);
 			if (tipWindow == null)
 				return null;
 
-			double w;
+			int ox = 0, oy = 0;
+			if (editor.GdkWindow != null)
+				editor.GdkWindow.GetOrigin (out ox, out oy);
+			
+			int w;
 			double xalign;
 			GetRequiredPosition (editor, tipWindow, out w, out xalign);
 			w += 10;
 
-			var loc = editor.ConvertToScreenCoordinates (new Point (mouseX, mouseY));
-			/*int x = mouseX + ox + editor.Allocation.X;
+			int x = mouseX + ox + editor.Allocation.X;
 			int y = mouseY + oy + editor.Allocation.Y;
 			Gdk.Rectangle geometry = editor.Screen.GetUsableMonitorGeometry (editor.Screen.GetMonitorAtPoint (x, y));
-			*/
-			var geometry = editor.ScreenBounds;
-
-			loc.X -= w * xalign;
-			loc.Y += 10;
 			
-			if (loc.X + w >= geometry.X + geometry.Width)
-				loc.X = geometry.X + geometry.Width - w;
-			if (loc.X < geometry.Left)
-				loc.X = geometry.Left;
+			x -= (int) ((double) w * xalign);
+			y += 10;
 			
-			var h = tipWindow.Height;
-			if (loc.Y + h >= geometry.Y + geometry.Height)
-				loc.Y = geometry.Y + geometry.Height - h;
-			if (loc.Y < geometry.Top)
-				loc.Y = geometry.Top;
+			if (x + w >= geometry.X + geometry.Width)
+				x = geometry.X + geometry.Width - w;
+			if (x < geometry.Left)
+				x = geometry.Left;
 			
-			tipWindow.Location = loc;
+			int h = tipWindow.SizeRequest ().Height;
+			if (y + h >= geometry.Y + geometry.Height)
+				y = geometry.Y + geometry.Height - h;
+			if (y < geometry.Top)
+				y = geometry.Top;
 			
-			tipWindow.Show ();
+			tipWindow.Move (x, y);
+			
+			tipWindow.ShowAll ();
 
 			return tipWindow;
 		}

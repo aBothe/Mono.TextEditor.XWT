@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
+using Gtk;
 using Mono.TextEditor.Highlighting;
 using System.Linq;
 
@@ -217,7 +218,7 @@ namespace Mono.TextEditor
 			return result + 1;
 		}
 		
-		static void InternalCaretMoveHome (TextEditorData data, bool firstNonWhitespace, bool hop)
+		internal static void InternalCaretMoveHome (TextEditorData data, bool firstNonWhitespace, bool hop)
 		{
 			if (!data.Caret.PreserveSelection)
 				data.ClearSelection ();

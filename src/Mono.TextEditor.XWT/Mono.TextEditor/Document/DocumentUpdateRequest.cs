@@ -52,7 +52,7 @@ namespace Mono.TextEditor
 	{
 		public override void Update (TextEditor editor)
 		{
-			editor.TextArea.QueueDraw ();
+			editor.QueueDraw ();
 		}
 	}
 	
@@ -83,6 +83,7 @@ namespace Mono.TextEditor
 		
 		public override void Update (TextEditor editor)
 		{
+			editor.TextViewMargin.PurgeLayoutCache ();
 			editor.RedrawLines (start, end);
 		}
 	}

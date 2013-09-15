@@ -25,7 +25,7 @@
 // THE SOFTWARE.
 
 using System;
-using Xwt;
+using Gdk;
 using System.Collections.Generic;
 using System.Text;
 
@@ -33,45 +33,46 @@ namespace Mono.TextEditor.Vi
 {
 	public struct ViKey : IEquatable<ViKey>
 	{
-		ModifierKeys modifiers;
+		Gdk.ModifierType modifiers;
 		char ch;
-		Key key;
+		Gdk.Key key;
 		
-		public ViKey (char ch) : this (ModifierKeys.None, ch, (Key) 0)
+		public ViKey (char ch) : this (ModifierType.None, ch, (Gdk.Key) 0)
 		{
 		}
 		
-		public ViKey (Key key) : this (ModifierKeys.None, '\0', key)
+		public ViKey (Gdk.Key key) : this (ModifierType.None, '\0', key)
 		{
 		}
 		
-		public ViKey (ModifierKeys modifiers, Key key) : this (modifiers, '\0', key)
+		public ViKey (ModifierType modifiers, Gdk.Key key) : this (modifiers, '\0', key)
 		{
 		}
 		
-		public ViKey (ModifierKeys modifiers, char ch) : this (modifiers, ch, (Key)0)
+		public ViKey (ModifierType modifiers, char ch) : this (modifiers, ch, (Gdk.Key)0)
 		{
 		}
 		
-		ViKey (ModifierKeys modifiers, char ch, Key key): this ()
+		ViKey (ModifierType modifiers, char ch, Gdk.Key key): this ()
 		{
 			this.modifiers = modifiers & KnownModifiers;
 			this.ch = ch;
 			this.key = key;
 		}
 		
-		public ModifierKeys Modifiers { get { return this.modifiers; } }
+		public ModifierType Modifiers { get { return this.modifiers; } }
 		public char Char { get { return this.ch; } }
 		public Key Key { get { return this.key; } }
 		
-		static ModifierKeys KnownModifiers = ModifierKeys.Shift | ModifierKeys.Alt | ModifierKeys.Command | ModifierKeys.Control;
+		static ModifierType KnownModifiers = ModifierType.ShiftMask | ModifierType.MetaMask
+			| ModifierType.ControlMask | ModifierType.Mod1Mask;
 		
 		public static implicit operator ViKey (char ch)
 		{
 			return new ViKey (ch);
 		}
 		
-		public static implicit operator ViKey (Key key)
+		public static implicit operator ViKey (Gdk.Key key)
 		{
 			return new ViKey (key);
 		}
@@ -126,7 +127,7 @@ namespace Mono.TextEditor.Vi
 		{
 			var c = GetString (key.Char);
 			if (c != null && key.Char != '\0') {
-				if (c.Length == 1 && key.Modifiers == ModifierKeys.None) {
+				if (c.Length == 1 && key.Modifiers == ModifierType.None) {
 					sb.Append (c);
 					return;
 				}
@@ -141,13 +142,13 @@ namespace Mono.TextEditor.Vi
 			
 			sb.Append ("<");
 			
-			if ((key.Modifiers & ModifierKeys.Shift) != 0)
+			if ((key.Modifiers & ModifierType.ShiftMask) != 0)
 				sb.Append ("S-");
-			if ((key.Modifiers & ModifierKeys.Control) != 0)
+			if ((key.Modifiers & ModifierType.ControlMask) != 0)
 				sb.Append ("C-");
-			if ((key.Modifiers & ModifierKeys.Alt) != 0) //TODO: This was ModifierType.Meta previously -- is it Alt?
+			if ((key.Modifiers & ModifierType.Mod1Mask) != 0)
 				sb.Append ("M-");
-			if ((key.Modifiers & ModifierKeys.Command) != 0) //HACK: Mac command key / was ModifierType.Mod1
+			if ((key.Modifiers & ModifierType.MetaMask) != 0) //HACK: Mac command key
 				sb.Append ("D-");
 			
 			sb.Append (c);
@@ -189,61 +190,61 @@ namespace Mono.TextEditor.Vi
 			return null;
 		}
 		
-		static Dictionary<Key, string> keyStringMaps = new Dictionary<Key, string> () {
-			{ Key.BackSpace,    "BS"        },
-			{ Key.Tab,          "Tab"       },
-			{ Key.Return,       "Enter"     }, //"CR" "Return"
-			{ Key.Escape,       "Esc"       },
-			{ Key.Space,        "Space"     },
-			{ Key.NumPadUp,        "Up"        },
-			{ Key.Up,           "Up"        },
-			{ Key.NumPadDown,      "Down"      },
-			{ Key.Down,         "Down"      },
-			{ Key.NumPadLeft,      "Left"      },
-			{ Key.Left,         "Left"      },
-			{ Key.NumPadRight,     "Right"     },
-			{ Key.Right,        "Right"     },
-			{ Key.F1,           "F1"        },
-			{ Key.F2,           "F2"        },
-			{ Key.F3,           "F3"        },
-			{ Key.F4,           "F4"        },
-			{ Key.F5,           "F5"        },
-			{ Key.F6,           "F6"        },
-			{ Key.F7,           "F7"        },
-			{ Key.F8,           "F8"        },
-			{ Key.F9,           "F9"        },
-			{ Key.F10,          "F10"       },
-			//{ Key.F11,          "F11"       },
-			//{ Key.F12,          "F12"       },
-			{ Key.Insert,       "Insert"    },
-			{ Key.Delete,       "Del"       },
-			{ Key.NumPadDelete,    "kDel"		},
-			{ Key.Home,         "Home"      },
-			{ Key.End,          "End"       },
-			{ Key.PageUp,      "PageUp"    },
-			{ Key.PageDown,    "PageDown"  },
-			{ Key.NumPadHome,      "kHome"     },
-			{ Key.NumPadEnd,       "kEnd"      },
-			//{ Key.NumPadPage_Up,   "kPageUp"   },
-			//{ Key.NumPadPage_Down, "kPageDown" },
-			{ Key.NumPadAdd,       "kPlus"     },
-			{ Key.NumPadSubtract,  "kMinus"    },
-			{ Key.NumPadMultiply,  "kMultiply" },
-			{ Key.NumPadDivide,    "kDivide"   },
-			{ Key.NumPadEnter,     "kEnter"    },
-			{ Key.NumPadDecimal,   "kPoint"    },
-			{ Key.NumPad0,         "k0"        },
-			{ Key.NumPad1,         "k1"        },
-			{ Key.NumPad2,         "k2"        },
-			{ Key.NumPad3,         "k3"        },
-			{ Key.NumPad4,         "k4"        },
-			{ Key.NumPad5,         "k5"        },
-			{ Key.NumPad6,         "k6"        },
-			{ Key.NumPad7,         "k7"        },
-			{ Key.NumPad8,         "k8"        },
-			{ Key.NumPad9,         "k9"        },
-			{ Key.Help,         "Help"      },
-			{ Key.Undo,         "Undo"      },
+		static Dictionary<Gdk.Key, string> keyStringMaps = new Dictionary<Gdk.Key, string> () {
+			{ Gdk.Key.BackSpace,    "BS"        },
+			{ Gdk.Key.Tab,          "Tab"       },
+			{ Gdk.Key.Return,       "Enter"     }, //"CR" "Return"
+			{ Gdk.Key.Escape,       "Esc"       },
+			{ Gdk.Key.space,        "Space"     },
+			{ Gdk.Key.KP_Up,        "Up"        },
+			{ Gdk.Key.Up,           "Up"        },
+			{ Gdk.Key.KP_Down,      "Down"      },
+			{ Gdk.Key.Down,         "Down"      },
+			{ Gdk.Key.KP_Left,      "Left"      },
+			{ Gdk.Key.Left,         "Left"      },
+			{ Gdk.Key.KP_Right,     "Right"     },
+			{ Gdk.Key.Right,        "Right"     },
+			{ Gdk.Key.F1,           "F1"        },
+			{ Gdk.Key.F2,           "F2"        },
+			{ Gdk.Key.F3,           "F3"        },
+			{ Gdk.Key.F4,           "F4"        },
+			{ Gdk.Key.F5,           "F5"        },
+			{ Gdk.Key.F6,           "F6"        },
+			{ Gdk.Key.F7,           "F7"        },
+			{ Gdk.Key.F8,           "F8"        },
+			{ Gdk.Key.F9,           "F9"        },
+			{ Gdk.Key.F10,          "F10"       },
+			{ Gdk.Key.F11,          "F11"       },
+			{ Gdk.Key.F12,          "F12"       },
+			{ Gdk.Key.Insert,       "Insert"    },
+			{ Gdk.Key.Delete,       "Del"       },
+			{ Gdk.Key.KP_Delete,    "kDel"		},
+			{ Gdk.Key.Home,         "Home"      },
+			{ Gdk.Key.End,          "End"       },
+			{ Gdk.Key.Page_Up,      "PageUp"    },
+			{ Gdk.Key.Page_Down,    "PageDown"  },
+			{ Gdk.Key.KP_Home,      "kHome"     },
+			{ Gdk.Key.KP_End,       "kEnd"      },
+			{ Gdk.Key.KP_Page_Up,   "kPageUp"   },
+			{ Gdk.Key.KP_Page_Down, "kPageDown" },
+			{ Gdk.Key.KP_Add,       "kPlus"     },
+			{ Gdk.Key.KP_Subtract,  "kMinus"    },
+			{ Gdk.Key.KP_Multiply,  "kMultiply" },
+			{ Gdk.Key.KP_Divide,    "kDivide"   },
+			{ Gdk.Key.KP_Enter,     "kEnter"    },
+			{ Gdk.Key.KP_Decimal,   "kPoint"    },
+			{ Gdk.Key.KP_0,         "k0"        },
+			{ Gdk.Key.KP_1,         "k1"        },
+			{ Gdk.Key.KP_2,         "k2"        },
+			{ Gdk.Key.KP_3,         "k3"        },
+			{ Gdk.Key.KP_4,         "k4"        },
+			{ Gdk.Key.KP_5,         "k5"        },
+			{ Gdk.Key.KP_6,         "k6"        },
+			{ Gdk.Key.KP_7,         "k7"        },
+			{ Gdk.Key.KP_8,         "k8"        },
+			{ Gdk.Key.KP_9,         "k9"        },
+			{ Gdk.Key.Help,         "Help"      },
+			{ Gdk.Key.Undo,         "Undo"      },
 		};
 		
 		static char GetChar (string charName)
@@ -274,82 +275,82 @@ namespace Mono.TextEditor.Vi
 			{ "Bar",     '|'  },
 		};
 		
-		static Key GetKey (string code)
+		static Gdk.Key GetKey (string code)
 		{
-			Key k;
+			Gdk.Key k;
 			if (stringKeyMaps.TryGetValue (code, out k))
 				return k;
-			return (Key)0;
+			return (Gdk.Key)0;
 		}
 		
-		static Dictionary<string, Key> stringKeyMaps = new Dictionary<string, Key> () {
-			{ "BS",        Key.BackSpace    },
-			{ "Tab",       Key.Tab          },
-			{ "CR",        Key.Return       },
-			{ "Return",    Key.Return       },
-			{ "Enter",     Key.Return       },
-			{ "Esc",       Key.Escape       },
-			{ "Space",     Key.Space        },
-			{ "Up",        Key.Up           },
-			{ "Down",      Key.Down         },
-			{ "Left",      Key.Left         },
-			{ "Right",     Key.Right        },
-			{ "#1",        Key.F1           },
-			{ "F1",        Key.F1           },
-			{ "#2",        Key.F2           },
-			{ "F2",        Key.F2           },
-			{ "#3",        Key.F3           },
-			{ "F3",        Key.F3           },
-			{ "#4",        Key.F4           },
-			{ "F4",        Key.F4           },
-			{ "#5",        Key.F5           },
-			{ "F5",        Key.F5           },
-			{ "#6",        Key.F6           },
-			{ "F6",        Key.F6           },
-			{ "#7",        Key.F7           },
-			{ "F7",        Key.F7           },
-			{ "#8",        Key.F8           },
-			{ "F8",        Key.F8           },
-			{ "#9",        Key.F9           },
-			{ "F9",        Key.F9           },
-			{ "#0",        Key.F10          },
-			{ "F10",       Key.F10          },
-			//{ "F11",       Key.F11          },
-			//{ "F12",       Key.F12          },
-			{ "Insert",    Key.Insert       },
-			{ "Del",       Key.Delete       },
-			{ "Home",      Key.Home         },
-			{ "End",       Key.End          },
-			{ "PageUp",    Key.PageUp      },
-			{ "PageDown",  Key.PageDown    },
-			{ "kHome",     Key.Home      },
-			{ "kEnd",      Key.End       },
-			//{ "kPageUp",   Key.NumPadPage_Up   },
-			//{ "kPageDown", Key.NumPadPage_Down },
-			{ "kPlus",     Key.NumPadAdd       },
-			{ "kMinus",    Key.NumPadSubtract  },
-			{ "kMultiply", Key.NumPadMultiply  },
-			{ "kDivide",   Key.NumPadDivide    },
-			{ "kEnter",    Key.NumPadEnter     },
-			{ "kPoint",    Key.NumPadDecimal   },
-			{ "k0",        Key.NumPad0         },
-			{ "k1",        Key.NumPad1         },
-			{ "k2",        Key.NumPad2         },
-			{ "k3",        Key.NumPad3         },
-			{ "k4",        Key.NumPad4         },
-			{ "k5",        Key.NumPad5         },
-			{ "k6",        Key.NumPad6         },
-			{ "k7",        Key.NumPad7         },
-			{ "k8",        Key.NumPad8         },
-			{ "k9",        Key.NumPad9         },
-			{ "Help",      Key.Help         },
-			{ "Undo",      Key.Undo         },
+		static Dictionary<string, Gdk.Key> stringKeyMaps = new Dictionary<string, Gdk.Key> () {
+			{ "BS",        Gdk.Key.BackSpace    },
+			{ "Tab",       Gdk.Key.Tab          },
+			{ "CR",        Gdk.Key.Return       },
+			{ "Return",    Gdk.Key.Return       },
+			{ "Enter",     Gdk.Key.Return       },
+			{ "Esc",       Gdk.Key.Escape       },
+			{ "Space",     Gdk.Key.space        },
+			{ "Up",        Gdk.Key.Up           },
+			{ "Down",      Gdk.Key.Down         },
+			{ "Left",      Gdk.Key.Left         },
+			{ "Right",     Gdk.Key.Right        },
+			{ "#1",        Gdk.Key.F1           },
+			{ "F1",        Gdk.Key.F1           },
+			{ "#2",        Gdk.Key.F2           },
+			{ "F2",        Gdk.Key.F2           },
+			{ "#3",        Gdk.Key.F3           },
+			{ "F3",        Gdk.Key.F3           },
+			{ "#4",        Gdk.Key.F4           },
+			{ "F4",        Gdk.Key.F4           },
+			{ "#5",        Gdk.Key.F5           },
+			{ "F5",        Gdk.Key.F5           },
+			{ "#6",        Gdk.Key.F6           },
+			{ "F6",        Gdk.Key.F6           },
+			{ "#7",        Gdk.Key.F7           },
+			{ "F7",        Gdk.Key.F7           },
+			{ "#8",        Gdk.Key.F8           },
+			{ "F8",        Gdk.Key.F8           },
+			{ "#9",        Gdk.Key.F9           },
+			{ "F9",        Gdk.Key.F9           },
+			{ "#0",        Gdk.Key.F10          },
+			{ "F10",       Gdk.Key.F10          },
+			{ "F11",       Gdk.Key.F11          },
+			{ "F12",       Gdk.Key.F12          },
+			{ "Insert",    Gdk.Key.Insert       },
+			{ "Del",       Gdk.Key.Delete       },
+			{ "Home",      Gdk.Key.Home         },
+			{ "End",       Gdk.Key.End          },
+			{ "PageUp",    Gdk.Key.Page_Up      },
+			{ "PageDown",  Gdk.Key.Page_Down    },
+			{ "kHome",     Gdk.Key.KP_Home      },
+			{ "kEnd",      Gdk.Key.KP_End       },
+			{ "kPageUp",   Gdk.Key.KP_Page_Up   },
+			{ "kPageDown", Gdk.Key.KP_Page_Down },
+			{ "kPlus",     Gdk.Key.KP_Add       },
+			{ "kMinus",    Gdk.Key.KP_Subtract  },
+			{ "kMultiply", Gdk.Key.KP_Multiply  },
+			{ "kDivide",   Gdk.Key.KP_Divide    },
+			{ "kEnter",    Gdk.Key.KP_Enter     },
+			{ "kPoint",    Gdk.Key.KP_Decimal   },
+			{ "k0",        Gdk.Key.KP_0         },
+			{ "k1",        Gdk.Key.KP_1         },
+			{ "k2",        Gdk.Key.KP_2         },
+			{ "k3",        Gdk.Key.KP_3         },
+			{ "k4",        Gdk.Key.KP_4         },
+			{ "k5",        Gdk.Key.KP_5         },
+			{ "k6",        Gdk.Key.KP_6         },
+			{ "k7",        Gdk.Key.KP_7         },
+			{ "k8",        Gdk.Key.KP_8         },
+			{ "k9",        Gdk.Key.KP_9         },
+			{ "Help",      Gdk.Key.Help         },
+			{ "Undo",      Gdk.Key.Undo         },
 		};
 		
 		static ViKey FlattenControlMappings (ViKey k)
 		{
 			ViKey ret;
-			if ((k.Modifiers & ModifierKeys.Control) == k.Modifiers &&
+			if ((k.Modifiers & ModifierType.ControlMask) == k.Modifiers &&
 			    controlMappings.TryGetValue (k.Char, out ret))
 					return ret;
 			return k;
@@ -387,21 +388,21 @@ namespace Mono.TextEditor.Vi
 		//TODO: <CSI> <xCSI>
 		static ViKey ParseKeySequence (string seq)
 		{
-			var modifiers = ModifierKeys.None;
+			var modifiers = ModifierType.None;
 			while (seq.Length > 2 && seq[1] == '-') {
 				switch (seq[0]) {
 				case 'S':
-					modifiers |= ModifierKeys.Shift;
+					modifiers |= ModifierType.ShiftMask;
 					break;
 				case 'C':
-					modifiers |= ModifierKeys.Control;
+					modifiers |= ModifierType.ControlMask;
 					break;
 				case 'M':
 				case 'A':
-					modifiers |= ModifierKeys.Alt; // was Meta
+					modifiers |= ModifierType.Mod1Mask;
 					break;
 				case 'D':
-					modifiers |= ModifierKeys.Command;  //HACK: Mac command key
+					modifiers |= ModifierType.MetaMask;  //HACK: Mac command key
 					break;
 				default:
 					throw new FormatException ("Unknown modifier " + seq[0].ToString ());
@@ -410,7 +411,7 @@ namespace Mono.TextEditor.Vi
 			}
 			var k = GetKey (seq);
 			var c = '\0';
-			if (k == (Key)0)
+			if (k == (Gdk.Key)0)
 				c = GetChar (seq);
 			
 			var key = c == '\0'? new ViKey (modifiers, k) : new ViKey (modifiers, c);

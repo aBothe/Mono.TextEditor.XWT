@@ -82,7 +82,7 @@ namespace Mono.TextEditor
 			int startLineNr, endLineNr;
 			GetSelectedLines (data, out startLineNr, out endLineNr);
 			
-			using (var undo = data.OpenUndoGroup ()) {
+			using (var undo = data.OpenUndoGroup (OperationType.Format)) {
 				var anchor = data.MainSelection.Anchor;
 				var lead = data.MainSelection.Lead;
 				bool first = true;
@@ -163,7 +163,7 @@ namespace Mono.TextEditor
 			var anchor = data.MainSelection.Anchor;
 			var lead = data.MainSelection.Lead;
 			var indentationString = data.Options.IndentationString;
-			using (var undo = data.OpenUndoGroup ()) {
+			using (var undo = data.OpenUndoGroup (OperationType.Format)) {
 				foreach (DocumentLine line in data.SelectedLines) {
 					if (data.Options.IndentStyle == IndentStyle.Virtual && line.Length == 0)
 						continue;
@@ -233,7 +233,8 @@ namespace Mono.TextEditor
 			using (var undo = data.OpenUndoGroup ()) {
 				data.EnsureCaretIsNotVirtual ();
 				data.InsertAtCaret (data.EolMarker);
-				data.InsertAtCaret (data.GetIndentationString (data.Caret.Location));
+				var line = data.Document.GetLine (data.Caret.Line);
+				data.InsertAtCaret (data.GetIndentationString (line.EndOffset));
 			}
 		}
 		
@@ -243,8 +244,14 @@ namespace Mono.TextEditor
 				return;
 			
 			using (var undo = data.OpenUndoGroup ()) {
-				if (data.IsSomethingSelected)
+				if (data.IsSomethingSelected) {
+					var end = data.MainSelection.End;
 					data.DeleteSelectedText ();
+					if (end.Column == 1) {
+						CaretMoveActions.InternalCaretMoveHome (data, true, false);
+						return;
+					}
+				}
 				switch (data.Options.IndentStyle) {
 				case IndentStyle.None:
 					data.InsertAtCaret (data.EolMarker);
